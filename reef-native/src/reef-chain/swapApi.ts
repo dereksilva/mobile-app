@@ -1,0 +1,196 @@
+/**
+ * Swap API — DEX swap operations via Reefswap router.
+ * Ports swapApi.ts and math utilities from reef-mobile-js.
+ */
+
+import {Observable, Subject} from 'rxjs';
+import {Contract, BigNumber} from 'ethers';
+import {getProvider, getNetworkConfig} from './networkApi';
+import {STORAGE_LIMIT} from './config';
+import {ERC20_ABI, REEFSWAP_ROUTER_ABI, REEFSWAP_PAIR_ABI, REEFSWAP_FACTORY_ABI} from './abi';
+import type {TokenWithAmount, SwapSettings, SwapStatusUpdate} from './types';
+
+/**
+ * Execute a token swap via Reefswap router.
+ * Returns Observable of swap progress updates.
+ */
+export function executeSwap(
+  signerAddress: string,
+  token1: TokenWithAmount,
+  token2: TokenWithAmount,
+  settings: SwapSettings,
+): Observable<SwapStatusUpdate> {
+  const subject = new Subject<SwapStatusUpdate>();
+
+  (async () => {
+    try {
+      const provider = getProvider();
+      if (!provider) throw new Error('Provider not connected');
+
+      const config = getNetworkConfig();
+      const routerAddress = config.routerAddress;
+
+      // Step 1: Approve token1 spending
+      subject.next({status: 'approving'});
+
+      const token1Contract = new Contract(
+        token1.address,
+        ERC20_ABI,
+        provider as any,
+      );
+
+      const allowance = await token1Contract.allowance(
+        signerAddress,
+        routerAddress,
+      );
+
+      if (BigNumber.from(allowance).lt(BigNumber.from(token1.amount))) {
+        subject.next({status: 'approve-started'});
+
+        const approveTx = await token1Contract.approve(
+          routerAddress,
+          token1.amount,
+          {customData: {storageLimit: STORAGE_LIMIT}},
+        );
+
+        await approveTx.wait();
+      }
+
+      subject.next({status: 'approved'});
+
+      // Step 2: Execute swap
+      const routerContract = new Contract(
+        routerAddress,
+        REEFSWAP_ROUTER_ABI,
+        provider as any,
+      );
+
+      const amountOutMin = calculateAmountWithSlippage(
+        token2.amount,
+        settings.slippageTolerance,
+      );
+
+      const deadline = Math.floor(Date.now() / 1000) + settings.deadline * 60;
+
+      const path = [token1.address, token2.address];
+
+      const swapTx =
+        await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+          token1.amount,
+          amountOutMin,
+          path,
+          signerAddress,
+          deadline,
+          {customData: {storageLimit: STORAGE_LIMIT}},
+        );
+
+      subject.next({status: 'broadcast', txHash: swapTx.hash});
+
+      const receipt = await swapTx.wait();
+
+      subject.next({status: 'finalized', txHash: swapTx.hash});
+      subject.complete();
+    } catch (error: any) {
+      subject.next({status: 'error', error: error.message});
+      subject.complete();
+    }
+  })();
+
+  return subject.asObservable();
+}
+
+/**
+ * Get pool reserves for a token pair.
+ */
+export async function getPoolReserves(
+  token1Address: string,
+  token2Address: string,
+): Promise<{reserve1: string; reserve2: string} | null> {
+  const provider = getProvider();
+  if (!provider) return null;
+
+  const config = getNetworkConfig();
+
+  const factory = new Contract(
+    config.factoryAddress,
+    REEFSWAP_FACTORY_ABI,
+    provider as any,
+  );
+
+  const pairAddress = await factory.getPair(token1Address, token2Address);
+
+  if (
+    pairAddress === '0x0000000000000000000000000000000000000000'
+  ) {
+    return null;
+  }
+
+  const pair = new Contract(pairAddress, REEFSWAP_PAIR_ABI, provider as any);
+
+  const reserves = await pair.getReserves();
+  const token0 = await pair.token0();
+
+  // Ensure reserves match the order of input tokens
+  if (token0.toLowerCase() === token1Address.toLowerCase()) {
+    return {
+      reserve1: reserves[0].toString(),
+      reserve2: reserves[1].toString(),
+    };
+  }
+  return {
+    reserve1: reserves[1].toString(),
+    reserve2: reserves[0].toString(),
+  };
+}
+
+/**
+ * Calculate output amount for a swap (constant product formula).
+ * Mirrors getOutputAmount from reef-mobile-js math utils.
+ */
+export function getSwapOutputAmount(
+  inputAmount: string,
+  reserve1: string,
+  reserve2: string,
+): string {
+  const input = BigNumber.from(inputAmount);
+  const r1 = BigNumber.from(reserve1);
+  const r2 = BigNumber.from(reserve2);
+
+  if (r1.isZero() || r2.isZero()) return '0';
+
+  const inputWithFee = input.mul(997);
+  const numerator = inputWithFee.mul(r2);
+  const denominator = r1.mul(1000).add(inputWithFee);
+
+  return numerator.div(denominator).toString();
+}
+
+/**
+ * Calculate input amount for a desired output (constant product formula).
+ */
+export function getSwapInputAmount(
+  outputAmount: string,
+  reserve1: string,
+  reserve2: string,
+): string {
+  const output = BigNumber.from(outputAmount);
+  const r1 = BigNumber.from(reserve1);
+  const r2 = BigNumber.from(reserve2);
+
+  if (r1.isZero() || r2.isZero() || output.gte(r2)) return '0';
+
+  const numerator = r1.mul(output).mul(1000);
+  const denominator = r2.sub(output).mul(997);
+
+  return numerator.div(denominator).add(1).toString();
+}
+
+/** Apply slippage tolerance to an amount */
+function calculateAmountWithSlippage(
+  amount: string,
+  slippagePercent: number,
+): string {
+  const bn = BigNumber.from(amount);
+  const factor = Math.floor((100 - slippagePercent) * 100);
+  return bn.mul(factor).div(10000).toString();
+}
