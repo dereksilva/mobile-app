@@ -67,3 +67,15 @@ app.*.map.json
 # FIREBASE ANALYTICS
 env.json
 /android/app/build/
+CLAUDE.md
+CODE_QUALITY_REPORT_7_NOV_2025.md
+CODE_QUALITY_REPORT.md
+
+# React Native (reef-native/)
+reef-native/node_modules/
+reef-native/ios/Pods/
+reef-native/ios/build/
+reef-native/android/app/build/
+reef-native/android/build/
+reef-native/.gradle/
+reef-native/.metro-health-check*
