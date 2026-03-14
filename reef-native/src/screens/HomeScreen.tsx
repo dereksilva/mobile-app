@@ -26,8 +26,10 @@ import {Colors} from '../utils/colors';
 import SendScreen from './SendScreen';
 import SendNFTScreen from './SendNFTScreen';
 import ReceiveScreen from './ReceiveScreen';
+import BuyScreen from './BuyScreen';
+import DAppBrowserScreen from './DAppBrowserScreen';
 
-type SubScreen = 'home' | 'send' | 'sendNft' | 'receive';
+type SubScreen = 'home' | 'send' | 'sendNft' | 'receive' | 'buy' | 'dapp';
 type HomeTab = 'tokens' | 'nfts' | 'activity';
 
 export default function HomeScreen() {
@@ -98,6 +100,14 @@ export default function HomeScreen() {
     );
   }
 
+  if (subScreen === 'buy') {
+    return <BuyScreen onBack={() => setSubScreen('home')} />;
+  }
+
+  if (subScreen === 'dapp') {
+    return <DAppBrowserScreen onBack={() => setSubScreen('home')} />;
+  }
+
   return (
     <ScrollView
       style={{flex: 1, backgroundColor: Colors.primaryBg}}
@@ -163,6 +173,43 @@ export default function HomeScreen() {
             }}>
             <Text style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>
               ↓ {t('scan_qr_code')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Quick actions row */}
+        <View style={{flexDirection: 'row', gap: 12, width: '100%', marginTop: 12}}>
+          <TouchableOpacity
+            onPress={() => setSubScreen('buy')}
+            activeOpacity={0.7}
+            style={{
+              flex: 1,
+              backgroundColor: Colors.primaryBg,
+              borderRadius: 12,
+              paddingVertical: 12,
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: Colors.grey,
+            }}>
+            <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
+              💳 Buy
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setSubScreen('dapp')}
+            activeOpacity={0.7}
+            style={{
+              flex: 1,
+              backgroundColor: Colors.primaryBg,
+              borderRadius: 12,
+              paddingVertical: 12,
+              alignItems: 'center',
+              borderWidth: 1,
+              borderColor: Colors.grey,
+            }}>
+            <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
+              🌐 dApps
             </Text>
           </TouchableOpacity>
         </View>
