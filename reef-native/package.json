@@ -10,42 +10,35 @@
     "test": "jest"
   },
   "dependencies": {
-    "react": "19.2.3",
-    "react-native": "0.84.1",
-    "@react-native/new-app-screen": "0.84.1",
-    "react-native-safe-area-context": "^5.5.2",
-
-    "@react-navigation/native": "^7.1.33",
-    "@react-navigation/bottom-tabs": "^7.15.5",
-    "@react-navigation/stack": "^7.8.5",
-
-    "nativewind": "^4.2.2",
-
-    "zustand": "^5.0.11",
-
-    "react-native-mmkv": "^3.2.0",
-    "react-native-keychain": "^9.2.0",
-
-    "react-native-screens": "^4.10.0",
-    "react-native-gesture-handler": "^2.24.0",
-    "react-native-reanimated": "^3.17.0",
-    "react-native-svg": "^15.11.0",
-
-    "i18next": "^24.2.2",
-    "react-i18next": "^15.4.1",
-
-    "@reef-chain/evm-provider": "^4.0.5",
     "@polkadot/api": "^13.2.1",
     "@polkadot/keyring": "^13.1.1",
     "@polkadot/types": "^13.2.1",
     "@polkadot/util": "^13.1.1",
     "@polkadot/util-crypto": "^13.1.1",
     "@polkadot/wasm-crypto": "^7.4.1",
-    "ethers": "~5.7.2",
-
-    "rxjs": "^7.8.1",
+    "@react-native-clipboard/clipboard": "^1.16.3",
+    "@react-native/new-app-screen": "0.84.1",
+    "@react-navigation/bottom-tabs": "^7.15.5",
+    "@react-navigation/native": "^7.1.33",
+    "@react-navigation/stack": "^7.8.5",
+    "@reef-chain/evm-provider": "^4.0.5",
     "bcryptjs": "^2.4.3",
-    "uuid": "^11.1.0"
+    "ethers": "~5.7.2",
+    "i18next": "^24.2.2",
+    "nativewind": "^4.2.2",
+    "react": "19.2.3",
+    "react-i18next": "^15.4.1",
+    "react-native": "0.84.1",
+    "react-native-gesture-handler": "^2.24.0",
+    "react-native-keychain": "^9.2.0",
+    "react-native-mmkv": "^3.2.0",
+    "react-native-reanimated": "^3.17.0",
+    "react-native-safe-area-context": "^5.5.2",
+    "react-native-screens": "^4.10.0",
+    "react-native-svg": "^15.11.0",
+    "rxjs": "^7.8.1",
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
