@@ -5,6 +5,7 @@ import {useTranslation} from 'react-i18next';
 
 import HomeScreen from '../screens/HomeScreen';
 import AccountsScreen from '../screens/AccountsScreen';
+import SwapScreen from '../screens/SwapScreen';
 import PoolsScreen from '../screens/PoolsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import {Colors} from '../utils/colors';
@@ -45,6 +46,11 @@ export default function Navigation() {
           name="Accounts"
           component={AccountsScreen}
           options={{title: t('accounts')}}
+        />
+        <Tab.Screen
+          name="Swap"
+          component={SwapScreen}
+          options={{title: t('swap_tokens')}}
         />
         <Tab.Screen
           name="Pools"
