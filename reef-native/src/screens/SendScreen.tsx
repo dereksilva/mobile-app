@@ -30,6 +30,7 @@ import {sendToken} from '../reef-chain/transferApi';
 import {isValidSubstrateAddress, isValidEvmAddress} from '../reef-chain/accountApi';
 import {Colors} from '../utils/colors';
 import TokenSelectionModal from '../components/TokenSelectionModal';
+import QRScannerModal from '../components/QRScannerModal';
 
 interface SendScreenProps {
   onClose: () => void;
@@ -77,6 +78,7 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
   const [sendStatus, setSendStatus] = useState<SendStatus>('ready');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showTokenModal, setShowTokenModal] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
 
   // Auto-select first token if none selected
@@ -182,6 +184,17 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
     const text = await Clipboard.getString();
     if (text) setToAddress(text.trim());
   };
+
+  // Handle scanned QR code (address)
+  const handleScanAddress = useCallback((data: string) => {
+    setShowScanner(false);
+    const trimmed = data.trim();
+    if (isValidSubstrateAddress(trimmed) || isValidEvmAddress(trimmed)) {
+      setToAddress(trimmed);
+    } else {
+      Alert.alert('Error', t('invalid_qr_address'));
+    }
+  }, [t]);
 
   // Set max amount
   const handleMax = () => {
@@ -378,6 +391,18 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
                 : Colors.grey,
           }}
         />
+        <TouchableOpacity
+          onPress={() => setShowScanner(true)}
+          disabled={isInProgress}
+          activeOpacity={0.7}
+          style={{
+            backgroundColor: Colors.purple,
+            borderRadius: 12,
+            paddingHorizontal: 14,
+            justifyContent: 'center',
+          }}>
+          <Text style={{color: '#fff', fontSize: 16}}>📷</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={handlePaste}
           disabled={isInProgress}
@@ -628,6 +653,14 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
           setAmount('');
         }}
         onClose={() => setShowTokenModal(false)}
+      />
+
+      {/* QR Scanner Modal */}
+      <QRScannerModal
+        visible={showScanner}
+        hint={t('scan_address')}
+        onScan={handleScanAddress}
+        onClose={() => setShowScanner(false)}
       />
     </ScrollView>
   );

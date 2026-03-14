@@ -16,6 +16,7 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {useTranslation} from 'react-i18next';
@@ -25,6 +26,7 @@ import {useConnectionStore} from '../stores/useConnectionStore';
 import {sendNft} from '../reef-chain/transferApi';
 import {isValidSubstrateAddress, isValidEvmAddress} from '../reef-chain/accountApi';
 import {Colors} from '../utils/colors';
+import QRScannerModal from '../components/QRScannerModal';
 
 interface SendNFTScreenProps {
   nft: NFT;
@@ -53,6 +55,7 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
   const providerConnected = useConnectionStore(s => s.providerConn);
 
   const [toAddress, setToAddress] = useState('');
+  const [showScanner, setShowScanner] = useState(false);
   const [amount, setAmount] = useState('1');
   const [sendStatus, setSendStatus] = useState<SendStatus>('ready');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -96,6 +99,17 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
     const text = await Clipboard.getString();
     if (text) setToAddress(text.trim());
   };
+
+  // Handle scanned QR code (address)
+  const handleScanAddress = useCallback((data: string) => {
+    setShowScanner(false);
+    const trimmed = data.trim();
+    if (isValidSubstrateAddress(trimmed) || isValidEvmAddress(trimmed)) {
+      setToAddress(trimmed);
+    } else {
+      Alert.alert('Error', t('invalid_qr_address'));
+    }
+  }, [t]);
 
   const handleSend = () => {
     if (!canSubmit || !selectedAddress || !selectedAccount?.evmAddress) return;
@@ -304,6 +318,18 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
           }}
         />
         <TouchableOpacity
+          onPress={() => setShowScanner(true)}
+          disabled={isInProgress}
+          activeOpacity={0.7}
+          style={{
+            backgroundColor: Colors.purple,
+            borderRadius: 12,
+            paddingHorizontal: 14,
+            justifyContent: 'center',
+          }}>
+          <Text style={{color: '#fff', fontSize: 16}}>📷</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={handlePaste}
           disabled={isInProgress}
           activeOpacity={0.7}
@@ -443,6 +469,14 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
       )}
 
       <View style={{height: 40}} />
+
+      {/* QR Scanner Modal */}
+      <QRScannerModal
+        visible={showScanner}
+        hint={t('scan_address')}
+        onScan={handleScanAddress}
+        onClose={() => setShowScanner(false)}
+      />
     </ScrollView>
   );
 }

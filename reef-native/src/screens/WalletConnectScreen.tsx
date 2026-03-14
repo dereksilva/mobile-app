@@ -10,7 +10,7 @@
  * - Session expiry display
  */
 
-import React, {useState} from 'react';
+import React, {useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import {useWalletConnectStore} from '../stores/useWalletConnectStore';
 import {WCSession} from '../types';
 import * as WalletConnectService from '../services/WalletConnectService';
 import {Colors} from '../utils/colors';
+import QRScannerModal from '../components/QRScannerModal';
 
 interface WalletConnectScreenProps {
   onBack: () => void;
@@ -38,30 +39,37 @@ export default function WalletConnectScreen({
   const isInitialized = useWalletConnectStore(s => s.isInitialized);
 
   const [showPairInput, setShowPairInput] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
   const [pairUri, setPairUri] = useState('');
   const [isPairing, setIsPairing] = useState(false);
 
-  const handlePair = async () => {
-    const uri = pairUri.trim();
-    if (!uri) return;
+  const handlePairWithUri = useCallback(async (uri: string) => {
+    const trimmed = uri.trim();
+    if (!trimmed) return;
 
-    // Validate WalletConnect URI
-    if (!uri.startsWith('wc:')) {
-      Alert.alert('Error', 'Invalid WalletConnect URI. Must start with "wc:"');
+    if (!trimmed.startsWith('wc:')) {
+      Alert.alert('Error', t('invalid_qr_walletconnect'));
       return;
     }
 
     setIsPairing(true);
     try {
-      await WalletConnectService.pair(uri);
+      await WalletConnectService.pair(trimmed);
       setPairUri('');
       setShowPairInput(false);
-    } catch (err) {
+    } catch {
       Alert.alert('Error', 'Failed to pair with dApp. Please try again.');
     } finally {
       setIsPairing(false);
     }
-  };
+  }, [t]);
+
+  const handlePair = () => handlePairWithUri(pairUri);
+
+  const handleScanResult = useCallback((data: string) => {
+    setShowScanner(false);
+    handlePairWithUri(data);
+  }, [handlePairWithUri]);
 
   const handleDisconnect = (session: WCSession) => {
     Alert.alert(
@@ -98,12 +106,32 @@ export default function WalletConnectScreen({
         <View style={{width: 50}} />
       </View>
 
-      {/* Pair button */}
-      <View style={{paddingHorizontal: 16, paddingBottom: 8}}>
+      {/* Pair buttons */}
+      <View style={{paddingHorizontal: 16, paddingBottom: 8, flexDirection: 'row', gap: 8}}>
+        <TouchableOpacity
+          onPress={() => setShowScanner(true)}
+          activeOpacity={0.7}
+          style={{
+            backgroundColor: Colors.purpleDark,
+            borderRadius: 12,
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            alignItems: 'center',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 6,
+          }}>
+          <Text style={{color: '#fff', fontSize: 16}}>📷</Text>
+          <Text style={{color: '#fff', fontSize: 14, fontWeight: '600'}}>
+            {t('scan_qr')}
+          </Text>
+        </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => setShowPairInput(!showPairInput)}
           activeOpacity={0.7}
           style={{
+            flex: 1,
             backgroundColor: Colors.purple,
             borderRadius: 12,
             paddingVertical: 14,
@@ -112,8 +140,8 @@ export default function WalletConnectScreen({
             justifyContent: 'center',
             gap: 8,
           }}>
-          <Text style={{fontSize: 20}}>📱</Text>
-          <Text style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>
+          <Text style={{fontSize: 16}}>📱</Text>
+          <Text style={{color: '#fff', fontSize: 14, fontWeight: '600'}}>
             {t('create_new_connection')}
           </Text>
         </TouchableOpacity>
@@ -226,6 +254,14 @@ export default function WalletConnectScreen({
           ) : null
         }
         contentContainerStyle={{paddingHorizontal: 16, paddingBottom: 20}}
+      />
+
+      {/* QR Scanner Modal */}
+      <QRScannerModal
+        visible={showScanner}
+        hint="Scan a WalletConnect QR code"
+        onScan={handleScanResult}
+        onClose={() => setShowScanner(false)}
       />
     </View>
   );

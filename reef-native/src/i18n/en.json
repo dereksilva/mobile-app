@@ -178,5 +178,11 @@
   "indexer_connection": "Indexer Connection",
   "english": "English",
   "hindi": "हिन्दी",
-  "italian": "Italiano"
+  "italian": "Italiano",
+  "scan_qr": "Scan QR",
+  "camera_permission_required": "Camera permission is required to scan QR codes.",
+  "open_settings": "Open Settings",
+  "point_camera_at_qr": "Point your camera at a QR code",
+  "invalid_qr_address": "The scanned QR code is not a valid Reef address.",
+  "invalid_qr_walletconnect": "This QR code is not a WalletConnect URI."
 }
