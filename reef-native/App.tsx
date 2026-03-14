@@ -15,6 +15,7 @@ import IntroScreen from './src/screens/IntroScreen';
 import CreatePasswordScreen from './src/screens/CreatePasswordScreen';
 import Navigation from './src/app/Navigation';
 import SigningOverlay from './src/components/SigningOverlay';
+import WalletConnectSessionModal from './src/components/WalletConnectSessionModal';
 
 export default function App() {
   const {
@@ -86,6 +87,7 @@ export default function App() {
         <SigningOverlay>
           {renderContent()}
         </SigningOverlay>
+        <WalletConnectSessionModal />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

@@ -22,12 +22,14 @@ import {
 import {useTranslation} from 'react-i18next';
 import {useAppConfigStore} from '../stores/useAppConfigStore';
 import {useLocaleStore} from '../stores/useLocaleStore';
+import {useWalletConnectStore} from '../stores/useWalletConnectStore';
 import {useBiometrics} from '../hooks/useBiometrics';
 import {Colors} from '../utils/colors';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import LanguageSelectionModal from '../components/LanguageSelectionModal';
 import NetworkSwitcher from '../components/NetworkSwitcher';
 import ConnectionDiagnostics from '../components/ConnectionDiagnostics';
+import WalletConnectScreen from './WalletConnectScreen';
 
 const DEV_UNLOCK_TAPS = 4;
 
@@ -36,6 +38,8 @@ const LANGUAGE_LABELS: Record<string, string> = {
   hi: 'हिन्दी',
   it: 'Italiano',
 };
+
+type SubScreen = 'settings' | 'walletconnect';
 
 export default function SettingsScreen() {
   const {t} = useTranslation();
@@ -54,11 +58,13 @@ export default function SettingsScreen() {
   const developerMode = useAppConfigStore(s => s.developerMode);
   const setDeveloperMode = useAppConfigStore(s => s.setDeveloperMode);
   const selectedLanguage = useLocaleStore(s => s.selectedLanguage);
+  const wcSessionCount = useWalletConnectStore(s => s.sessions.length);
 
   // Biometrics
   const {isAvailable: biometricsAvailable, checkAvailability} = useBiometrics();
 
   // Local state
+  const [subScreen, setSubScreen] = useState<SubScreen>('settings');
   const [devTapCount, setDevTapCount] = useState(0);
   const [showDevSettings, setShowDevSettings] = useState(developerMode);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -105,6 +111,13 @@ export default function SettingsScreen() {
     [biometricsAvailable, setBiometricAuth, t],
   );
 
+  // Sub-screen routing
+  if (subScreen === 'walletconnect') {
+    return (
+      <WalletConnectScreen onBack={() => setSubScreen('settings')} />
+    );
+  }
+
   return (
     <ScrollView
       style={{flex: 1, backgroundColor: Colors.primaryBg}}
@@ -123,6 +136,14 @@ export default function SettingsScreen() {
           {t('settings')}
         </Text>
       </TouchableOpacity>
+
+      {/* ── WALLETCONNECT ── */}
+      <SettingsRow
+        icon="📱"
+        label="WalletConnect"
+        value={wcSessionCount > 0 ? `${wcSessionCount}` : undefined}
+        onPress={() => setSubScreen('walletconnect')}
+      />
 
       {/* ── GENERAL Section ── */}
       <SectionHeader label={t('general')} />
