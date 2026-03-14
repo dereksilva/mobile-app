@@ -1,97 +1,70 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Reef Native
 
-# Getting Started
+React Native + TypeScript implementation of the Reef blockchain mobile wallet.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Quick Start
 
-## Step 1: Start Metro
+```bash
+# Install dependencies (Node >= 22.11.0 required)
+npm install --legacy-peer-deps
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+# iOS only: install CocoaPods
+cd ios && bundle exec pod install && cd ..
 
-To start the Metro dev server, run the following command from the root of your React Native project:
-
-```sh
-# Using npm
+# Start Metro bundler
 npm start
 
-# OR using Yarn
-yarn start
+# Build & run
+npm run ios       # iOS simulator
+npm run android   # Android emulator
 ```
 
-## Step 2: Build and run your app
+## Development
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+```bash
+# Type check
+npx tsc --noEmit
 
-### Android
+# Lint
+npm run lint
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+# Test
+npm test
 ```
 
-### iOS
+## Architecture
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### State Management
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Zustand stores in `src/stores/` — each store is a hook (e.g. `useAccountStore`, `useTokenStore`). No providers needed; import and call directly in components.
 
-```sh
-bundle install
-```
+### Blockchain Integration
 
-Then, and every time you update your native dependencies, run:
+`src/reef-chain/` contains all Polkadot/Substrate and EVM interaction:
+- Uses `@polkadot/api` for native chain operations (no WebView bridge)
+- Uses `@reef-chain/evm-provider` for EVM compatibility
+- RPC endpoint: `wss://rpc.reefscan.com/ws` (mainnet)
 
-```sh
-bundle exec pod install
-```
+### Navigation
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+Bottom tab navigator with 5 tabs (Home, Swap, Pools, Accounts, Settings). Sub-screens use state-based inline routing within each tab — no deep stack navigation.
 
-```sh
-# Using npm
-npm run ios
+### Storage
 
-# OR using Yarn
-yarn ios
-```
+- **react-native-mmkv**: Fast encrypted key-value storage for app data
+- **react-native-keychain**: Biometric-protected credential storage
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### WalletConnect
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+`@reown/walletkit` (WalletConnect v2) for dApp connections. Supports `reef_signTransaction` and `reef_signMessage` methods with Reef-specific chain IDs.
 
-## Step 3: Modify your app
+### Internationalization
 
-Now that you have successfully run the app, let's make changes!
+i18next with translations in `src/i18n/`. Supported languages: English (`en`), Hindi (`hi`), Italian (`it`).
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+## Troubleshooting
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- **Peer dependency conflicts**: Always use `npm install --legacy-peer-deps`
+- **iOS pod issues**: Run `cd ios && bundle exec pod install --repo-update`
+- **Metro cache**: `npm start -- --reset-cache`
+- **Android build**: Ensure `JAVA_HOME` points to JDK 17+
