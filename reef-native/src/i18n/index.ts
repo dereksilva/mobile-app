@@ -1,10 +1,13 @@
 import i18n from 'i18next';
 import {initReactI18next} from 'react-i18next';
 import en from './en.json';
+import hi from './hi.json';
+import it from './it.json';
 
 const resources = {
   en: {translation: en},
-  // hi and it will be added in Phase 9
+  hi: {translation: hi},
+  it: {translation: it},
 };
 
 i18n.use(initReactI18next).init({
