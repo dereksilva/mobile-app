@@ -5,8 +5,11 @@
  */
 
 import React from 'react';
-import {View, Text, ActivityIndicator} from 'react-native';
+import {View, Text, Image, ActivityIndicator} from 'react-native';
 import {Colors} from '../utils/colors';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const reefLogo = require('../assets/images/reef.png');
 
 interface SplashScreenProps {
   error?: string | null;
@@ -23,19 +26,16 @@ export default function SplashScreen({error, onRetry}: SplashScreenProps) {
         alignItems: 'center',
         paddingHorizontal: 32,
       }}>
-      {/* Reef logo placeholder — replace with actual asset */}
-      <View
+      {/* Reef logo */}
+      <Image
+        source={reefLogo}
         style={{
           width: 128,
           height: 128,
-          borderRadius: 64,
-          backgroundColor: Colors.purple,
-          justifyContent: 'center',
-          alignItems: 'center',
           marginBottom: 32,
-        }}>
-        <Text style={{color: '#fff', fontSize: 48, fontWeight: '700'}}>R</Text>
-      </View>
+        }}
+        resizeMode="contain"
+      />
 
       <Text
         style={{

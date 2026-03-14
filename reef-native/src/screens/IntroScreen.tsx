@@ -7,6 +7,7 @@ import React, {useRef, useState} from 'react';
 import {
   View,
   Text,
+  Image,
   ScrollView,
   Dimensions,
   TouchableOpacity,
@@ -15,6 +16,9 @@ import {
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Colors} from '../utils/colors';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const introGif = require('../assets/images/intro.gif');
 
 const {width} = Dimensions.get('window');
 
@@ -84,23 +88,35 @@ export default function IntroScreen({onDone}: IntroScreenProps) {
               alignItems: 'center',
               paddingHorizontal: 40,
             }}>
-            {/* Colored circle icon */}
-            <View
-              style={{
-                width: 160,
-                height: 160,
-                borderRadius: 80,
-                backgroundColor: slide.color,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 48,
-                opacity: 0.9,
-              }}>
-              <Text
-                style={{color: '#fff', fontSize: 56, fontWeight: '700'}}>
-                R
-              </Text>
-            </View>
+            {/* Intro animation on first slide, colored circle on others */}
+            {index === 0 ? (
+              <Image
+                source={introGif}
+                style={{
+                  width: 200,
+                  height: 200,
+                  marginBottom: 48,
+                }}
+                resizeMode="contain"
+              />
+            ) : (
+              <View
+                style={{
+                  width: 160,
+                  height: 160,
+                  borderRadius: 80,
+                  backgroundColor: slide.color,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: 48,
+                  opacity: 0.9,
+                }}>
+                <Text
+                  style={{color: '#fff', fontSize: 56, fontWeight: '700'}}>
+                  R
+                </Text>
+              </View>
+            )}
 
             <Text
               style={{
