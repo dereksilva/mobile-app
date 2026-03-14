@@ -10,6 +10,7 @@ interface AppConfigState {
 
   toggleDisplayBalance: () => void;
   toggleBiometricAuth: () => void;
+  setBiometricAuth: (enabled: boolean) => void;
   toggleNavigateOnAccountSwitch: () => void;
   setDeveloperMode: (enabled: boolean) => void;
   loadFromStorage: () => void;
@@ -31,6 +32,11 @@ export const useAppConfigStore = create<AppConfigState>((set, get) => ({
     const next = !get().biometricAuth;
     Storage.setBoolValue(StorageKey.BIOMETRIC_AUTH, next);
     set({biometricAuth: next});
+  },
+
+  setBiometricAuth: (enabled: boolean) => {
+    Storage.setBoolValue(StorageKey.BIOMETRIC_AUTH, enabled);
+    set({biometricAuth: enabled});
   },
 
   toggleNavigateOnAccountSwitch: () => {

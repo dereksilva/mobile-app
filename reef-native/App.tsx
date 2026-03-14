@@ -14,6 +14,7 @@ import AuthScreen from './src/screens/AuthScreen';
 import IntroScreen from './src/screens/IntroScreen';
 import CreatePasswordScreen from './src/screens/CreatePasswordScreen';
 import Navigation from './src/app/Navigation';
+import SigningOverlay from './src/components/SigningOverlay';
 
 export default function App() {
   const {
@@ -82,7 +83,9 @@ export default function App() {
           barStyle="dark-content"
           backgroundColor={Colors.primaryBg}
         />
-        {renderContent()}
+        <SigningOverlay>
+          {renderContent()}
+        </SigningOverlay>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
