@@ -30,5 +30,18 @@ target 'ReefNative' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Suppress implicit conversion warnings in react-native-webview
+    installer.pods_project.targets.each do |target|
+      if target.name == 'react-native-webview'
+        target.build_configurations.each do |config|
+          config.build_settings['GCC_WARN_64_TO_32_BIT_CONVERSION'] = 'NO'
+          config.build_settings['GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS'] = 'NO'
+          config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          config.build_settings['OTHER_CFLAGS'] << '-Wno-shorten-64-to-32'
+          config.build_settings['OTHER_CFLAGS'] << '-Wno-nonnull'
+        end
+      end
+    end
   end
 end
