@@ -22,6 +22,7 @@ import {TokenBalance, NFT, TransactionRecord} from '../types';
 import {useAccountStore} from '../stores/useAccountStore';
 import {useTokenStore} from '../stores/useTokenStore';
 import {useAppConfigStore} from '../stores/useAppConfigStore';
+import Svg, {Path} from 'react-native-svg';
 import {Colors} from '../utils/colors';
 import SendScreen from './SendScreen';
 import SendNFTScreen from './SendNFTScreen';
@@ -191,9 +192,14 @@ export default function HomeScreen() {
               borderWidth: 1,
               borderColor: Colors.grey,
             }}>
-            <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
-              💳 Buy
-            </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                <Path d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" stroke={Colors.text} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+              <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
+                Buy
+              </Text>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -208,9 +214,14 @@ export default function HomeScreen() {
               borderWidth: 1,
               borderColor: Colors.grey,
             }}>
-            <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
-              🌐 dApps
-            </Text>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+              <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+                <Path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" stroke={Colors.text} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+              <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
+                dApps
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -305,14 +316,14 @@ function TokenList({
 
   return (
     <View>
-      {tokens.map(token => {
+      {tokens.map((token, index) => {
         const balance =
           parseFloat(token.balance) / Math.pow(10, token.decimals);
         const usdValue = balance * token.price;
 
         return (
           <TouchableOpacity
-            key={token.address}
+            key={token.address || `token-${index}`}
             onPress={() => onSend(token)}
             activeOpacity={0.7}
             style={{
@@ -415,9 +426,9 @@ function NFTGrid({
         flexWrap: 'wrap',
         gap: 12,
       }}>
-      {nfts.map(nft => (
+      {nfts.map((nft, index) => (
         <TouchableOpacity
-          key={`${nft.contractAddress}-${nft.nftId}`}
+          key={`${nft.contractAddress || index}-${nft.nftId || index}`}
           onPress={() => onSend(nft)}
           activeOpacity={0.7}
           style={{
@@ -487,9 +498,9 @@ function ActivityList({txHistory}: {txHistory: TransactionRecord[]}) {
 
   return (
     <View>
-      {txHistory.map(tx => (
+      {txHistory.map((tx, index) => (
         <View
-          key={tx.hash}
+          key={tx.hash || `tx-${index}`}
           style={{
             backgroundColor: '#fff',
             borderRadius: 14,

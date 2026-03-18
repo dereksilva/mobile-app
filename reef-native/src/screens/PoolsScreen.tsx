@@ -9,35 +9,99 @@
  * - Inline pool detail view
  */
 
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Pool, TokenBalance} from '../types';
-import {usePoolsStore} from '../stores/usePoolsStore';
 import {useTokenStore} from '../stores/useTokenStore';
 import {useSwapStore} from '../stores/useSwapStore';
+import {useAccountStore} from '../stores/useAccountStore';
+import {fetchAllPools, DexPool} from '../reef-chain/poolsApi';
 import {Colors} from '../utils/colors';
 
 type SubScreen = 'list' | 'detail';
 
 export default function PoolsScreen() {
   const {t} = useTranslation();
-  const poolsData = usePoolsStore(s => s.pools);
-  const pools = poolsData.data ?? [];
   const tokensData = useTokenStore(s => s.selectedErc20s);
   const tokens = tokensData.data ?? [];
   const setTokenFrom = useSwapStore(s => s.setTokenFrom);
   const setTokenTo = useSwapStore(s => s.setTokenTo);
+  const selectedAddress = useAccountStore(s => s.selectedAddress);
 
+  const [dexPools, setDexPools] = useState<DexPool[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [searchDebounced, setSearchDebounced] = useState('');
   const [subScreen, setSubScreen] = useState<SubScreen>('list');
   const [selectedPool, setSelectedPool] = useState<Pool | null>(null);
+
+  // Debounce search for API calls
+  useEffect(() => {
+    const timer = setTimeout(() => setSearchDebounced(search), 400);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch pools from DEX GraphQL API
+  const loadPools = useCallback(async () => {
+    try {
+      setLoading(true);
+      const pools = await fetchAllPools(
+        50,
+        0,
+        searchDebounced,
+        selectedAddress ?? '',
+      );
+      setDexPools(pools);
+    } catch (err) {
+      console.error('[PoolsScreen] Failed to fetch pools:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchDebounced, selectedAddress]);
+
+  useEffect(() => {
+    loadPools();
+  }, [loadPools]);
+
+  // Map DexPool to our Pool type for rendering
+  const pools: Pool[] = useMemo(
+    () =>
+      dexPools.map(dp => ({
+        address: dp.id,
+        token1: {
+          address: dp.token1,
+          name: dp.name1,
+          symbol: dp.symbol1,
+          decimals: dp.decimals1,
+          balance: dp.userLockedAmount1 ?? '0',
+          price: 0,
+          iconUrl: dp.iconUrl1 ?? '',
+        },
+        token2: {
+          address: dp.token2,
+          name: dp.name2,
+          symbol: dp.symbol2,
+          decimals: dp.decimals2,
+          balance: dp.userLockedAmount2 ?? '0',
+          price: 0,
+          iconUrl: dp.iconUrl2 ?? '',
+        },
+        reserve1: dp.reserved1 ?? '0',
+        reserve2: dp.reserved2 ?? '0',
+        totalSupply: '0',
+        dayVolume1: dp.dayVolume1,
+        dayVolume2: dp.dayVolume2,
+      })),
+    [dexPools],
+  );
 
   // Map token addresses to balance for quick lookup
   const tokenBalanceMap = useMemo(() => {
@@ -47,21 +111,6 @@ export default function PoolsScreen() {
     }
     return map;
   }, [tokens]);
-
-  // Filter pools by search
-  const filteredPools = useMemo(() => {
-    if (!search.trim()) return pools;
-    const query = search.trim().toLowerCase();
-    return pools.filter(
-      pool =>
-        pool.token1.name.toLowerCase().includes(query) ||
-        pool.token1.symbol.toLowerCase().includes(query) ||
-        pool.token2.name.toLowerCase().includes(query) ||
-        pool.token2.symbol.toLowerCase().includes(query) ||
-        pool.token1.address.toLowerCase().includes(query) ||
-        pool.token2.address.toLowerCase().includes(query),
-    );
-  }, [pools, search]);
 
   // Check if user has balance in either token of a pool
   const userHasBalance = (pool: Pool): boolean => {
@@ -137,7 +186,7 @@ export default function PoolsScreen() {
               marginBottom: 8,
               marginLeft: 4,
             }}>
-            {filteredPools.length} pool{filteredPools.length !== 1 ? 's' : ''}{' '}
+            {pools.length} pool{pools.length !== 1 ? 's' : ''}{' '}
             found
           </Text>
         ) : (
@@ -147,7 +196,7 @@ export default function PoolsScreen() {
 
       {/* Pool list */}
       <FlatList
-        data={filteredPools}
+        data={pools}
         keyExtractor={item => item.address}
         renderItem={({item}) => (
           <PoolCard
@@ -162,9 +211,23 @@ export default function PoolsScreen() {
         )}
         ListEmptyComponent={
           <View style={{padding: 40, alignItems: 'center'}}>
-            <Text style={{color: Colors.textLight, fontSize: 14}}>
-              {pools.length === 0 ? t('loading_pool_data') : t('no_pool_data')}
-            </Text>
+            {loading ? (
+              <>
+                <ActivityIndicator size="large" color={Colors.purple} />
+                <Text
+                  style={{
+                    color: Colors.textLight,
+                    fontSize: 14,
+                    marginTop: 12,
+                  }}>
+                  {t('loading_pool_data')}
+                </Text>
+              </>
+            ) : (
+              <Text style={{color: Colors.textLight, fontSize: 14}}>
+                {t('no_pool_data')}
+              </Text>
+            )}
           </View>
         }
         contentContainerStyle={{paddingHorizontal: 16, paddingBottom: 20}}

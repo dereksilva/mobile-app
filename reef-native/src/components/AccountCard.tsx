@@ -13,6 +13,7 @@ interface AccountCardProps {
   isSelected: boolean;
   onPress: () => void;
   onLongPress?: () => void;
+  onClaimEvm?: () => void;
   showBalance?: boolean;
 }
 
@@ -33,6 +34,7 @@ export default function AccountCard({
   isSelected,
   onPress,
   onLongPress,
+  onClaimEvm,
   showBalance = true,
 }: AccountCardProps) {
   return (
@@ -160,6 +162,28 @@ export default function AccountCard({
             }}>
             EVM: {shortenAddress(account.evmAddress)}
           </Text>
+        )}
+
+        {/* Claim EVM button — shown when EVM not yet bound */}
+        {!account.isEvmClaimed && onClaimEvm && (
+          <TouchableOpacity
+            onPress={e => {
+              e.stopPropagation();
+              onClaimEvm();
+            }}
+            activeOpacity={0.7}
+            style={{
+              backgroundColor: Colors.purple,
+              borderRadius: 10,
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              alignSelf: 'flex-start',
+              marginTop: 10,
+            }}>
+            <Text style={{color: '#fff', fontSize: 12, fontWeight: '600'}}>
+              Claim EVM Address
+            </Text>
+          </TouchableOpacity>
         )}
       </View>
     </TouchableOpacity>

@@ -5,7 +5,7 @@
  */
 
 import React, {useState, useEffect} from 'react';
-import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, Alert} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {ReefAccount} from '../types';
 import {useAccounts} from '../hooks/useAccounts';
@@ -27,7 +27,7 @@ type SubScreen =
 
 export default function AccountsScreen() {
   const {t} = useTranslation();
-  const {accounts, selectedAddress, selectAccount, loadAccounts} =
+  const {accounts, selectedAddress, selectAccount, loadAccounts, claimEvm} =
     useAccounts();
 
   const [subScreen, setSubScreen] = useState<SubScreen>('list');
@@ -39,6 +39,31 @@ export default function AccountsScreen() {
 
   const handleAccountPress = (account: ReefAccount) => {
     selectAccount(account.address);
+  };
+
+  const handleClaimEvm = (account: ReefAccount) => {
+    Alert.alert(
+      'Claim EVM Address',
+      `Bind an EVM address to "${account.name}"? This requires a small REEF transaction fee.`,
+      [
+        {text: 'Cancel', style: 'cancel'},
+        {
+          text: 'Claim',
+          onPress: async () => {
+            try {
+              await claimEvm(account.address);
+              Alert.alert('Success', 'EVM address claimed successfully.');
+              loadAccounts();
+            } catch (err: any) {
+              Alert.alert(
+                'Error',
+                err.message ?? 'Failed to claim EVM address.',
+              );
+            }
+          },
+        },
+      ],
+    );
   };
 
   const handleAccountLongPress = (account: ReefAccount) => {
@@ -181,6 +206,11 @@ export default function AccountsScreen() {
                 isSelected={account.address === selectedAddress}
                 onPress={() => handleAccountPress(account)}
                 onLongPress={() => handleAccountLongPress(account)}
+                onClaimEvm={
+                  !account.isEvmClaimed
+                    ? () => handleClaimEvm(account)
+                    : undefined
+                }
               />
             ))}
         </>

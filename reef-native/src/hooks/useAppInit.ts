@@ -5,13 +5,21 @@
  */
 
 import {useState, useEffect, useCallback} from 'react';
-import {InitState, NetworkName, StorageKey} from '../types';
+import {
+  InitState,
+  NetworkName,
+  StorageKey,
+  ReefAccount,
+  createCompleteStatus,
+} from '../types';
 import {useInitStore} from '../stores/useInitStore';
 import {useAppConfigStore} from '../stores/useAppConfigStore';
 import {useLocaleStore} from '../stores/useLocaleStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
+import {useAccountStore} from '../stores/useAccountStore';
 import * as Storage from '../services/StorageService';
 import {initReefState} from '../reef-chain/initReefState';
+import {reefState} from '@reef-chain/util-lib';
 
 export function useAppInit() {
   const {initState, error, setInitState, setError} = useInitStore();
@@ -43,10 +51,34 @@ export function useAppInit() {
           : NetworkName.MAINNET;
       useNetworkStore.getState().setNetwork(network);
 
-      // 5. Initialize reef chain connection
+      // 5. Load accounts from storage into the store BEFORE initializing
+      //    reef state, so util-lib knows about them and can fetch balances.
+      const storedAccounts = await Storage.getAllAccounts();
+      const reefAccounts: ReefAccount[] = storedAccounts.map(a => ({
+        ...a,
+        balance: '0',
+        evmAddress: undefined,
+      }));
+      useAccountStore.getState().setAccounts(createCompleteStatus(reefAccounts));
+
+      // Restore selected address
+      const savedAddress = Storage.getValue(StorageKey.SELECTED_ADDRESS);
+      if (savedAddress && storedAccounts.some(a => a.address === savedAddress)) {
+        useAccountStore.getState().setSelectedAddress(savedAddress);
+      } else if (storedAccounts.length > 0) {
+        useAccountStore.getState().setSelectedAddress(storedAccounts[0].address);
+      }
+
+      // 6. Initialize reef chain connection (util-lib reads accounts from store)
       await initReefState(network);
 
-      // 6. Determine init state
+      // 7. Tell util-lib which account is selected so it filters data streams
+      const selectedAddr = useAccountStore.getState().selectedAddress;
+      if (selectedAddr) {
+        reefState.setSelectedAddress(selectedAddr);
+      }
+
+      // 8. Determine init state
       if (firstLaunch) {
         setInitState(InitState.FIRST_LAUNCH);
       } else if (passwordSet) {

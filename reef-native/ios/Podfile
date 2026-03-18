@@ -31,15 +31,73 @@ target 'ReefNative' do
       # :ccache_enabled => true
     )
 
-    # Suppress implicit conversion warnings in react-native-webview
+    # Suppress third-party pod warnings treated as errors
     installer.pods_project.targets.each do |target|
-      if target.name == 'react-native-webview'
-        target.build_configurations.each do |config|
-          config.build_settings['GCC_WARN_64_TO_32_BIT_CONVERSION'] = 'NO'
-          config.build_settings['GCC_TREAT_IMPLICIT_FUNCTION_DECLARATIONS_AS_ERRORS'] = 'NO'
-          config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
-          config.build_settings['OTHER_CFLAGS'] << '-Wno-shorten-64-to-32'
-          config.build_settings['OTHER_CFLAGS'] << '-Wno-nonnull'
+      target.build_configurations.each do |build_config|
+        case target.name
+        when 'react-native-webview'
+          build_config.build_settings['GCC_WARN_64_TO_32_BIT_CONVERSION'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-shorten-64-to-32'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-nonnull'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-deprecated-declarations'
+        when 'react-native-camera-kit'
+          build_config.build_settings['SWIFT_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-incompatible-pointer-types'
+        when 'RNCClipboard'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-deprecated-declarations'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-mismatched-parameter-types'
+        when 'RNGestureHandler'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-unused-function'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-documentation'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-implicit-retain-self'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-deprecated-declarations'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-objc-missing-super-calls'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-enum-conversion'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-return-type'
+        when 'RNKeychain'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-deprecated-declarations'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-comma'
+        when 'RNScreens'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-deprecated-declarations'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-switch'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-format'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-documentation'
+        when 'RNSVG'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-objc-missing-super-calls'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-vla-extension'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-unused-function'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-static-inline-explicit-instantiation'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-auto-var-id'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-objc-property-synthesis'
+        when 'RNWorklets'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-shorten-64-to-32'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-deprecated-declarations'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-unused-function'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-documentation'
+        when 'RNReanimated'
+          build_config.build_settings['GCC_TREAT_WARNINGS_AS_ERRORS'] = 'NO'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-shorten-64-to-32'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-deprecated-declarations'
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-nullability-completeness'
+        when 'React-Fabric'
+          build_config.build_settings['OTHER_CFLAGS'] ||= ['$(inherited)']
+          build_config.build_settings['OTHER_CFLAGS'] << '-Wno-documentation'
         end
       end
     end

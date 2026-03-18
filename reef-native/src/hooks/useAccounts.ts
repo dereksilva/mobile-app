@@ -8,6 +8,8 @@ import {useAccountStore} from '../stores/useAccountStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
 import * as Storage from '../services/StorageService';
 import * as AccountApi from '../reef-chain/accountApi';
+import {syncAccountsToUtilLib} from '../reef-chain/initReefState';
+import {reefState} from '@reef-chain/util-lib';
 import {
   StoredAccount,
   ReefAccount,
@@ -42,6 +44,9 @@ export function useAccounts() {
         setSelectedAddress(stored[0].address);
         Storage.setValue(StorageKey.SELECTED_ADDRESS, stored[0].address);
       }
+
+      // Sync accounts to util-lib so it can fetch balances/tokens
+      syncAccountsToUtilLib();
     } catch (err: any) {
       setAccounts(createErrorStatus(err.message));
     }
@@ -87,6 +92,7 @@ export function useAccounts() {
       };
 
       useAccountStore.getState().addAccount(reefAccount);
+      syncAccountsToUtilLib();
       return reefAccount;
     },
     [],
@@ -115,6 +121,7 @@ export function useAccounts() {
       };
 
       useAccountStore.getState().addAccount(reefAccount);
+      syncAccountsToUtilLib();
       return {account: reefAccount, mnemonic: generated.mnemonic};
     },
     [],
@@ -151,6 +158,7 @@ export function useAccounts() {
       };
 
       useAccountStore.getState().addAccount(reefAccount);
+      syncAccountsToUtilLib();
       return reefAccount;
     },
     [],
@@ -175,6 +183,8 @@ export function useAccounts() {
           Storage.deleteValue(StorageKey.SELECTED_ADDRESS);
         }
       }
+
+      syncAccountsToUtilLib();
     },
     [selectedAddress, setSelectedAddress],
   );
@@ -186,6 +196,8 @@ export function useAccounts() {
     (address: string) => {
       setSelectedAddress(address);
       Storage.setValue(StorageKey.SELECTED_ADDRESS, address);
+      // Notify util-lib so it switches its observable streams to the new account
+      reefState.setSelectedAddress(address);
     },
     [setSelectedAddress],
   );
