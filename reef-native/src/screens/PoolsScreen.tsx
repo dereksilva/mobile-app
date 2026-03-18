@@ -19,6 +19,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
+import {useNavigation} from '@react-navigation/native';
 import {Pool, TokenBalance} from '../types';
 import {useTokenStore} from '../stores/useTokenStore';
 import {useSwapStore} from '../stores/useSwapStore';
@@ -30,6 +31,7 @@ type SubScreen = 'list' | 'detail';
 
 export default function PoolsScreen() {
   const {t} = useTranslation();
+  const navigation = useNavigation<any>();
   const tokensData = useTokenStore(s => s.selectedErc20s);
   const tokens = tokensData.data ?? [];
   const setTokenFrom = useSwapStore(s => s.setTokenFrom);
@@ -122,13 +124,16 @@ export default function PoolsScreen() {
     );
   };
 
-  // Navigate to swap with pool tokens preselected
+  // Navigate to swap with pool tokens preselected.
+  // Use the user's wallet token (has real balance) when available,
+  // otherwise fall back to the pool's token metadata so both
+  // FROM and TO are always populated on the Swap screen.
   const handleSwapFromPool = (pool: Pool) => {
     const tk1 = tokenBalanceMap.get(pool.token1.address.toLowerCase());
     const tk2 = tokenBalanceMap.get(pool.token2.address.toLowerCase());
-    if (tk1) setTokenFrom(tk1);
-    if (tk2) setTokenTo(tk2);
-    // Note: actual navigation to swap tab would be handled by parent navigator
+    setTokenFrom(tk1 ?? pool.token1);
+    setTokenTo(tk2 ?? pool.token2);
+    navigation.navigate('Swap');
   };
 
   if (subScreen === 'detail' && selectedPool) {

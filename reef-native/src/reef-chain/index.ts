@@ -60,6 +60,24 @@ export {
 // Metadata
 export {getMetadata} from './metadataApi';
 
+// Staking
+export {
+  getStakingInfo,
+  getStakingLedger,
+  getNominations,
+  getPayee,
+  getValidators,
+  getEraRewards,
+  calculateApy,
+  stakeBond,
+  stakeBondExtra,
+  stakeUnbond,
+  stakeWithdraw,
+  stakeNominate,
+  stakeChill,
+  estimateStakeFee,
+} from './stakingApi';
+
 // ABIs
 export {
   ERC20_ABI,
@@ -92,3 +110,12 @@ export type {
   PoolInfo,
   ChainMetadata,
 } from './types';
+
+export type {
+  ValidatorInfo,
+  StakingLedger,
+  StakingInfo,
+  UnlockChunk,
+  RewardDestination,
+  EraRewardInfo,
+} from './stakingApi';

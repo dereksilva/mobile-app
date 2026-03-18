@@ -33,6 +33,7 @@ import {
   getSwapInputAmount,
 } from '../reef-chain/swapApi';
 import type {SwapStatusUpdate} from '../reef-chain/types';
+import {fetchAllPools} from '../reef-chain/poolsApi';
 import {Colors} from '../utils/colors';
 import TokenSelectionModal from '../components/TokenSelectionModal';
 
@@ -52,9 +53,59 @@ type SwapStatus =
 export default function SwapScreen() {
   const {t} = useTranslation();
   const tokensData = useTokenStore(s => s.selectedErc20s);
-  const tokens = tokensData.data ?? [];
+  const userTokens = tokensData.data ?? [];
   const selectedAddress = useAccountStore(s => s.selectedAddress);
   const providerConnected = useConnectionStore(s => s.providerConn);
+
+  // Fetch all pool tokens so the selection modal isn't limited to held tokens
+  const [poolTokens, setPoolTokens] = useState<TokenBalance[]>([]);
+  useEffect(() => {
+    fetchAllPools(50, 0, '', selectedAddress ?? '')
+      .then(pools => {
+        const map = new Map<string, TokenBalance>();
+        for (const dp of pools) {
+          if (!map.has(dp.token1.toLowerCase())) {
+            map.set(dp.token1.toLowerCase(), {
+              address: dp.token1,
+              name: dp.name1,
+              symbol: dp.symbol1,
+              decimals: dp.decimals1,
+              balance: '0',
+              price: 0,
+              iconUrl: dp.iconUrl1 ?? '',
+            });
+          }
+          if (!map.has(dp.token2.toLowerCase())) {
+            map.set(dp.token2.toLowerCase(), {
+              address: dp.token2,
+              name: dp.name2,
+              symbol: dp.symbol2,
+              decimals: dp.decimals2,
+              balance: '0',
+              price: 0,
+              iconUrl: dp.iconUrl2 ?? '',
+            });
+          }
+        }
+        setPoolTokens(Array.from(map.values()));
+      })
+      .catch(() => {});
+  }, [selectedAddress]);
+
+  // Merge user tokens (with balances) and pool tokens (for selection),
+  // giving priority to user tokens since they have real balance data
+  const allTokens = useMemo(() => {
+    const merged = new Map<string, TokenBalance>();
+    // Pool tokens first (balance=0)
+    for (const pt of poolTokens) {
+      merged.set(pt.address.toLowerCase(), pt);
+    }
+    // User tokens overwrite with real balances
+    for (const ut of userTokens) {
+      merged.set(ut.address.toLowerCase(), ut);
+    }
+    return Array.from(merged.values());
+  }, [userTokens, poolTokens]);
 
   const {
     tokenFrom,
@@ -325,17 +376,6 @@ export default function SwapScreen() {
       style={{flex: 1, backgroundColor: Colors.primaryBg}}
       contentContainerStyle={{padding: 16}}
       keyboardShouldPersistTaps="handled">
-      {/* Header */}
-      <Text
-        style={{
-          fontSize: 22,
-          fontWeight: '700',
-          color: Colors.text,
-          marginBottom: 20,
-        }}>
-        {t('swap_tokens')}
-      </Text>
-
       {/* From token */}
       <TokenInputSection
         label="From"
@@ -636,7 +676,7 @@ export default function SwapScreen() {
       {/* Token selection modals */}
       <TokenSelectionModal
         visible={showFromModal}
-        tokens={tokens}
+        tokens={allTokens}
         excludeAddress={tokenTo?.address}
         onSelect={token => {
           setTokenFrom(token);
@@ -648,7 +688,7 @@ export default function SwapScreen() {
       />
       <TokenSelectionModal
         visible={showToModal}
-        tokens={tokens}
+        tokens={allTokens}
         excludeAddress={tokenFrom?.address}
         onSelect={token => {
           setTokenTo(token);
