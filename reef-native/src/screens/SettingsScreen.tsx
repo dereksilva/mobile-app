@@ -20,6 +20,26 @@ import {
   Alert,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
+import Svg, {Path} from 'react-native-svg';
+
+/** SVG icon for settings rows (Heroicons outline, 24x24) */
+function SettingsIcon({d, color = Colors.purple, size = 20}: {d: string; color?: string; size?: number}) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={{marginRight: 12}}>
+      <Path d={d} stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+// Heroicons outline paths for settings icons
+const SETTINGS_ICONS = {
+  walletconnect: 'M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-6 18h6',  // device-phone-mobile
+  language: 'M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418',  // globe-alt
+  eye: 'M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z',  // eye
+  home: 'M2.25 12l8.954-8.955a1.126 1.126 0 011.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',  // home
+  lock: 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z',  // lock-closed
+  key: 'M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z',  // key
+};
 import {useAppConfigStore} from '../stores/useAppConfigStore';
 import {useLocaleStore} from '../stores/useLocaleStore';
 import {useWalletConnectStore} from '../stores/useWalletConnectStore';
@@ -139,7 +159,7 @@ export default function SettingsScreen() {
 
       {/* ── WALLETCONNECT ── */}
       <SettingsRow
-        icon="📱"
+        iconPath={SETTINGS_ICONS.walletconnect}
         label="WalletConnect"
         value={wcSessionCount > 0 ? `${wcSessionCount}` : undefined}
         onPress={() => setSubScreen('walletconnect')}
@@ -150,7 +170,7 @@ export default function SettingsScreen() {
 
       {/* Language */}
       <SettingsRow
-        icon="🌐"
+        iconPath={SETTINGS_ICONS.language}
         label={t('select_language')}
         value={LANGUAGE_LABELS[selectedLanguage] || selectedLanguage}
         onPress={() => setShowLanguageModal(true)}
@@ -158,7 +178,7 @@ export default function SettingsScreen() {
 
       {/* Display Balance */}
       <SettingsToggle
-        icon="👁"
+        iconPath={SETTINGS_ICONS.eye}
         label={t('display_balance')}
         value={displayBalance}
         onToggle={toggleDisplayBalance}
@@ -166,7 +186,7 @@ export default function SettingsScreen() {
 
       {/* Navigate on Account Switch */}
       <SettingsToggle
-        icon="🏠"
+        iconPath={SETTINGS_ICONS.home}
         label={t('go_to_home_on_account_switch')}
         value={navigateOnAccountSwitch}
         onToggle={toggleNavigateOnAccountSwitch}
@@ -177,14 +197,14 @@ export default function SettingsScreen() {
 
       {/* Change Password */}
       <SettingsRow
-        icon="🔒"
+        iconPath={SETTINGS_ICONS.lock}
         label={t('change_password')}
         onPress={() => setShowPasswordModal(true)}
       />
 
       {/* Biometric Auth */}
       <SettingsToggle
-        icon="🔑"
+        iconPath={SETTINGS_ICONS.key}
         label={t('biometric_auth')}
         value={biometricAuth}
         onToggle={handleBiometricToggle}
@@ -325,13 +345,13 @@ function SectionHeader({label}: {label: string}) {
 // --- Settings Row (tappable) ---
 
 interface SettingsRowProps {
-  icon: string;
+  iconPath: string;
   label: string;
   value?: string;
   onPress: () => void;
 }
 
-function SettingsRow({icon, label, value, onPress}: SettingsRowProps) {
+function SettingsRow({iconPath, label, value, onPress}: SettingsRowProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -348,7 +368,7 @@ function SettingsRow({icon, label, value, onPress}: SettingsRowProps) {
         borderWidth: 1,
         borderColor: Colors.grey,
       }}>
-      <Text style={{fontSize: 18, marginRight: 12}}>{icon}</Text>
+      <SettingsIcon d={iconPath} />
       <Text style={{flex: 1, fontSize: 15, color: Colors.text}}>{label}</Text>
       {value && (
         <Text
@@ -368,7 +388,7 @@ function SettingsRow({icon, label, value, onPress}: SettingsRowProps) {
 // --- Settings Toggle (switch) ---
 
 interface SettingsToggleProps {
-  icon: string;
+  iconPath: string;
   label: string;
   value: boolean;
   onToggle: (val: boolean) => void;
@@ -376,7 +396,7 @@ interface SettingsToggleProps {
 }
 
 function SettingsToggle({
-  icon,
+  iconPath,
   label,
   value,
   onToggle,
@@ -397,7 +417,7 @@ function SettingsToggle({
         borderColor: Colors.grey,
         opacity: disabled ? 0.5 : 1,
       }}>
-      <Text style={{fontSize: 18, marginRight: 12}}>{icon}</Text>
+      <SettingsIcon d={iconPath} />
       <Text style={{flex: 1, fontSize: 15, color: Colors.text}}>{label}</Text>
       <Switch
         value={value}

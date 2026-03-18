@@ -21,11 +21,30 @@ import {
   Image,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
+import Svg, {Path} from 'react-native-svg';
 import {useWalletConnectStore} from '../stores/useWalletConnectStore';
 import {WCSession} from '../types';
 import * as WalletConnectService from '../services/WalletConnectService';
 import {Colors} from '../utils/colors';
 import QRScannerModal from '../components/QRScannerModal';
+
+/** SVG icon helper (Heroicons outline, 24×24) */
+function WCIcon({d, color = '#fff', size = 18}: {d: string; color?: string; size?: number}) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d={d} stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+const WC_ICONS = {
+  camera:
+    'M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316zM16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z',
+  link:
+    'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m9.86-2.54a4.5 4.5 0 00-6.364-6.364L4.5 8.25a4.5 4.5 0 006.364 6.364L13.19 12.31',
+  phone:
+    'M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-6 18h6',
+};
 
 interface WalletConnectScreenProps {
   onBack: () => void;
@@ -97,8 +116,9 @@ export default function WalletConnectScreen({
           padding: 16,
           paddingBottom: 8,
         }}>
-        <TouchableOpacity onPress={onBack}>
-          <Text style={{color: Colors.purple, fontSize: 16}}>← Back</Text>
+        <TouchableOpacity onPress={onBack} style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
+          <WCIcon d="M15.75 19.5L8.25 12l7.5-7.5" color={Colors.purple} size={16} />
+          <Text style={{color: Colors.purple, fontSize: 16}}>Back</Text>
         </TouchableOpacity>
         <Text style={{fontSize: 18, fontWeight: '700', color: Colors.text}}>
           WalletConnect
@@ -121,7 +141,7 @@ export default function WalletConnectScreen({
             justifyContent: 'center',
             gap: 6,
           }}>
-          <Text style={{color: '#fff', fontSize: 16}}>📷</Text>
+          <WCIcon d={WC_ICONS.camera} />
           <Text style={{color: '#fff', fontSize: 14, fontWeight: '600'}}>
             {t('scan_qr')}
           </Text>
@@ -140,7 +160,7 @@ export default function WalletConnectScreen({
             justifyContent: 'center',
             gap: 8,
           }}>
-          <Text style={{fontSize: 16}}>📱</Text>
+          <WCIcon d={WC_ICONS.phone} />
           <Text style={{color: '#fff', fontSize: 14, fontWeight: '600'}}>
             {t('create_new_connection')}
           </Text>
@@ -229,7 +249,9 @@ export default function WalletConnectScreen({
         ListEmptyComponent={
           isInitialized ? (
             <View style={{padding: 40, alignItems: 'center'}}>
-              <Text style={{fontSize: 40, marginBottom: 12}}>🔗</Text>
+              <View style={{marginBottom: 12}}>
+                <WCIcon d={WC_ICONS.link} color={Colors.textLight} size={40} />
+              </View>
               <Text
                 style={{
                   color: Colors.textLight,

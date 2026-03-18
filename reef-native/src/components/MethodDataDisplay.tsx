@@ -75,25 +75,17 @@ export default function MethodDataDisplay({
         <DetailRow label="Contract" value={decoded.contractAddress} />
       )}
 
-      {/* Transaction type */}
-      <DetailRow label="Type" value={decoded.type.toUpperCase()} />
-
       {/* Decoded params */}
       {Object.entries(decoded.params).map(([key, value]) => (
         <DetailRow key={key} label={key} value={value} />
       ))}
 
-      {/* Metadata section */}
+      {/* Metadata section (slim — only chain and tip) */}
       {metadata && (
         <>
           {metadata.chainName && (
             <DetailRow label="Chain" value={metadata.chainName} />
           )}
-          {metadata.genesisHash && (
-            <DetailRow label="Genesis" value={metadata.genesisHash} />
-          )}
-          <DetailRow label="Nonce" value={metadata.nonce} />
-          <DetailRow label="Spec Ver" value={metadata.specVersion} />
           {metadata.tip && metadata.tip !== '0' && (
             <DetailRow label="Tip" value={metadata.tip} />
           )}

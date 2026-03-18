@@ -29,11 +29,23 @@ export function useAccounts() {
   const loadAccounts = useCallback(async () => {
     try {
       const stored = await Storage.getAllAccounts();
-      const reefAccounts: ReefAccount[] = stored.map(a => ({
-        ...a,
-        balance: '0',
-        evmAddress: undefined,
-      }));
+
+      // Preserve existing balances from the store so non-selected accounts
+      // don't get reset to '0' every time this is called.
+      const existingAccounts = useAccountStore.getState().accounts.data ?? [];
+      const balanceMap = new Map(
+        existingAccounts.map(a => [a.address, {balance: a.balance, evmAddress: a.evmAddress, isEvmClaimed: a.isEvmClaimed}]),
+      );
+
+      const reefAccounts: ReefAccount[] = stored.map(a => {
+        const existing = balanceMap.get(a.address);
+        return {
+          ...a,
+          balance: existing?.balance ?? '0',
+          evmAddress: existing?.evmAddress,
+          isEvmClaimed: existing?.isEvmClaimed ?? a.isEvmClaimed,
+        };
+      });
       setAccounts(createCompleteStatus(reefAccounts));
 
       // Restore selected address

@@ -23,6 +23,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  Modal,
 } from 'react-native';
 import {useTokenStore} from '../stores/useTokenStore';
 import {useAccountStore} from '../stores/useAccountStore';
@@ -112,6 +113,8 @@ export default function StakingScreen() {
 
   const [activeTab, setActiveTab] = useState<StakingTab>('active');
   const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
+  const [showUnstakeModal, setShowUnstakeModal] = useState(false);
+  const [unstakeAmount, setUnstakeAmount] = useState('');
 
   // Find REEF token for price data
   const reefToken = useMemo(
@@ -317,33 +320,22 @@ export default function StakingScreen() {
 
   // Handle unstake
   const handleUnstake = () => {
-    Alert.prompt(
-      'Unstake REEF',
-      `Enter amount to unstake (max: ${formatReef(ledger?.active ?? '0')} REEF).\nUnbonding takes ${stakingInfo?.bondingDuration ?? '~'} eras.`,
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {
-          text: 'Unstake',
-          style: 'destructive',
-          onPress: async (val?: string) => {
-            if (!val || !selectedAddress) return;
-            const amount = parseFloat(val);
-            if (!amount || amount <= 0) return;
-            try {
-              const planck = BigInt(Math.floor(amount * 1e18)).toString();
-              await stakeUnbond(selectedAddress, planck);
-              Alert.alert('Success', 'Unbonding started.');
-              loadStakingData();
-            } catch (err: any) {
-              Alert.alert('Error', err.message ?? 'Unstake failed');
-            }
-          },
-        },
-      ],
-      'plain-text',
-      '',
-      'decimal-pad',
-    );
+    setUnstakeAmount('');
+    setShowUnstakeModal(true);
+  };
+
+  const handleUnstakeConfirm = async () => {
+    const amount = parseFloat(unstakeAmount);
+    if (!amount || amount <= 0 || !selectedAddress) return;
+    setShowUnstakeModal(false);
+    try {
+      const planck = BigInt(Math.floor(amount * 1e18)).toString();
+      await stakeUnbond(selectedAddress, planck);
+      Alert.alert('Success', 'Unbonding started.');
+      loadStakingData();
+    } catch (err: any) {
+      Alert.alert('Error', err.message ?? 'Unstake failed');
+    }
   };
 
   // Handle withdraw
@@ -583,10 +575,8 @@ export default function StakingScreen() {
     {key: 'nominators', label: 'Nominators'},
   ];
 
-  return (
-    <ScrollView
-      style={{flex: 1, backgroundColor: Colors.primaryBg}}
-      contentContainerStyle={{paddingBottom: 40}}>
+  const headerContent = (
+    <>
       {/* Header with total value */}
       <View style={{alignItems: 'center', paddingTop: 20, paddingBottom: 24}}>
         <Text
@@ -654,10 +644,39 @@ export default function StakingScreen() {
           </TouchableOpacity>
         ))}
       </View>
+    </>
+  );
 
-      {/* Content by tab */}
-      <View style={{paddingHorizontal: 16}}>
-        {activeTab === 'active' && (
+  // Validators and Nominators tabs use FlatList for proper scrolling
+  if (activeTab === 'validators') {
+    return (
+      <ValidatorsTab
+        validators={validators}
+        loading={loadingValidators}
+        nominations={nominations}
+        header={headerContent}
+      />
+    );
+  }
+
+  if (activeTab === 'nominators') {
+    return (
+      <NominatorsTab
+        nominations={nominations}
+        validators={validators}
+        header={headerContent}
+      />
+    );
+  }
+
+  // Active tab uses ScrollView
+  return (
+    <>
+      <ScrollView
+        style={{flex: 1, backgroundColor: Colors.primaryBg}}
+        contentContainerStyle={{paddingBottom: 40}}>
+        {headerContent}
+        <View style={{paddingHorizontal: 16}}>
           <ActiveTab
             reefToken={reefToken}
             reefPrice={reefPrice}
@@ -673,24 +692,97 @@ export default function StakingScreen() {
             onUnstake={handleUnstake}
             onWithdraw={handleWithdraw}
           />
-        )}
+        </View>
+      </ScrollView>
 
-        {activeTab === 'validators' && (
-          <ValidatorsTab
-            validators={validators}
-            loading={loadingValidators}
-            nominations={nominations}
-          />
-        )}
-
-        {activeTab === 'nominators' && (
-          <NominatorsTab
-            nominations={nominations}
-            validators={validators}
-          />
-        )}
-      </View>
-    </ScrollView>
+      {/* Unstake amount modal — avoids Alert.prompt which triggers iOS password autofill */}
+      <Modal
+        visible={showUnstakeModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowUnstakeModal(false)}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            padding: 32,
+          }}>
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 16,
+              padding: 24,
+              width: '100%',
+              maxWidth: 340,
+            }}>
+            <Text style={{fontSize: 18, fontWeight: '700', color: Colors.text, marginBottom: 8}}>
+              Unstake REEF
+            </Text>
+            <Text style={{fontSize: 14, color: Colors.textLight, marginBottom: 16, lineHeight: 20}}>
+              Enter amount to unstake (max: {formatReef(ledger?.active ?? '0')} REEF).
+              {'\n'}Unbonding takes {stakingInfo?.bondingDuration ?? '~'} eras.
+            </Text>
+            <TextInput
+              value={unstakeAmount}
+              onChangeText={setUnstakeAmount}
+              placeholder="0.00"
+              placeholderTextColor={Colors.textLight}
+              keyboardType="decimal-pad"
+              autoCorrect={false}
+              autoComplete="off"
+              textContentType="none"
+              autoFocus
+              style={{
+                backgroundColor: Colors.primaryBg,
+                borderRadius: 10,
+                paddingHorizontal: 14,
+                paddingVertical: 12,
+                fontSize: 16,
+                color: Colors.text,
+                marginBottom: 20,
+              }}
+            />
+            <View style={{flexDirection: 'row', gap: 12}}>
+              <TouchableOpacity
+                onPress={() => setShowUnstakeModal(false)}
+                style={{
+                  flex: 1,
+                  backgroundColor: Colors.grey,
+                  borderRadius: 12,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                }}>
+                <Text style={{fontSize: 15, fontWeight: '600', color: Colors.text}}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleUnstakeConfirm}
+                disabled={!unstakeAmount || parseFloat(unstakeAmount) <= 0}
+                style={{
+                  flex: 1,
+                  backgroundColor: !unstakeAmount || parseFloat(unstakeAmount) <= 0
+                    ? Colors.grey
+                    : Colors.error,
+                  borderRadius: 12,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                }}>
+                <Text style={{
+                  fontSize: 15,
+                  fontWeight: '600',
+                  color: !unstakeAmount || parseFloat(unstakeAmount) <= 0
+                    ? Colors.textLight
+                    : '#fff',
+                }}>
+                  Unstake
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -962,10 +1054,12 @@ function ValidatorsTab({
   validators,
   loading,
   nominations,
+  header,
 }: {
   validators: ValidatorInfo[];
   loading: boolean;
   nominations: string[] | null;
+  header: React.ReactElement;
 }) {
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState<'stake' | 'commission'>('stake');
@@ -992,84 +1086,94 @@ function ValidatorsTab({
     return list;
   }, [validators, search, sortBy]);
 
-  if (loading) {
-    return (
-      <View style={{padding: 40, alignItems: 'center'}}>
-        <ActivityIndicator size="large" color={Colors.purple} />
-        <Text style={{color: Colors.textLight, fontSize: 14, marginTop: 12}}>
-          Loading validators...
-        </Text>
+  const listHeader = (
+    <>
+      {header}
+      <View style={{paddingHorizontal: 16}}>
+        {/* Search */}
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Search validators..."
+          placeholderTextColor={Colors.textLight}
+          autoCapitalize="none"
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            fontSize: 15,
+            color: Colors.text,
+            borderWidth: 1,
+            borderColor: Colors.grey,
+            marginBottom: 12,
+          }}
+        />
+
+        {/* Sort */}
+        <View style={{flexDirection: 'row', gap: 8, marginBottom: 16}}>
+          {(['stake', 'commission'] as const).map(s => (
+            <TouchableOpacity
+              key={s}
+              onPress={() => setSortBy(s)}
+              activeOpacity={0.7}
+              style={{
+                paddingHorizontal: 14,
+                paddingVertical: 8,
+                borderRadius: 8,
+                backgroundColor: sortBy === s ? Colors.purple : '#fff',
+                borderWidth: 1,
+                borderColor: sortBy === s ? Colors.purple : Colors.grey,
+              }}>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: sortBy === s ? '#fff' : Colors.text,
+                }}>
+                {s === 'stake' ? 'By Stake' : 'By Commission'}
+              </Text>
+            </TouchableOpacity>
+          ))}
+          <Text
+            style={{
+              fontSize: 12,
+              color: Colors.textLight,
+              alignSelf: 'center',
+              marginLeft: 'auto',
+            }}>
+            {filtered.length} validators
+          </Text>
+        </View>
       </View>
-    );
-  }
+
+      {loading && (
+        <View style={{padding: 40, alignItems: 'center'}}>
+          <ActivityIndicator size="large" color={Colors.purple} />
+          <Text style={{color: Colors.textLight, fontSize: 14, marginTop: 12}}>
+            Loading validators...
+          </Text>
+        </View>
+      )}
+    </>
+  );
 
   return (
-    <>
-      {/* Search */}
-      <TextInput
-        value={search}
-        onChangeText={setSearch}
-        placeholder="Search validators..."
-        placeholderTextColor={Colors.textLight}
-        autoCapitalize="none"
-        style={{
-          backgroundColor: '#fff',
-          borderRadius: 12,
-          paddingHorizontal: 16,
-          paddingVertical: 12,
-          fontSize: 15,
-          color: Colors.text,
-          borderWidth: 1,
-          borderColor: Colors.grey,
-          marginBottom: 12,
-        }}
-      />
-
-      {/* Sort */}
-      <View style={{flexDirection: 'row', gap: 8, marginBottom: 16}}>
-        {(['stake', 'commission'] as const).map(s => (
-          <TouchableOpacity
-            key={s}
-            onPress={() => setSortBy(s)}
-            activeOpacity={0.7}
-            style={{
-              paddingHorizontal: 14,
-              paddingVertical: 8,
-              borderRadius: 8,
-              backgroundColor: sortBy === s ? Colors.purple : '#fff',
-              borderWidth: 1,
-              borderColor: sortBy === s ? Colors.purple : Colors.grey,
-            }}>
-            <Text
-              style={{
-                fontSize: 12,
-                fontWeight: '600',
-                color: sortBy === s ? '#fff' : Colors.text,
-              }}>
-              {s === 'stake' ? 'By Stake' : 'By Commission'}
-            </Text>
-          </TouchableOpacity>
-        ))}
-        <Text
-          style={{
-            fontSize: 12,
-            color: Colors.textLight,
-            alignSelf: 'center',
-            marginLeft: 'auto',
-          }}>
-          {filtered.length} validators
-        </Text>
-      </View>
-
-      {/* Validator list */}
-      {filtered.map(v => (
-        <ValidatorCard
-          key={v.address}
-          validator={v}
-          isNominated={nominations?.includes(v.address) ?? false}
-        />
-      ))}
-    </>
+    <FlatList
+      style={{flex: 1, backgroundColor: Colors.primaryBg}}
+      data={loading ? [] : filtered}
+      keyExtractor={item => item.address}
+      ListHeaderComponent={listHeader}
+      renderItem={({item}) => (
+        <View style={{paddingHorizontal: 16}}>
+          <ValidatorCard
+            validator={item}
+            isNominated={nominations?.includes(item.address) ?? false}
+          />
+        </View>
+      )}
+      contentContainerStyle={{paddingBottom: 40}}
+    />
   );
 }
 
@@ -1078,74 +1182,105 @@ function ValidatorsTab({
 function NominatorsTab({
   nominations,
   validators,
+  header,
 }: {
   nominations: string[] | null;
   validators: ValidatorInfo[];
+  header: React.ReactElement;
 }) {
-  if (!nominations || nominations.length === 0) {
-    return (
-      <View
-        style={{
-          backgroundColor: '#fff',
-          borderRadius: 16,
-          padding: 32,
-          alignItems: 'center',
-          borderWidth: 1,
-          borderColor: Colors.grey,
-        }}>
-        <Text
-          style={{fontSize: 16, fontWeight: '600', color: Colors.text, marginBottom: 8}}>
-          No Nominations
-        </Text>
-        <Text
-          style={{color: Colors.textLight, fontSize: 14, textAlign: 'center'}}>
-          You haven't nominated any validators yet. Start staking to nominate
-          validators and earn rewards.
-        </Text>
-      </View>
-    );
-  }
+  const validatorMap = useMemo(
+    () => new Map(validators.map(v => [v.address, v])),
+    [validators],
+  );
 
-  const validatorMap = new Map(validators.map(v => [v.address, v]));
+  // Build data for FlatList — each nomination address
+  const data = nominations ?? [];
 
-  return (
+  const listHeader = (
     <>
-      <Text
-        style={{
-          fontSize: 12,
-          color: Colors.textLight,
-          marginBottom: 12,
-        }}>
-        Your {nominations.length} nominated validator
-        {nominations.length !== 1 ? 's' : ''}
-      </Text>
-      {nominations.map(addr => {
-        const v = validatorMap.get(addr);
-        return v ? (
-          <ValidatorCard key={addr} validator={v} isNominated />
-        ) : (
+      {header}
+      <View style={{paddingHorizontal: 16}}>
+        {data.length === 0 ? (
           <View
-            key={addr}
             style={{
               backgroundColor: '#fff',
-              borderRadius: 12,
-              padding: 14,
-              marginBottom: 8,
+              borderRadius: 16,
+              padding: 32,
+              alignItems: 'center',
               borderWidth: 1,
               borderColor: Colors.grey,
             }}>
             <Text
               style={{
-                fontSize: 13,
-                fontFamily: 'monospace',
+                fontSize: 16,
+                fontWeight: '600',
                 color: Colors.text,
+                marginBottom: 8,
               }}>
-              {shortenAddress(addr)}
+              No Nominations
+            </Text>
+            <Text
+              style={{
+                color: Colors.textLight,
+                fontSize: 14,
+                textAlign: 'center',
+              }}>
+              You haven't nominated any validators yet. Start staking to
+              nominate validators and earn rewards.
             </Text>
           </View>
-        );
-      })}
+        ) : (
+          <Text
+            style={{
+              fontSize: 12,
+              color: Colors.textLight,
+              marginBottom: 12,
+            }}>
+            Your {data.length} nominated validator
+            {data.length !== 1 ? 's' : ''}
+          </Text>
+        )}
+      </View>
     </>
+  );
+
+  return (
+    <FlatList
+      style={{flex: 1, backgroundColor: Colors.primaryBg}}
+      data={data}
+      keyExtractor={item => item}
+      ListHeaderComponent={listHeader}
+      renderItem={({item: addr}) => {
+        const v = validatorMap.get(addr);
+        return (
+          <View style={{paddingHorizontal: 16}}>
+            {v ? (
+              <ValidatorCard validator={v} isNominated />
+            ) : (
+              <View
+                style={{
+                  backgroundColor: '#fff',
+                  borderRadius: 12,
+                  padding: 14,
+                  marginBottom: 8,
+                  borderWidth: 1,
+                  borderColor: Colors.grey,
+                }}>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    fontFamily: 'monospace',
+                    color: Colors.text,
+                  }}>
+                  {shortenAddress(addr)}
+                </Text>
+              </View>
+            )}
+          </View>
+        );
+      }}
+      contentContainerStyle={{paddingBottom: 40}}
+    />
   );
 }
 

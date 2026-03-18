@@ -20,6 +20,7 @@ import {
   Alert,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
+import Svg, {Path} from 'react-native-svg';
 import {ethers} from 'ethers';
 import {TokenBalance, Constants} from '../types';
 import {useTokenStore} from '../stores/useTokenStore';
@@ -407,9 +408,9 @@ export default function SwapScreen() {
             borderWidth: 3,
             borderColor: Colors.primaryBg,
           }}>
-          <Text style={{color: '#fff', fontSize: 18, fontWeight: '700'}}>
-            ↕
-          </Text>
+          <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+            <Path d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
         </TouchableOpacity>
       </View>
 

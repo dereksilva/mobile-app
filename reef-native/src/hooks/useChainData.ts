@@ -13,6 +13,7 @@
 import {useEffect, useRef} from 'react';
 import {Subscription} from 'rxjs';
 import {reefState} from '@reef-chain/util-lib';
+import {getApi} from '../reef-chain/networkApi';
 import {useTokenStore} from '../stores/useTokenStore';
 import {useAccountStore} from '../stores/useAccountStore';
 import {useConnectionStore} from '../stores/useConnectionStore';
@@ -117,6 +118,36 @@ export function useChainData() {
       }),
     );
 
+    // 4b. All accounts — query native REEF balance for every account
+    //     so non-selected accounts don't show stale '0' balances.
+    const pollAllBalances = async () => {
+      const api = getApi();
+      if (!api) return;
+      const allAccounts = useAccountStore.getState().accounts.data ?? [];
+      if (allAccounts.length === 0) return;
+
+      try {
+        const addresses = allAccounts.map(a => a.address);
+        const accountInfos = await api.query.system.account.multi(addresses);
+        accountInfos.forEach((info: any, idx: number) => {
+          const freeBalance = info.data?.free?.toString() ?? '0';
+          const addr = addresses[idx];
+          // Only update if the account isn't the currently selected one
+          // (selectedAccount$ handles the selected account with more detail)
+          const selectedAddr = useAccountStore.getState().selectedAddress;
+          if (addr !== selectedAddr) {
+            useAccountStore.getState().updateAccount(addr, {balance: freeBalance});
+          }
+        });
+      } catch (err) {
+        console.log('[useChainData] Failed to query all account balances:', err);
+      }
+    };
+
+    // Poll all balances once immediately and then every 30 seconds
+    pollAllBalances();
+    const balanceInterval = setInterval(pollAllBalances, 30_000);
+
     // 5. Provider connection state
     subs.push(
       reefState.providerConnState$.subscribe(connState => {
@@ -190,6 +221,7 @@ export function useChainData() {
       // Cleanup all subscriptions on unmount
       subs.forEach(sub => sub.unsubscribe());
       subscriptions.current = [];
+      clearInterval(balanceInterval);
     };
   }, []);
 }

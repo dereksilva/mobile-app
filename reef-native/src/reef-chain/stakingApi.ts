@@ -5,7 +5,7 @@
  * Uses the Polkadot.js ApiPromise for storage queries and extrinsic submission.
  *
  * Key pallet calls:
- *   staking.bond(value, payee)       — initial bond
+ *   staking.bond(controller, value, payee) — initial bond (Reef uses older 3-arg form)
  *   staking.nominate(targets)        — select validators
  *   staking.bond_extra(value)        — add to existing stake
  *   staking.unbond(value)            — start unbonding
@@ -354,7 +354,9 @@ export async function stakeBond(
         ? {Stash: null}
         : {Account: (payee as any).Account};
 
-  txs.push(api.tx.staking.bond(amount, rewardDest));
+  // Reef uses an older Substrate runtime where bond takes 3 args:
+  // bond(controller, value, payee) — controller is the same as stash on Reef.
+  txs.push(api.tx.staking.bond(stashAddress, amount, rewardDest));
 
   // If validator addresses provided, add nominate call
   if (validatorAddresses && validatorAddresses.length > 0) {
@@ -556,7 +558,8 @@ export async function estimateStakeFee(
   const api = getApi();
   if (!api) throw new Error('API not connected');
 
-  const txs = [api.tx.staking.bond(amount, {Staked: null})];
+  // Reef uses older Substrate: bond(controller, value, payee)
+  const txs = [api.tx.staking.bond(stashAddress, amount, {Staked: null})];
   if (validatorAddresses.length > 0) {
     txs.push(api.tx.staking.nominate(validatorAddresses));
   }

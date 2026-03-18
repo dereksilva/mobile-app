@@ -176,6 +176,7 @@ export default function Navigation() {
           component={SwapScreen}
           options={{
             title: 'Swap Tokens',
+            headerBackTitle: 'Back',
             headerStyle: {
               backgroundColor: Colors.primaryBg,
               elevation: 0,
