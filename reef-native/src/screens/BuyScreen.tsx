@@ -26,15 +26,17 @@ import {useAccountStore} from '../stores/useAccountStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
 import {NetworkName} from '../types';
 import {Colors} from '../utils/colors';
+import Svg, {Path} from 'react-native-svg';
 
 interface BuyScreenProps {
   onBack: () => void;
 }
 
-type BuyMethod = 'select' | 'binance' | 'stealthex';
+type BuyMethod = 'select' | 'stealthex';
 
-// Binance Connect proxy
-const BINANCE_CONNECT_URL = 'https://www.binance.com/en/crypto/buy/REEF';
+// Alchemy Pay onramp
+const ALCHEMY_PAY_URL =
+  'https://ramp.alchemypay.org/?appId=dkSs37G15U8I4pm2&crypto=REEF&fiat=USD&fiatAmount=433&merchantOrderNo=1754981505038&network=REEF&timestamp=1754981505053&sign=zRe2miL4QFCUuYNC6QIEKNl9F/orvf4gNSAj9xDNkVE%3D#/index';
 
 // StealthEx partner link
 const STEALTHEX_URL = 'https://stealthex.io/?to=reef';
@@ -49,9 +51,8 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
 
   const isTestnet = networkName === NetworkName.TESTNET;
 
-  const handleBinance = () => {
-    setBuyMethod('binance');
-    setWebViewUrl(BINANCE_CONNECT_URL);
+  const handleAlchemyPay = () => {
+    handleOpenExternal(ALCHEMY_PAY_URL);
   };
 
   const handleStealthEx = () => {
@@ -95,10 +96,18 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
               color: Colors.text,
             }}
             numberOfLines={1}>
-            {buyMethod === 'binance' ? 'Binance' : 'StealthEx'}
+            StealthEx
           </Text>
           <TouchableOpacity onPress={() => handleOpenExternal(webViewUrl)}>
-            <Text style={{fontSize: 14}}>↗</Text>
+            <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                stroke={Colors.textLight}
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
           </TouchableOpacity>
         </View>
 
@@ -249,9 +258,9 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
               </Text>
             </View>
 
-            {/* Binance Connect */}
+            {/* Alchemy Pay */}
             <TouchableOpacity
-              onPress={handleBinance}
+              onPress={handleAlchemyPay}
               activeOpacity={0.7}
               style={{
                 backgroundColor: '#fff',
@@ -267,7 +276,17 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
                   alignItems: 'center',
                   marginBottom: 12,
                 }}>
-                <Text style={{fontSize: 28, marginRight: 12}}>💳</Text>
+                <View style={{marginRight: 12}}>
+                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15A2.25 2.25 0 002.25 6.75v10.5A2.25 2.25 0 004.5 19.5z"
+                      stroke={Colors.purple}
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                </View>
                 <View style={{flex: 1}}>
                   <Text
                     style={{
@@ -283,7 +302,7 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
                       color: Colors.textLight,
                       marginTop: 2,
                     }}>
-                    via Binance
+                    via Alchemy
                   </Text>
                 </View>
                 <Text style={{fontSize: 16, color: Colors.textLight}}>›</Text>
@@ -295,7 +314,7 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
                   lineHeight: 20,
                 }}>
                 Purchase REEF tokens directly with credit/debit card through
-                Binance's secure checkout.
+                Alchemy Pay's secure checkout.
               </Text>
             </TouchableOpacity>
 
@@ -317,7 +336,17 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
                   alignItems: 'center',
                   marginBottom: 12,
                 }}>
-                <Text style={{fontSize: 28, marginRight: 12}}>🔄</Text>
+                <View style={{marginRight: 12}}>
+                  <Svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+                    <Path
+                      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+                      stroke={Colors.purple}
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </Svg>
+                </View>
                 <View style={{flex: 1}}>
                   <Text
                     style={{

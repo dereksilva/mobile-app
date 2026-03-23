@@ -10,7 +10,8 @@
  * - Submit → triggers signing flow via transferApi
  */
 
-import React, {useState, useCallback, useMemo, useEffect} from 'react';
+import React, {useState, useCallback, useMemo, useEffect, useRef} from 'react';
+import {Subscription} from 'rxjs';
 import {
   View,
   Text,
@@ -78,6 +79,13 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
   const [amount, setAmount] = useState('');
   const [sendStatus, setSendStatus] = useState<SendStatus>('ready');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const sendSubRef = useRef<Subscription | null>(null);
+
+  useEffect(() => {
+    return () => {
+      sendSubRef.current?.unsubscribe();
+    };
+  }, []);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -223,7 +231,8 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
       return;
     }
 
-    const subscription = sendToken(
+    sendSubRef.current?.unsubscribe();
+    sendSubRef.current = sendToken(
       selectedAddress,
       toAddress.trim(),
       amountBN,

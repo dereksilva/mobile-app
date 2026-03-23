@@ -104,7 +104,9 @@ export interface TransactionRecord {
   timestamp: number;
   token?: TokenBalance;
   toAddress?: string;
+  fromAddress?: string;
   amount?: string;
+  inbound?: boolean;
   status: 'pending' | 'success' | 'error';
   blockNumber?: number;
 }

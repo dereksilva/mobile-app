@@ -16,6 +16,8 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {TokenBalance, NFT, TransactionRecord} from '../types';
@@ -173,7 +175,7 @@ export default function HomeScreen() {
               alignItems: 'center',
             }}>
             <Text style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>
-              ↓ {t('scan_qr_code')}
+              ↓ Receive
             </Text>
           </TouchableOpacity>
         </View>
@@ -400,6 +402,99 @@ function TokenList({
 
 // --- NFT Grid ---
 
+function NFTCard({nft, onSend}: {nft: NFT; onSend: (nft: NFT) => void}) {
+  const [imgLoading, setImgLoading] = useState(true);
+  const [imgError, setImgError] = useState(false);
+  const hasImage = !!nft.iconUrl && !imgError;
+
+  return (
+    <TouchableOpacity
+      onPress={() => onSend(nft)}
+      activeOpacity={0.7}
+      style={{
+        width: '47%',
+        backgroundColor: '#fff',
+        borderRadius: 14,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: Colors.grey,
+      }}>
+      {/* NFT image */}
+      <View
+        style={{
+          height: 160,
+          backgroundColor: Colors.purple + '10',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        {hasImage ? (
+          <>
+            <Image
+              source={{uri: nft.iconUrl}}
+              style={{width: '100%', height: '100%'}}
+              resizeMode="cover"
+              onLoad={() => setImgLoading(false)}
+              onError={() => {
+                setImgLoading(false);
+                setImgError(true);
+              }}
+            />
+            {imgLoading && (
+              <ActivityIndicator
+                style={{position: 'absolute'}}
+                color={Colors.purple}
+              />
+            )}
+          </>
+        ) : (
+          <Svg width={36} height={36} viewBox="0 0 24 24" fill="none">
+            <Path
+              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
+              stroke={Colors.textLight}
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </Svg>
+        )}
+      </View>
+
+      {/* Name + balance badge */}
+      <View
+        style={{
+          padding: 10,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+        <View style={{flex: 1, marginRight: 6}}>
+          <Text
+            style={{fontSize: 13, fontWeight: '600', color: Colors.text}}
+            numberOfLines={1}>
+            {nft.name || `NFT #${nft.nftId}`}
+          </Text>
+          <Text style={{fontSize: 11, color: Colors.textLight, marginTop: 2}}>
+            ID: {nft.nftId}
+          </Text>
+        </View>
+        {nft.balance > 1 && (
+          <View
+            style={{
+              backgroundColor: Colors.purple,
+              borderRadius: 12,
+              paddingHorizontal: 8,
+              paddingVertical: 2,
+            }}>
+            <Text style={{color: '#fff', fontSize: 11, fontWeight: '600'}}>
+              x{nft.balance}
+            </Text>
+          </View>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 function NFTGrid({
   nfts,
   onSend,
@@ -412,8 +507,17 @@ function NFTGrid({
   if (nfts.length === 0) {
     return (
       <View style={{padding: 40, alignItems: 'center'}}>
-        <Text style={{color: Colors.textLight, fontSize: 14}}>
-          {t('loading')}
+        <Svg width={48} height={48} viewBox="0 0 24 24" fill="none">
+          <Path
+            d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"
+            stroke={Colors.textLight}
+            strokeWidth={1.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
+        <Text style={{color: Colors.textLight, fontSize: 14, marginTop: 12}}>
+          No NFTs found
         </Text>
       </View>
     );
@@ -427,41 +531,11 @@ function NFTGrid({
         gap: 12,
       }}>
       {nfts.map((nft, index) => (
-        <TouchableOpacity
+        <NFTCard
           key={`${nft.contractAddress || index}-${nft.nftId || index}`}
-          onPress={() => onSend(nft)}
-          activeOpacity={0.7}
-          style={{
-            width: '47%',
-            backgroundColor: '#fff',
-            borderRadius: 14,
-            overflow: 'hidden',
-            borderWidth: 1,
-            borderColor: Colors.grey,
-          }}>
-          {/* NFT image placeholder */}
-          <View
-            style={{
-              height: 120,
-              backgroundColor: Colors.purple + '10',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <Text style={{fontSize: 36}}>🖼</Text>
-          </View>
-
-          <View style={{padding: 10}}>
-            <Text
-              style={{fontSize: 13, fontWeight: '600', color: Colors.text}}
-              numberOfLines={1}>
-              {nft.name || `NFT #${nft.nftId}`}
-            </Text>
-            <Text style={{fontSize: 11, color: Colors.textLight, marginTop: 2}}>
-              ID: {nft.nftId}
-              {nft.balance > 1 ? ` · ×${nft.balance}` : ''}
-            </Text>
-          </View>
-        </TouchableOpacity>
+          nft={nft}
+          onSend={onSend}
+        />
       ))}
     </View>
   );
@@ -524,7 +598,11 @@ function ActivityList({txHistory}: {txHistory: TransactionRecord[]}) {
               marginRight: 12,
             }}>
             <Text style={{fontSize: 16}}>
-              {typeIcons[tx.type] ?? '•'}
+              {tx.type === 'transfer'
+                ? tx.inbound
+                  ? '↓'
+                  : '↑'
+                : (typeIcons[tx.type] ?? '•')}
             </Text>
           </View>
 
@@ -532,31 +610,62 @@ function ActivityList({txHistory}: {txHistory: TransactionRecord[]}) {
           <View style={{flex: 1}}>
             <Text
               style={{fontSize: 14, fontWeight: '600', color: Colors.text}}>
-              {tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+              {tx.type === 'transfer'
+                ? tx.inbound
+                  ? 'Received'
+                  : 'Sent'
+                : tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+              {tx.token?.symbol ? ` ${tx.token.symbol}` : ''}
             </Text>
+            {tx.type === 'transfer' && tx.inbound && tx.fromAddress ? (
+              <Text
+                style={{fontSize: 12, color: Colors.textLight, marginTop: 2}}
+                numberOfLines={1}>
+                From: {tx.fromAddress.slice(0, 6)}...{tx.fromAddress.slice(-4)}
+              </Text>
+            ) : tx.toAddress ? (
+              <Text
+                style={{fontSize: 12, color: Colors.textLight, marginTop: 2}}
+                numberOfLines={1}>
+                To: {tx.toAddress.slice(0, 6)}...{tx.toAddress.slice(-4)}
+              </Text>
+            ) : null}
             <Text
-              style={{fontSize: 12, color: Colors.textLight, marginTop: 2}}>
-              {new Date(tx.timestamp).toLocaleDateString()}
+              style={{fontSize: 11, color: Colors.textLight, marginTop: 2}}>
+              {new Date(tx.timestamp).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </Text>
           </View>
 
-          {/* Amount */}
-          {tx.amount && (
-            <Text style={{fontSize: 14, fontWeight: '600', color: Colors.text}}>
-              {tx.amount} {tx.token?.symbol ?? ''}
+          {/* Amount + status */}
+          <View style={{alignItems: 'flex-end'}}>
+            {tx.amount ? (
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: tx.inbound ? Colors.green : Colors.text,
+                }}>
+                {tx.inbound ? '+' : tx.type === 'transfer' ? '-' : ''}
+                {tx.amount} {tx.token?.symbol ?? ''}
+              </Text>
+            ) : (
+              <Text style={{fontSize: 12, color: Colors.textLight}}>—</Text>
+            )}
+            <Text
+              style={{
+                fontSize: 11,
+                color: statusColors[tx.status] ?? Colors.textLight,
+                marginTop: 2,
+                fontWeight: '500',
+              }}>
+              {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
             </Text>
-          )}
-
-          {/* Status dot */}
-          <View
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 4,
-              backgroundColor: statusColors[tx.status] ?? Colors.textLight,
-              marginLeft: 8,
-            }}
-          />
+          </View>
         </View>
       ))}
     </View>

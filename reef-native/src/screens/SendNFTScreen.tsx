@@ -9,7 +9,8 @@
  * - Transaction status stepper
  */
 
-import React, {useState, useMemo, useCallback} from 'react';
+import React, {useState, useMemo, useCallback, useRef, useEffect} from 'react';
+import {Subscription} from 'rxjs';
 import {
   View,
   Text,
@@ -58,6 +59,13 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
   const [showScanner, setShowScanner] = useState(false);
   const [amount, setAmount] = useState('1');
   const [sendStatus, setSendStatus] = useState<SendStatus>('ready');
+  const sendSubRef = useRef<Subscription | null>(null);
+
+  useEffect(() => {
+    return () => {
+      sendSubRef.current?.unsubscribe();
+    };
+  }, []);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
 
@@ -117,7 +125,8 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
     setSendStatus('signing');
     setErrorMsg(null);
 
-    const subscription = sendNft(
+    sendSubRef.current?.unsubscribe();
+    sendSubRef.current = sendNft(
       selectedAccount.evmAddress,
       selectedAddress,
       toAddress.trim(),

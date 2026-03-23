@@ -13,7 +13,7 @@
  */
 
 import React, {useState, useEffect, useMemo} from 'react';
-import {View, Text, ScrollView, TouchableOpacity, Alert} from 'react-native';
+import {View, Text, ScrollView, TouchableOpacity, Alert, SafeAreaView} from 'react-native';
 import Svg, {Path} from 'react-native-svg';
 import {useTranslation} from 'react-i18next';
 import {useSigningStore} from '../stores/useSigningStore';
@@ -146,7 +146,7 @@ export default function SigningOverlay({children}: SigningOverlayProps) {
       </View>
 
       {/* Signing modal (full-screen overlay) */}
-      <View
+      <SafeAreaView
         style={{
           position: 'absolute',
           top: 0,
@@ -283,7 +283,7 @@ export default function SigningOverlay({children}: SigningOverlayProps) {
           {/* Bottom spacer for keyboard */}
           <View style={{height: 40}} />
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </View>
   );
 }

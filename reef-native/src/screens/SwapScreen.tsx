@@ -10,7 +10,8 @@
  * - Multi-step transaction status (approve → swap → finalize)
  */
 
-import React, {useState, useEffect, useCallback, useMemo} from 'react';
+import React, {useState, useEffect, useCallback, useMemo, useRef} from 'react';
+import {Subscription} from 'rxjs';
 import {
   View,
   Text,
@@ -127,6 +128,14 @@ export default function SwapScreen() {
   const [swapStatus, setSwapStatus] = useState<SwapStatus>('ready');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const swapSubRef = useRef<Subscription | null>(null);
+
+  // Cleanup swap subscription on unmount
+  useEffect(() => {
+    return () => {
+      swapSubRef.current?.unsubscribe();
+    };
+  }, []);
   const [showFromModal, setShowFromModal] = useState(false);
   const [showToModal, setShowToModal] = useState(false);
   const [showSlippage, setShowSlippage] = useState(false);
@@ -322,7 +331,9 @@ export default function SwapScreen() {
       return;
     }
 
-    const subscription = executeSwap(
+    // Unsubscribe any previous swap before starting a new one
+    swapSubRef.current?.unsubscribe();
+    swapSubRef.current = executeSwap(
       selectedAddress,
       {address: tokenFrom.address, decimals: tokenFrom.decimals, amount: amountFromBN},
       {address: tokenTo.address, decimals: tokenTo.decimals, amount: amountToBN},

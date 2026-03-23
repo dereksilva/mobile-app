@@ -37,8 +37,6 @@ export function useChainData() {
   const subscriptions = useRef<Subscription[]>([]);
 
   useEffect(() => {
-    console.log('[useChainData] subscribing to observables');
-    console.log('[useChainData] selectedPools_status$ exists:', !!reefState.selectedPools_status$);
     const subs: Subscription[] = [];
 
     // 1. Token balances with prices
@@ -79,28 +77,59 @@ export function useChainData() {
     subs.push(
       reefState.selectedTransactionHistory$.subscribe(txs => {
         if (!txs) return;
-        const mapped: TransactionRecord[] = txs.map((tx: any) => ({
-          hash: tx.extrinsicHash ?? tx.hash ?? '',
-          type: mapTxType(tx.type),
-          timestamp: tx.timestamp
-            ? new Date(tx.timestamp).getTime()
-            : Date.now(),
-          amount: tx.amount?.toString(),
-          status: 'success' as const,
-          token: tx.token
-            ? {
-                address: tx.token.address,
-                name: tx.token.name ?? '',
-                symbol: tx.token.symbol ?? '',
-                decimals: tx.token.decimals ?? 18,
-                balance: '0',
-                price: 0,
-                iconUrl: tx.token.iconUrl ?? '',
-              }
-            : undefined,
-          toAddress: tx.to,
-          blockNumber: tx.blockHeight,
-        }));
+        const mapped: TransactionRecord[] = txs.map((tx: any) => {
+          // Determine action type from TokenTransfer fields
+          let txType: TransactionRecord['type'] = 'other';
+          if (tx.reefswapAction) {
+            txType = 'swap';
+          } else if (tx.inbound !== undefined) {
+            txType = 'transfer';
+          } else {
+            txType = mapTxType(tx.type);
+          }
+
+          // Extract amount — token.balance is a BigNumber
+          let amount: string | undefined = tx.amount?.toString();
+          if (!amount && tx.token?.balance) {
+            const raw = tx.token.balance;
+            const decimals = tx.token.decimals ?? 18;
+            const val =
+              typeof raw === 'object' && raw._isBigNumber
+                ? Number(raw.toString()) / 10 ** decimals
+                : typeof raw === 'string' || typeof raw === 'number'
+                  ? Number(raw) / 10 ** decimals
+                  : undefined;
+            if (val !== undefined && !isNaN(val)) {
+              amount = val % 1 === 0 ? val.toString() : val.toFixed(4);
+            }
+          }
+
+          return {
+            hash:
+              tx.extrinsic?.hash ?? tx.extrinsicHash ?? tx.hash ?? '',
+            type: txType,
+            timestamp: tx.timestamp
+              ? new Date(tx.timestamp).getTime()
+              : Date.now(),
+            amount,
+            inbound: tx.inbound ?? false,
+            status: tx.success === false ? ('error' as const) : ('success' as const),
+            token: tx.token
+              ? {
+                  address: tx.token.address,
+                  name: tx.token.name ?? '',
+                  symbol: tx.token.symbol ?? '',
+                  decimals: tx.token.decimals ?? 18,
+                  balance: '0',
+                  price: 0,
+                  iconUrl: tx.token.iconUrl ?? '',
+                }
+              : undefined,
+            toAddress: tx.to,
+            fromAddress: tx.from,
+            blockNumber: tx.extrinsic?.blockHeight ?? tx.blockHeight,
+          };
+        });
         useTokenStore.getState().setTxHistory(createCompleteStatus(mapped));
       }),
     );
@@ -185,14 +214,6 @@ export function useChainData() {
     subs.push(
       reefState.selectedPools_status$.subscribe({
         next: (poolsStatus: any) => {
-          console.log(
-            '[useChainData] pools emission:',
-            JSON.stringify({
-              hasData: !!poolsStatus?.data,
-              dataLength: poolsStatus?.data?.length,
-              status: poolsStatus?.status,
-            }),
-          );
           if (!poolsStatus?.data) return;
           const mapped: Pool[] = poolsStatus.data
             .filter((pSdo: any) => pSdo?.data != null)
@@ -208,7 +229,6 @@ export function useChainData() {
                 userPoolBalance: p.userPoolBalance,
               };
             });
-          console.log('[useChainData] mapped pools count:', mapped.length);
           usePoolsStore.getState().setPools(createCompleteStatus(mapped));
         },
         error: (err: any) => console.error('[useChainData] pools error:', err),
