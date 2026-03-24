@@ -5,6 +5,7 @@
 
 import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
+import Svg, {Circle} from 'react-native-svg';
 import {ReefAccount} from '../types';
 import {Colors} from '../utils/colors';
 
@@ -14,6 +15,7 @@ interface AccountCardProps {
   onPress: () => void;
   onLongPress?: () => void;
   onClaimEvm?: () => void;
+  onMore?: () => void;
   showBalance?: boolean;
 }
 
@@ -35,6 +37,7 @@ export default function AccountCard({
   onPress,
   onLongPress,
   onClaimEvm,
+  onMore,
   showBalance = true,
 }: AccountCardProps) {
   return (
@@ -94,6 +97,27 @@ export default function AccountCard({
               </Text>
             )}
           </View>
+
+          {/* More button */}
+          {onMore && (
+            <TouchableOpacity
+              onPress={e => {
+                e.stopPropagation();
+                onMore();
+              }}
+              hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+              activeOpacity={0.6}
+              style={{
+                padding: 4,
+                marginRight: 8,
+              }}>
+              <Svg width={20} height={20} viewBox="0 0 20 20">
+                <Circle cx="4" cy="10" r="2" fill="rgba(255,255,255,0.7)" />
+                <Circle cx="10" cy="10" r="2" fill="rgba(255,255,255,0.7)" />
+                <Circle cx="16" cy="10" r="2" fill="rgba(255,255,255,0.7)" />
+              </Svg>
+            </TouchableOpacity>
+          )}
 
           {/* EVM status badge */}
           {account.isEvmClaimed ? (

@@ -369,7 +369,7 @@ function SessionCard({session, onDisconnect}: SessionCardProps) {
         <TouchableOpacity
           onPress={() => onDisconnect(session)}
           style={{padding: 8}}>
-          <Text style={{fontSize: 18, color: Colors.error}}>✕</Text>
+          <WCIcon d="M6 18L18 6M6 6l12 12" color={Colors.error} size={18} />
         </TouchableOpacity>
       </View>
 

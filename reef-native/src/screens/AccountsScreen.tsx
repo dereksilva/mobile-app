@@ -5,7 +5,17 @@
  */
 
 import React, {useState, useEffect} from 'react';
-import {View, Text, TouchableOpacity, ScrollView, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  ActionSheetIOS,
+  Modal,
+  TextInput,
+} from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import {useTranslation} from 'react-i18next';
 import {ReefAccount} from '../types';
 import {useAccounts} from '../hooks/useAccounts';
@@ -27,11 +37,13 @@ type SubScreen =
 
 export default function AccountsScreen() {
   const {t} = useTranslation();
-  const {accounts, selectedAddress, selectAccount, loadAccounts, claimEvm} =
+  const {accounts, selectedAddress, selectAccount, loadAccounts, claimEvm, renameAccount, deleteAccount} =
     useAccounts();
 
   const [subScreen, setSubScreen] = useState<SubScreen>('list');
   const [detailAccount, setDetailAccount] = useState<ReefAccount | null>(null);
+  const [renameTarget, setRenameTarget] = useState<ReefAccount | null>(null);
+  const [renameValue, setRenameValue] = useState('');
 
   useEffect(() => {
     loadAccounts();
@@ -69,6 +81,63 @@ export default function AccountsScreen() {
   const handleAccountLongPress = (account: ReefAccount) => {
     setDetailAccount(account);
     setSubScreen('details');
+  };
+
+  const handleMore = (account: ReefAccount) => {
+    const options = ['Rename', 'Copy Native Address'];
+    if (account.evmAddress) {
+      options.push('Copy EVM Address');
+    }
+    options.push('Delete');
+    options.push('Cancel');
+
+    const destructiveIndex = options.indexOf('Delete');
+    const cancelIndex = options.indexOf('Cancel');
+
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        options,
+        destructiveButtonIndex: destructiveIndex,
+        cancelButtonIndex: cancelIndex,
+        title: account.name,
+      },
+      buttonIndex => {
+        const selected = options[buttonIndex];
+        if (selected === 'Rename') {
+          setRenameValue(account.name);
+          setRenameTarget(account);
+        } else if (selected === 'Copy Native Address') {
+          Clipboard.setString(account.address);
+          Alert.alert('Copied', 'Native address copied to clipboard.');
+        } else if (selected === 'Copy EVM Address' && account.evmAddress) {
+          Clipboard.setString(account.evmAddress);
+          Alert.alert('Copied', 'EVM address copied to clipboard.');
+        } else if (selected === 'Delete') {
+          Alert.alert(
+            'Delete Account',
+            `Are you sure you want to delete "${account.name}"? Make sure you have backed up your recovery phrase.`,
+            [
+              {text: 'Cancel', style: 'cancel'},
+              {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                  await deleteAccount(account.address);
+                  loadAccounts();
+                },
+              },
+            ],
+          );
+        }
+      },
+    );
+  };
+
+  const handleRenameConfirm = async () => {
+    if (!renameTarget || !renameValue.trim()) return;
+    await renameAccount(renameTarget.address, renameValue.trim());
+    setRenameTarget(null);
+    loadAccounts();
   };
 
   const handleDone = () => {
@@ -206,6 +275,7 @@ export default function AccountsScreen() {
                 isSelected={account.address === selectedAddress}
                 onPress={() => handleAccountPress(account)}
                 onLongPress={() => handleAccountLongPress(account)}
+                onMore={() => handleMore(account)}
                 onClaimEvm={
                   !account.isEvmClaimed
                     ? () => handleClaimEvm(account)
@@ -215,6 +285,100 @@ export default function AccountsScreen() {
             ))}
         </>
       )}
+      {/* Rename modal */}
+      <Modal
+        visible={!!renameTarget}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setRenameTarget(null)}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0,0,0,0.4)',
+          }}>
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 20,
+              padding: 24,
+              width: '80%',
+              shadowColor: '#000',
+              shadowOffset: {width: 0, height: 4},
+              shadowOpacity: 0.15,
+              shadowRadius: 12,
+              elevation: 8,
+            }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '700',
+                color: Colors.text,
+                marginBottom: 16,
+              }}>
+              Rename Account
+            </Text>
+            <TextInput
+              value={renameValue}
+              onChangeText={setRenameValue}
+              placeholder="Account name"
+              autoFocus
+              selectTextOnFocus
+              style={{
+                borderWidth: 1,
+                borderColor: Colors.grey,
+                borderRadius: 12,
+                padding: 14,
+                fontSize: 16,
+                color: Colors.text,
+                marginBottom: 20,
+              }}
+            />
+            <View style={{flexDirection: 'row', gap: 10}}>
+              <TouchableOpacity
+                onPress={() => setRenameTarget(null)}
+                activeOpacity={0.7}
+                style={{
+                  flex: 1,
+                  backgroundColor: Colors.primaryBg,
+                  borderRadius: 12,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                }}>
+                <Text
+                  style={{
+                    color: Colors.text,
+                    fontSize: 15,
+                    fontWeight: '600',
+                  }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleRenameConfirm}
+                activeOpacity={0.7}
+                style={{
+                  flex: 1,
+                  backgroundColor: Colors.accent,
+                  borderRadius: 12,
+                  paddingVertical: 14,
+                  alignItems: 'center',
+                  opacity: renameValue.trim() ? 1 : 0.5,
+                }}>
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 15,
+                    fontWeight: '700',
+                  }}>
+                  Save
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
