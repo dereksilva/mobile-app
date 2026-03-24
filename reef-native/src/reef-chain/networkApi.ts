@@ -90,6 +90,10 @@ export async function initProvider(
  */
 export async function disconnectProvider(): Promise<void> {
   if (currentWsProvider) {
+    // Remove event listeners before disconnecting to prevent leaks
+    try {
+      (currentWsProvider as any).removeAllListeners?.();
+    } catch {}
     await currentWsProvider.disconnect();
     currentWsProvider = null;
   }

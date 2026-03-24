@@ -68,6 +68,11 @@ export async function initWalletConnect(): Promise<void> {
       metadata: METADATA,
     });
 
+    // Remove any stale listeners before subscribing (prevents duplicates on re-init)
+    walletKit.off('session_proposal', onSessionProposal);
+    walletKit.off('session_request', onSessionRequest);
+    walletKit.off('session_delete', onSessionDelete);
+
     // Subscribe to lifecycle events
     walletKit.on('session_proposal', onSessionProposal);
     walletKit.on('session_request', onSessionRequest);

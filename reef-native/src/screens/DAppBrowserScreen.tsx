@@ -175,7 +175,9 @@ export default function DAppBrowserScreen({
 
   const handleOpenExternal = useCallback(() => {
     if (currentUrl) {
-      Linking.openURL(currentUrl).catch(() => {});
+      Linking.openURL(currentUrl).catch(() => {
+        Alert.alert('Error', 'Could not open URL in browser.');
+      });
     }
   }, [currentUrl]);
 

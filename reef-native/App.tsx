@@ -1,8 +1,8 @@
 import './global.css';
 import './src/i18n';
 
-import React, {Component, useState} from 'react';
-import {DevSettings, StatusBar, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {Component, useState, useEffect} from 'react';
+import {DevSettings, Linking, StatusBar, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {InitState} from './src/types';
@@ -107,6 +107,30 @@ export default function App() {
 
   const [introComplete, setIntroComplete] = useState(false);
   const [passwordCreated, setPasswordCreated] = useState(false);
+
+  // Deep link handler — forwards wc: URIs to WalletConnect pairing
+  useEffect(() => {
+    const handleDeepLink = ({url}: {url: string}) => {
+      if (!url) return;
+      if (url.startsWith('wc:')) {
+        // WalletConnect pairing URI
+        const {pair} = require('./src/services/WalletConnectService');
+        pair(url).catch((err: any) =>
+          console.warn('[DeepLink] WC pair failed:', err?.message),
+        );
+      }
+      // reef:// scheme can be extended for other deep link routes
+    };
+
+    // Handle URL that launched the app
+    Linking.getInitialURL().then(url => {
+      if (url) handleDeepLink({url});
+    });
+
+    // Handle URLs while app is running
+    const sub = Linking.addEventListener('url', handleDeepLink);
+    return () => sub.remove();
+  }, []);
 
   const renderContent = () => {
     // 1. Loading or error

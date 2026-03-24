@@ -15,6 +15,7 @@ import {AppState, Platform, Alert} from 'react-native';
 
 let isInitialized = false;
 let appState = AppState.currentState;
+let appStateSubscription: ReturnType<typeof AppState.addEventListener> | null = null;
 
 /**
  * Initialize the notification service.
@@ -23,11 +24,22 @@ let appState = AppState.currentState;
 export function initNotifications(): void {
   if (isInitialized) return;
 
-  AppState.addEventListener('change', nextState => {
+  appStateSubscription = AppState.addEventListener('change', nextState => {
     appState = nextState;
   });
 
   isInitialized = true;
+}
+
+/**
+ * Clean up the notification service listener.
+ */
+export function cleanupNotifications(): void {
+  if (appStateSubscription) {
+    appStateSubscription.remove();
+    appStateSubscription = null;
+  }
+  isInitialized = false;
 }
 
 /**

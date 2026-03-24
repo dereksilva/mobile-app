@@ -97,7 +97,9 @@ export default function SwapScreen() {
         }
         setPoolTokens(Array.from(map.values()));
       })
-      .catch(() => {});
+      .catch(err => {
+        console.warn('[SwapScreen] Failed to fetch pool tokens:', err?.message);
+      });
   }, [selectedAddress]);
 
   // Merge user tokens (with balances) and pool tokens (for selection),
@@ -181,7 +183,8 @@ export default function SwapScreen() {
         }
         setLoadingReserves(false);
       })
-      .catch(() => {
+      .catch(err => {
+        console.warn('[SwapScreen] Failed to fetch reserves:', err?.message);
         if (!cancelled) {
           setReserve1(null);
           setReserve2(null);
