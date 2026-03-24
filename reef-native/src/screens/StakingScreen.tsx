@@ -935,10 +935,10 @@ function ActiveTab({
             label="Staked Value"
             value={formatUsd(stakedBalance * reefPrice)}
           />
-          {unbondingBalance > 0 && (
-            <InfoRow
-              label="Unbonding"
-              value={`${unbondingBalance.toLocaleString(undefined, {maximumFractionDigits: 2})} REEF`}
+          {ledger && ledger.unlocking.length > 0 && (
+            <UnbondingDetails
+              unlocking={ledger.unlocking}
+              activeEra={stakingInfo?.activeEra ?? 0}
             />
           )}
           {nominations && nominations.length > 0 && (
@@ -971,27 +971,40 @@ function ActiveTab({
                 Unstake
               </Text>
             </TouchableOpacity>
-            {unbondingBalance > 0 && (
-              <TouchableOpacity
-                onPress={onWithdraw}
-                activeOpacity={0.7}
-                style={{
-                  flex: 1,
-                  backgroundColor: Colors.green,
-                  borderRadius: 12,
-                  paddingVertical: 12,
-                  alignItems: 'center',
-                }}>
-                <Text
+            {ledger && ledger.unlocking.length > 0 && (() => {
+              const activeEra = stakingInfo?.activeEra ?? 0;
+              const withdrawable = ledger.unlocking.some(
+                (c: any) => c.era <= activeEra,
+              );
+              const withdrawableAmount = ledger.unlocking
+                .filter((c: any) => c.era <= activeEra)
+                .reduce((sum: number, c: any) => sum + parseFloat(c.value) / 1e18, 0);
+              return (
+                <TouchableOpacity
+                  onPress={onWithdraw}
+                  disabled={!withdrawable}
+                  activeOpacity={0.7}
                   style={{
-                    color: '#fff',
-                    fontSize: 14,
-                    fontWeight: '600',
+                    flex: 1,
+                    backgroundColor: withdrawable ? Colors.green : Colors.grey,
+                    borderRadius: 12,
+                    paddingVertical: 12,
+                    alignItems: 'center',
+                    opacity: withdrawable ? 1 : 0.6,
                   }}>
-                  Withdraw
-                </Text>
-              </TouchableOpacity>
-            )}
+                  <Text
+                    style={{
+                      color: withdrawable ? '#fff' : Colors.textLight,
+                      fontSize: 14,
+                      fontWeight: '600',
+                    }}>
+                    {withdrawable
+                      ? `Withdraw ${withdrawableAmount.toLocaleString(undefined, {maximumFractionDigits: 2})} REEF`
+                      : 'Withdraw'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })()}
           </View>
         </View>
       )}
@@ -1947,6 +1960,87 @@ function InfoRow({
         }}>
         {value}
       </Text>
+    </View>
+  );
+}
+
+/**
+ * Shows per-chunk unbonding details with eras remaining and estimated time.
+ * Reef era ≈ 24 hours.
+ */
+function UnbondingDetails({
+  unlocking,
+  activeEra,
+}: {
+  unlocking: {value: string; era: number}[];
+  activeEra: number;
+}) {
+  if (unlocking.length === 0) return null;
+
+  const totalUnbonding = unlocking.reduce(
+    (sum, c) => sum + parseFloat(c.value) / 1e18,
+    0,
+  );
+
+  return (
+    <View style={{paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: Colors.grey}}>
+      <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6}}>
+        <Text style={{fontSize: 14, color: Colors.textLight}}>Unbonding</Text>
+        <Text style={{fontSize: 14, fontWeight: '600', color: Colors.text}}>
+          {totalUnbonding.toLocaleString(undefined, {maximumFractionDigits: 2})} REEF
+        </Text>
+      </View>
+      {unlocking.map((chunk, idx) => {
+        const amount = parseFloat(chunk.value) / 1e18;
+        const erasLeft = Math.max(0, chunk.era - activeEra);
+        const isReady = erasLeft === 0;
+        // Reef era ≈ 24 hours
+        const hoursLeft = erasLeft * 24;
+        const daysLeft = Math.floor(hoursLeft / 24);
+        const remainingHours = hoursLeft % 24;
+
+        let timeStr = '';
+        if (isReady) {
+          timeStr = 'Ready to withdraw';
+        } else if (daysLeft > 0) {
+          timeStr = `~${daysLeft}d ${remainingHours}h remaining (${erasLeft} eras)`;
+        } else {
+          timeStr = `~${remainingHours}h remaining (${erasLeft} eras)`;
+        }
+
+        return (
+          <View
+            key={idx}
+            style={{
+              backgroundColor: isReady ? '#e8f5e9' : Colors.primaryBg,
+              borderRadius: 8,
+              padding: 10,
+              marginTop: 4,
+            }}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text style={{fontSize: 13, fontWeight: '600', color: Colors.text}}>
+                {amount.toLocaleString(undefined, {maximumFractionDigits: 2})} REEF
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: '500',
+                  color: isReady ? Colors.green : Colors.purple,
+                }}>
+                Era #{chunk.era}
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 12,
+                color: isReady ? Colors.green : Colors.textLight,
+                marginTop: 2,
+              }}>
+              {timeStr}
+            </Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
