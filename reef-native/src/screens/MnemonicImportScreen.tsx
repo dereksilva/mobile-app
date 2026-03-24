@@ -37,7 +37,7 @@ export default function MnemonicImportScreen({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const mnemonicTrimmed = mnemonic.trim().toLowerCase();
+  const mnemonicTrimmed = mnemonic.trim();
   const wordCount = mnemonicTrimmed
     ? mnemonicTrimmed.split(/\s+/).length
     : 0;
