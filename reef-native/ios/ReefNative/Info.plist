@@ -34,10 +34,10 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Reef needs camera access to scan QR codes for account import and receiving tokens.</string>
+	<string>Reef needs camera access to scan QR codes for account import and sending tokens.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Reef uses Face ID to securely unlock your wallet and approve transactions.</string>
-<key>NSPhotoLibraryUsageDescription</key>
+	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Reef needs photo library access to save QR codes of your wallet address.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
