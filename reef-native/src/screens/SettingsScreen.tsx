@@ -246,12 +246,15 @@ export default function SettingsScreen() {
               {/* Network Switcher */}
               <View
                 style={{
-                  backgroundColor: '#fff',
-                  borderRadius: 14,
+                  backgroundColor: Colors.cardBg,
+                  borderRadius: 20,
                   padding: 16,
                   marginBottom: 12,
-                  borderWidth: 1,
-                  borderColor: Colors.grey,
+                  shadowColor: '#000',
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: 0.06,
+                  shadowRadius: 8,
+                  elevation: 2,
                 }}>
                 <Text
                   style={{
@@ -269,12 +272,15 @@ export default function SettingsScreen() {
               {/* Connection Diagnostics */}
               <View
                 style={{
-                  backgroundColor: '#fff',
-                  borderRadius: 14,
+                  backgroundColor: Colors.cardBg,
+                  borderRadius: 20,
                   padding: 16,
                   marginBottom: 12,
-                  borderWidth: 1,
-                  borderColor: Colors.grey,
+                  shadowColor: '#000',
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: 0.06,
+                  shadowRadius: 8,
+                  elevation: 2,
                 }}>
                 <ConnectionDiagnostics />
               </View>
@@ -289,11 +295,14 @@ export default function SettingsScreen() {
       <View
         style={{
           marginHorizontal: 16,
-          backgroundColor: '#fff',
-          borderRadius: 14,
+          backgroundColor: Colors.cardBg,
+          borderRadius: 20,
           padding: 16,
-          borderWidth: 1,
-          borderColor: Colors.grey,
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          elevation: 2,
         }}>
         <View
           style={{
@@ -359,14 +368,17 @@ function SettingsRow({iconPath, label, value, onPress}: SettingsRowProps) {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         marginHorizontal: 16,
         marginBottom: 2,
         paddingHorizontal: 16,
         paddingVertical: 14,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: Colors.grey,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 2,
       }}>
       <SettingsIcon d={iconPath} />
       <Text style={{flex: 1, fontSize: 15, color: Colors.text}}>{label}</Text>
@@ -407,14 +419,17 @@ function SettingsToggle({
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         marginHorizontal: 16,
         marginBottom: 2,
         paddingHorizontal: 16,
         paddingVertical: 10,
-        borderRadius: 14,
-        borderWidth: 1,
-        borderColor: Colors.grey,
+        borderRadius: 20,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 2,
         opacity: disabled ? 0.5 : 1,
       }}>
       <SettingsIcon d={iconPath} />

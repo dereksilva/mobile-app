@@ -115,25 +115,24 @@ export default function HomeScreen() {
     <ScrollView
       style={{flex: 1, backgroundColor: Colors.primaryBg}}
       contentContainerStyle={{padding: 16}}>
-      {/* Balance header */}
+      {/* Balance header — hero card */}
       <View
         style={{
-          backgroundColor: '#fff',
-          borderRadius: 20,
-          padding: 24,
+          backgroundColor: Colors.darkBg,
+          borderRadius: 24,
+          padding: 28,
           marginBottom: 20,
-          borderWidth: 1,
-          borderColor: Colors.grey,
           alignItems: 'center',
         }}>
         {/* Balance display */}
         <TouchableOpacity onPress={toggleDisplayBalance} activeOpacity={0.7}>
           <Text
             style={{
-              fontSize: 32,
-              fontWeight: '700',
-              color: Colors.text,
+              fontSize: 36,
+              fontWeight: '800',
+              color: Colors.white,
               marginBottom: 4,
+              letterSpacing: -0.5,
             }}>
             {displayBalance
               ? `$${totalUsdBalance.toLocaleString(undefined, {
@@ -143,7 +142,7 @@ export default function HomeScreen() {
               : '••••••'}
           </Text>
         </TouchableOpacity>
-        <Text style={{fontSize: 13, color: Colors.textLight, marginBottom: 20}}>
+        <Text style={{fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 24}}>
           {t('balance')}
         </Text>
 
@@ -154,12 +153,12 @@ export default function HomeScreen() {
             activeOpacity={0.7}
             style={{
               flex: 1,
-              backgroundColor: Colors.purple,
-              borderRadius: 12,
+              backgroundColor: Colors.accent,
+              borderRadius: 14,
               paddingVertical: 14,
               alignItems: 'center',
             }}>
-            <Text style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>
+            <Text style={{color: '#fff', fontSize: 15, fontWeight: '700'}}>
               ↑ {t('send')}
             </Text>
           </TouchableOpacity>
@@ -170,11 +169,11 @@ export default function HomeScreen() {
             style={{
               flex: 1,
               backgroundColor: Colors.purpleDark,
-              borderRadius: 12,
+              borderRadius: 14,
               paddingVertical: 14,
               alignItems: 'center',
             }}>
-            <Text style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>
+            <Text style={{color: '#fff', fontSize: 15, fontWeight: '700'}}>
               ↓ Receive
             </Text>
           </TouchableOpacity>
@@ -187,18 +186,16 @@ export default function HomeScreen() {
             activeOpacity={0.7}
             style={{
               flex: 1,
-              backgroundColor: Colors.primaryBg,
-              borderRadius: 12,
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: 14,
               paddingVertical: 12,
               alignItems: 'center',
-              borderWidth: 1,
-              borderColor: Colors.grey,
             }}>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
               <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" stroke={Colors.text} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+                <Path d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" stroke="rgba(255,255,255,0.8)" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
               </Svg>
-              <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
+              <Text style={{color: 'rgba(255,255,255,0.9)', fontSize: 14, fontWeight: '600'}}>
                 Buy
               </Text>
             </View>
@@ -209,18 +206,16 @@ export default function HomeScreen() {
             activeOpacity={0.7}
             style={{
               flex: 1,
-              backgroundColor: Colors.primaryBg,
-              borderRadius: 12,
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: 14,
               paddingVertical: 12,
               alignItems: 'center',
-              borderWidth: 1,
-              borderColor: Colors.grey,
             }}>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
               <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-                <Path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" stroke={Colors.text} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+                <Path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" stroke="rgba(255,255,255,0.8)" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
               </Svg>
-              <Text style={{color: Colors.text, fontSize: 14, fontWeight: '600'}}>
+              <Text style={{color: 'rgba(255,255,255,0.9)', fontSize: 14, fontWeight: '600'}}>
                 dApps
               </Text>
             </View>
@@ -232,12 +227,10 @@ export default function HomeScreen() {
       <View
         style={{
           flexDirection: 'row',
-          backgroundColor: '#fff',
-          borderRadius: 12,
+          backgroundColor: Colors.cardBg,
+          borderRadius: 14,
           padding: 4,
           marginBottom: 16,
-          borderWidth: 1,
-          borderColor: Colors.grey,
         }}>
         {(['tokens', 'nfts', 'activity'] as HomeTab[]).map(tab => (
           <TouchableOpacity
@@ -250,7 +243,7 @@ export default function HomeScreen() {
               borderRadius: 10,
               alignItems: 'center',
               backgroundColor:
-                activeTab === tab ? Colors.purple : 'transparent',
+                activeTab === tab ? Colors.accent : 'transparent',
             }}>
             <Text
               style={{
@@ -329,22 +322,25 @@ function TokenList({
             onPress={() => onSend(token)}
             activeOpacity={0.7}
             style={{
-              backgroundColor: '#fff',
-              borderRadius: 14,
-              padding: 14,
-              marginBottom: 8,
-              borderWidth: 1,
-              borderColor: Colors.grey,
+              backgroundColor: Colors.cardBg,
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 10,
               flexDirection: 'row',
               alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: {width: 0, height: 1},
+              shadowOpacity: 0.04,
+              shadowRadius: 4,
+              elevation: 1,
             }}>
             {/* Token icon */}
             <View
               style={{
-                width: 42,
-                height: 42,
-                borderRadius: 21,
-                backgroundColor: Colors.purple + '15',
+                width: 44,
+                height: 44,
+                borderRadius: 22,
+                backgroundColor: Colors.accent + '18',
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginRight: 12,
@@ -353,7 +349,7 @@ function TokenList({
                 style={{
                   fontSize: 16,
                   fontWeight: '700',
-                  color: Colors.purple,
+                  color: Colors.accent,
                 }}>
                 {token.symbol.charAt(0)}
               </Text>

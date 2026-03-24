@@ -57,6 +57,12 @@ export default function SwapScreen() {
   const tokensData = useTokenStore(s => s.selectedErc20s);
   const userTokens = tokensData.data ?? [];
   const selectedAddress = useAccountStore(s => s.selectedAddress);
+  const accounts = useAccountStore(s => s.accounts);
+  const selectedAccount = useMemo(
+    () => (accounts.data ?? []).find(a => a.address === selectedAddress),
+    [accounts, selectedAddress],
+  );
+  const evmAddress = selectedAccount?.evmAddress ?? '';
   const providerConnected = useConnectionStore(s => s.providerConn);
 
   // Fetch all pool tokens so the selection modal isn't limited to held tokens
@@ -309,7 +315,7 @@ export default function SwapScreen() {
 
   // Execute swap
   const handleSwap = () => {
-    if (!canSubmit || !tokenFrom || !tokenTo || !selectedAddress) return;
+    if (!canSubmit || !tokenFrom || !tokenTo || !evmAddress) return;
 
     setSwapStatus('approving');
     setErrorMsg(null);
@@ -334,7 +340,7 @@ export default function SwapScreen() {
     // Unsubscribe any previous swap before starting a new one
     swapSubRef.current?.unsubscribe();
     swapSubRef.current = executeSwap(
-      selectedAddress,
+      evmAddress,
       {address: tokenFrom.address, decimals: tokenFrom.decimals, amount: amountFromBN},
       {address: tokenTo.address, decimals: tokenTo.decimals, amount: amountToBN},
       {slippageTolerance, deadline},
@@ -441,12 +447,15 @@ export default function SwapScreen() {
       {tokenFrom && tokenTo && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 14,
             marginTop: 16,
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <Text
             style={{
@@ -515,10 +524,13 @@ export default function SwapScreen() {
           alignItems: 'center',
           marginTop: 16,
           padding: 14,
-          backgroundColor: '#fff',
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: Colors.grey,
+          backgroundColor: Colors.cardBg,
+          borderRadius: 20,
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          elevation: 2,
         }}>
         <Text style={{fontSize: 13, color: Colors.textLight}}>
           Slippage Tolerance
@@ -571,12 +583,15 @@ export default function SwapScreen() {
       {swapStatus !== 'ready' && swapStatus !== 'error' && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 16,
             marginTop: 16,
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <SwapStepper status={swapStatus} />
         </View>
@@ -603,12 +618,15 @@ export default function SwapScreen() {
       {txHash && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 12,
             marginTop: 12,
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <Text style={{fontSize: 12, color: Colors.textLight, marginBottom: 4}}>
             TX Hash
@@ -646,7 +664,7 @@ export default function SwapScreen() {
           style={{
             marginTop: 20,
             backgroundColor:
-              canSubmit && !isInProgress ? Colors.purple : Colors.grey,
+              canSubmit && !isInProgress ? Colors.accent : Colors.grey,
             borderRadius: 12,
             paddingVertical: 16,
             alignItems: 'center',
@@ -670,12 +688,15 @@ export default function SwapScreen() {
           activeOpacity={0.7}
           style={{
             marginTop: 12,
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             paddingVertical: 14,
             alignItems: 'center',
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <Text style={{color: Colors.text, fontSize: 15, fontWeight: '600'}}>
             {t('reload')}
@@ -744,11 +765,14 @@ function TokenInputSection({
   return (
     <View
       style={{
-        backgroundColor: '#fff',
-        borderRadius: 16,
+        backgroundColor: Colors.cardBg,
+        borderRadius: 20,
         padding: 16,
-        borderWidth: 1,
-        borderColor: Colors.grey,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 2,
       }}>
       {/* Label + balance */}
       <View

@@ -31,7 +31,7 @@ function DetailRow({label, value}: {label: string; value: string}) {
           width: 100,
           fontSize: 12,
           fontWeight: '600',
-          color: Colors.purple,
+          color: Colors.accent,
           textTransform: 'uppercase',
         }}>
         {label}

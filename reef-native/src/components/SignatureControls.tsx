@@ -166,8 +166,8 @@ export default function SignatureControls({
               height: 22,
               borderRadius: 4,
               borderWidth: 2,
-              borderColor: useBiometric ? Colors.purple : Colors.grey,
-              backgroundColor: useBiometric ? Colors.purple : 'transparent',
+              borderColor: useBiometric ? Colors.accent : Colors.grey,
+              backgroundColor: useBiometric ? Colors.accent : 'transparent',
               justifyContent: 'center',
               alignItems: 'center',
               marginRight: 12,
@@ -201,7 +201,7 @@ export default function SignatureControls({
             backgroundColor:
               isProcessing || (!useBiometric && !password.trim())
                 ? Colors.grey
-                : Colors.purple,
+                : Colors.accent,
             borderRadius: 12,
             paddingVertical: 14,
             alignItems: 'center',

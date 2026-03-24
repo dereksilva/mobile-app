@@ -264,12 +264,15 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
       onPress={onPress}
       activeOpacity={0.7}
       style={{
-        backgroundColor: '#fff',
-        borderRadius: 14,
+        backgroundColor: Colors.cardBg,
+        borderRadius: 20,
         padding: 16,
         marginBottom: 10,
-        borderWidth: 1,
-        borderColor: Colors.grey,
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 2,
       }}>
       {/* Token pair header */}
       <View
@@ -337,7 +340,7 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
             }}
             activeOpacity={0.7}
             style={{
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.accent,
               borderRadius: 8,
               paddingHorizontal: 14,
               paddingVertical: 8,
@@ -469,12 +472,15 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
       {/* Reserves card */}
       <View
         style={{
-          backgroundColor: '#fff',
-          borderRadius: 14,
+          backgroundColor: Colors.cardBg,
+          borderRadius: 20,
           padding: 20,
           marginBottom: 16,
-          borderWidth: 1,
-          borderColor: Colors.grey,
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          elevation: 2,
         }}>
         <Text
           style={{
@@ -512,12 +518,15 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
       {/* Contract address */}
       <View
         style={{
-          backgroundColor: '#fff',
-          borderRadius: 14,
+          backgroundColor: Colors.cardBg,
+          borderRadius: 20,
           padding: 16,
           marginBottom: 20,
-          borderWidth: 1,
-          borderColor: Colors.grey,
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          elevation: 2,
         }}>
         <Text
           style={{
@@ -545,7 +554,7 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
           onPress={onSwap}
           activeOpacity={0.7}
           style={{
-            backgroundColor: Colors.purple,
+            backgroundColor: Colors.accent,
             borderRadius: 12,
             paddingVertical: 16,
             alignItems: 'center',

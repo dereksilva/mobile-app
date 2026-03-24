@@ -37,7 +37,7 @@ const SLIDES = [
   },
   {
     titleKey: 'efficient',
-    color: Colors.accentSecondaryDark,
+    color: Colors.violet,
   },
   {
     titleKey: 'fast',

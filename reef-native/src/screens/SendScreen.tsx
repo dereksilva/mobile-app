@@ -328,11 +328,14 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
         disabled={isInProgress}
         activeOpacity={0.7}
         style={{
-          backgroundColor: '#fff',
-          borderRadius: 12,
+          backgroundColor: Colors.cardBg,
+          borderRadius: 20,
           padding: 14,
-          borderWidth: 1,
-          borderColor: Colors.grey,
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.06,
+          shadowRadius: 8,
+          elevation: 2,
           flexDirection: 'row',
           alignItems: 'center',
           marginBottom: 20,
@@ -387,18 +390,23 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
           editable={!isInProgress}
           style={{
             flex: 1,
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             paddingHorizontal: 16,
             paddingVertical: 14,
             fontSize: 14,
             fontFamily: 'monospace',
             color: Colors.text,
-            borderWidth: 1,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
+            borderWidth: toAddress.trim() && validationStatus === 'addressNotValid' ? 1 : 0,
             borderColor:
               toAddress.trim() && validationStatus === 'addressNotValid'
                 ? Colors.error
-                : Colors.grey,
+                : 'transparent',
           }}
         />
         <TouchableOpacity
@@ -406,7 +414,7 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
           disabled={isInProgress}
           activeOpacity={0.7}
           style={{
-            backgroundColor: Colors.purple,
+            backgroundColor: Colors.accent,
             borderRadius: 12,
             paddingHorizontal: 14,
             justifyContent: 'center',
@@ -458,18 +466,23 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
           editable={!isInProgress}
           style={{
             flex: 1,
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             paddingHorizontal: 16,
             paddingVertical: 14,
             fontSize: 18,
             fontWeight: '600',
             color: Colors.text,
-            borderWidth: 1,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
+            borderWidth: amount.trim() && validationStatus === 'amountTooHigh' ? 1 : 0,
             borderColor:
               amount.trim() && validationStatus === 'amountTooHigh'
                 ? Colors.error
-                : Colors.grey,
+                : 'transparent',
           }}
         />
         <TouchableOpacity
@@ -477,7 +490,7 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
           disabled={isInProgress}
           activeOpacity={0.7}
           style={{
-            backgroundColor: Colors.purple,
+            backgroundColor: Colors.accent,
             borderRadius: 12,
             paddingHorizontal: 20,
             justifyContent: 'center',
@@ -515,12 +528,15 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
               activeOpacity={0.7}
               style={{
                 flex: 1,
-                backgroundColor: '#fff',
+                backgroundColor: Colors.cardBg,
                 borderRadius: 8,
                 paddingVertical: 8,
                 alignItems: 'center',
-                borderWidth: 1,
-                borderColor: Colors.grey,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.06,
+                shadowRadius: 8,
+                elevation: 2,
               }}>
               <Text
                 style={{
@@ -539,12 +555,15 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
       {sendStatus !== 'ready' && sendStatus !== 'error' && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 16,
             marginBottom: 20,
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <TransactionStepper status={sendStatus} />
         </View>
@@ -571,12 +590,15 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
       {txHash && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 12,
             marginBottom: 20,
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <Text style={{fontSize: 12, color: Colors.textLight, marginBottom: 4}}>
             TX Hash
@@ -612,7 +634,7 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
           activeOpacity={0.7}
           style={{
             backgroundColor:
-              canSubmit && !isInProgress ? Colors.purple : Colors.grey,
+              canSubmit && !isInProgress ? Colors.accent : Colors.grey,
             borderRadius: 12,
             paddingVertical: 16,
             alignItems: 'center',
@@ -639,12 +661,15 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
           activeOpacity={0.7}
           style={{
             marginTop: 12,
-            backgroundColor: '#fff',
-            borderRadius: 12,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             paddingVertical: 14,
             alignItems: 'center',
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <Text style={{color: Colors.text, fontSize: 15, fontWeight: '600'}}>
             {t('reload')}

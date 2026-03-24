@@ -838,12 +838,15 @@ function ActiveTab({
       {reefToken && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 16,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 20,
-            borderWidth: 1,
-            borderColor: Colors.grey,
             marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Image
@@ -870,7 +873,7 @@ function ActiveTab({
                 style={{
                   fontSize: 17,
                   fontWeight: '700',
-                  color: Colors.purple,
+                  color: Colors.accent,
                 }}>
                 {formatUsd(availableBalance * reefPrice)}
               </Text>
@@ -890,12 +893,12 @@ function ActiveTab({
             onPress={onStake}
             activeOpacity={0.7}
             style={{
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.accent,
               borderRadius: 24,
               paddingVertical: 14,
               alignItems: 'center',
               marginTop: 16,
-              shadowColor: Colors.purple,
+              shadowColor: Colors.accent,
               shadowOffset: {width: 0, height: 4},
               shadowOpacity: 0.3,
               shadowRadius: 8,
@@ -912,12 +915,15 @@ function ActiveTab({
       {(stakedBalance > 0 || unbondingBalance > 0) && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 16,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 20,
-            borderWidth: 1,
-            borderColor: Colors.grey,
             marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <Text
             style={{
@@ -1013,11 +1019,14 @@ function ActiveTab({
       {stakingInfo && (
         <View
           style={{
-            backgroundColor: '#fff',
-            borderRadius: 16,
+            backgroundColor: Colors.cardBg,
+            borderRadius: 20,
             padding: 20,
-            borderWidth: 1,
-            borderColor: Colors.grey,
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 2},
+            shadowOpacity: 0.06,
+            shadowRadius: 8,
+            elevation: 2,
           }}>
           <Text
             style={{

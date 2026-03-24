@@ -169,7 +169,7 @@ export default function WalletConnectSessionModal() {
                 paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: 'center',
-                backgroundColor: Colors.purple,
+                backgroundColor: Colors.accent,
               }}>
               <Text
                 style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>

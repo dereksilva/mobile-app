@@ -304,7 +304,7 @@ export default function QRScannerModal({
               onPress={handleOpenSettings}
               activeOpacity={0.7}
               style={{
-                backgroundColor: Colors.purple,
+                backgroundColor: Colors.accent,
                 borderRadius: 12,
                 paddingVertical: 14,
                 paddingHorizontal: 32,

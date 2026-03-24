@@ -84,13 +84,16 @@ function TabNavigator() {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: Colors.purple,
+        tabBarActiveTintColor: Colors.accent,
         tabBarInactiveTintColor: Colors.textLight,
         tabBarStyle: {
           backgroundColor: Colors.nav,
-          borderTopWidth: 0,
+          borderTopWidth: 1,
+          borderTopColor: Colors.grey,
           elevation: 0,
-          paddingTop: 4,
+          shadowOpacity: 0,
+          paddingTop: 6,
+          paddingBottom: 2,
         },
         headerStyle: {
           backgroundColor: Colors.primaryBg,
@@ -100,6 +103,7 @@ function TabNavigator() {
         headerTitleStyle: {
           color: Colors.text,
           fontWeight: '700',
+          fontSize: 18,
         },
       }}>
       <Tab.Screen

@@ -161,11 +161,14 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
         {isTestnet ? (
           <View
             style={{
-              backgroundColor: '#fff',
-              borderRadius: 14,
+              backgroundColor: Colors.cardBg,
+              borderRadius: 20,
               padding: 20,
-              borderWidth: 1,
-              borderColor: Colors.grey,
+              shadowColor: '#000',
+              shadowOffset: {width: 0, height: 2},
+              shadowOpacity: 0.06,
+              shadowRadius: 8,
+              elevation: 2,
             }}>
             <Text
               style={{
@@ -214,7 +217,7 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
               }
               activeOpacity={0.7}
               style={{
-                backgroundColor: Colors.purple,
+                backgroundColor: Colors.accent,
                 borderRadius: 12,
                 paddingVertical: 14,
                 alignItems: 'center',
@@ -229,12 +232,15 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
             {/* Wallet address */}
             <View
               style={{
-                backgroundColor: '#fff',
-                borderRadius: 14,
+                backgroundColor: Colors.cardBg,
+                borderRadius: 20,
                 padding: 16,
                 marginBottom: 16,
-                borderWidth: 1,
-                borderColor: Colors.grey,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.06,
+                shadowRadius: 8,
+                elevation: 2,
               }}>
               <Text
                 style={{
@@ -263,12 +269,15 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
               onPress={handleAlchemyPay}
               activeOpacity={0.7}
               style={{
-                backgroundColor: '#fff',
-                borderRadius: 14,
+                backgroundColor: Colors.cardBg,
+                borderRadius: 20,
                 padding: 20,
                 marginBottom: 12,
-                borderWidth: 1,
-                borderColor: Colors.grey,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.06,
+                shadowRadius: 8,
+                elevation: 2,
               }}>
               <View
                 style={{
@@ -323,12 +332,15 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
               onPress={handleStealthEx}
               activeOpacity={0.7}
               style={{
-                backgroundColor: '#fff',
-                borderRadius: 14,
+                backgroundColor: Colors.cardBg,
+                borderRadius: 20,
                 padding: 20,
                 marginBottom: 12,
-                borderWidth: 1,
-                borderColor: Colors.grey,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.06,
+                shadowRadius: 8,
+                elevation: 2,
               }}>
               <View
                 style={{

@@ -98,14 +98,14 @@ export default function LanguageSelectionModal({
                   padding: 16,
                   marginBottom: 10,
                   borderWidth: 1,
-                  borderColor: isSelected ? Colors.purple : Colors.grey,
+                  borderColor: isSelected ? Colors.accent : Colors.grey,
                 }}>
                 <View>
                   <Text
                     style={{
                       fontSize: 16,
                       fontWeight: '600',
-                      color: isSelected ? Colors.purple : Colors.text,
+                      color: isSelected ? Colors.accent : Colors.text,
                     }}>
                     {lang.nativeLabel}
                   </Text>
@@ -126,7 +126,7 @@ export default function LanguageSelectionModal({
                       width: 24,
                       height: 24,
                       borderRadius: 12,
-                      backgroundColor: Colors.purple,
+                      backgroundColor: Colors.accent,
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}>

@@ -67,7 +67,7 @@ export default function AccountCard({
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: Colors.purple,
+              backgroundColor: Colors.accent,
               justifyContent: 'center',
               alignItems: 'center',
               marginRight: 12,
