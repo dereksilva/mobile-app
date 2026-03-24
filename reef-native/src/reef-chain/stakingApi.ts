@@ -190,9 +190,13 @@ export async function getValidators(): Promise<ValidatorInfo[]> {
   const api = getApi();
   if (!api) return [];
 
-  const activeEraOpt = await api.query.staking.activeEra();
+  const [activeEraOpt, maxNominatorRewarded] = await Promise.all([
+    api.query.staking.activeEra(),
+    api.consts.staking.maxNominatorRewardedPerValidator,
+  ]);
   const activeEra = (activeEraOpt as any).unwrapOrDefault();
   const eraIndex = activeEra.index.toNumber();
+  const maxRewarded = (maxNominatorRewarded as any).toNumber();
 
   // Get all validator addresses from staking.validators entries
   const validatorEntries = await api.query.staking.validators.entries();
@@ -242,6 +246,23 @@ export async function getValidators(): Promise<ValidatorInfo[]> {
         // Check if blocked
         const isBlocked = (prefs as any).blocked?.isTrue ?? false;
 
+        // Check slashing spans
+        let hasSlashes = false;
+        try {
+          const slashingSpans = await api.query.staking.slashingSpans(
+            validatorAddress,
+          );
+          if (
+            (slashingSpans as any).isSome &&
+            (slashingSpans as any).unwrap().lastNonzeroSlash.toNumber() > 0
+          ) {
+            hasSlashes = true;
+          }
+        } catch {}
+
+        // Check oversubscription
+        const isOversubscribed = nominatorCount > maxRewarded;
+
         return {
           address: validatorAddress,
           identity,
@@ -250,8 +271,8 @@ export async function getValidators(): Promise<ValidatorInfo[]> {
           ownStake,
           nominatorCount,
           isElected: true, // from validators.entries = elected
-          isOversubscribed: false, // TODO: check against maxNominatorRewardedPerValidator
-          hasSlashes: false, // TODO: check slashing spans
+          isOversubscribed,
+          hasSlashes,
           isBlocked,
         } as ValidatorInfo;
       }),

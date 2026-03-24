@@ -184,5 +184,21 @@
   "open_settings": "Apri Impostazioni",
   "point_camera_at_qr": "Punta la fotocamera su un codice QR",
   "invalid_qr_address": "Il codice QR scansionato non è un indirizzo Reef valido.",
-  "invalid_qr_walletconnect": "Questo codice QR non è un URI WalletConnect."
+  "invalid_qr_walletconnect": "Questo codice QR non è un URI WalletConnect.",
+  "back": "Indietro",
+  "dapp_browser": "Browser dApp",
+  "popular_dapps": "dApp popolari",
+  "go": "Vai",
+  "claim_evm_address": "Richiedi indirizzo EVM",
+  "no_evm": "Nessun EVM",
+  "enter_dapp_url": "Inserisci URL dApp...",
+  "connected_to": "Connesso a",
+  "rename": "Rinomina",
+  "save": "Salva",
+  "rename_account": "Rinomina account",
+  "more_options": "Altre opzioni",
+  "stake": "Stake",
+  "unstake": "Unstake",
+  "withdraw": "Preleva",
+  "confirm_sign": "Conferma e firma"
 }

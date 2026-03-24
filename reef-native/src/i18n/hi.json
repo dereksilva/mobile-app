@@ -184,5 +184,21 @@
   "open_settings": "सेटिंग्स खोलें",
   "point_camera_at_qr": "अपना कैमरा QR कोड पर लगाएं",
   "invalid_qr_address": "स्कैन किया गया QR कोड एक वैध Reef पता नहीं है।",
-  "invalid_qr_walletconnect": "यह QR कोड WalletConnect URI नहीं है।"
+  "invalid_qr_walletconnect": "यह QR कोड WalletConnect URI नहीं है।",
+  "back": "वापस",
+  "dapp_browser": "dApp ब्राउज़र",
+  "popular_dapps": "लोकप्रिय dApps",
+  "go": "जाएं",
+  "claim_evm_address": "EVM पता क्लेम करें",
+  "no_evm": "EVM नहीं",
+  "enter_dapp_url": "dApp URL दर्ज करें...",
+  "connected_to": "से जुड़ा हुआ",
+  "rename": "नाम बदलें",
+  "save": "सहेजें",
+  "rename_account": "खाते का नाम बदलें",
+  "more_options": "अधिक विकल्प",
+  "stake": "स्टेक",
+  "unstake": "अनस्टेक",
+  "withdraw": "निकालें",
+  "confirm_sign": "पुष्टि करें और हस्ताक्षर करें"
 }

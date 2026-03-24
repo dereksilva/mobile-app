@@ -107,6 +107,8 @@ export default function AccountCard({
               }}
               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
               activeOpacity={0.6}
+              accessibilityLabel="More options"
+              accessibilityRole="button"
               style={{
                 padding: 4,
                 marginRight: 8,

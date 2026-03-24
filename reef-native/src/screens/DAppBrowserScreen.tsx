@@ -27,6 +27,7 @@ import {WebView, WebViewNavigation} from 'react-native-webview';
 import {useTranslation} from 'react-i18next';
 import {useAccountStore} from '../stores/useAccountStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
+import {useSigningStore} from '../stores/useSigningStore';
 import * as Storage from '../services/StorageService';
 import {Colors} from '../utils/colors';
 
@@ -161,16 +162,65 @@ export default function DAppBrowserScreen({
             true;
           `);
         } else if (msgType === 'reef_signTransaction') {
-          // TODO: Route through signing store when dApp injection is finalized
-          Alert.alert('Sign Request', 'Transaction signing from dApps will be available in a future update.');
+          const requestId = String(Date.now());
+          new Promise((resolve, reject) => {
+            useSigningStore.getState().addRequest({
+              id: requestId,
+              payload: data.payload,
+              resolve,
+              reject,
+              description: `dApp transaction from ${currentUrl}`,
+            });
+          })
+            .then(result => {
+              webViewRef.current?.injectJavaScript(`
+                window.dispatchEvent(new CustomEvent('reefSignResponse', {
+                  detail: { id: ${data.id}, result: ${JSON.stringify(result)} }
+                }));
+                true;
+              `);
+            })
+            .catch(err => {
+              webViewRef.current?.injectJavaScript(`
+                window.dispatchEvent(new CustomEvent('reefSignResponse', {
+                  detail: { id: ${data.id}, error: '${(err as Error).message || 'Signing rejected'}' }
+                }));
+                true;
+              `);
+            });
         } else if (msgType === 'reef_signMessage') {
-          Alert.alert('Sign Request', 'Message signing from dApps will be available in a future update.');
+          const requestId = String(Date.now());
+          new Promise((resolve, reject) => {
+            useSigningStore.getState().addRequest({
+              id: requestId,
+              payload: {data: data.message},
+              resolve,
+              reject,
+              description: `dApp message signing from ${currentUrl}`,
+            });
+          })
+            .then(result => {
+              webViewRef.current?.injectJavaScript(`
+                window.dispatchEvent(new CustomEvent('reefSignResponse', {
+                  detail: { id: ${data.id}, result: ${JSON.stringify(result)} }
+                }));
+                true;
+              `);
+            })
+            .catch(err => {
+              webViewRef.current?.injectJavaScript(`
+                window.dispatchEvent(new CustomEvent('reefSignResponse', {
+                  detail: { id: ${data.id}, error: '${(err as Error).message || 'Signing rejected'}' }
+                }));
+                true;
+              `);
+            });
         }
       } catch {
         // Ignore non-JSON messages
       }
     },
-    [selectedAddress],
+    [selectedAddress, currentUrl],
   );
 
   const handleOpenExternal = useCallback(() => {

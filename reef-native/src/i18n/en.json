@@ -184,5 +184,21 @@
   "open_settings": "Open Settings",
   "point_camera_at_qr": "Point your camera at a QR code",
   "invalid_qr_address": "The scanned QR code is not a valid Reef address.",
-  "invalid_qr_walletconnect": "This QR code is not a WalletConnect URI."
+  "invalid_qr_walletconnect": "This QR code is not a WalletConnect URI.",
+  "back": "Back",
+  "dapp_browser": "dApp Browser",
+  "popular_dapps": "Popular dApps",
+  "go": "Go",
+  "claim_evm_address": "Claim EVM Address",
+  "no_evm": "No EVM",
+  "enter_dapp_url": "Enter dApp URL...",
+  "connected_to": "Connected to",
+  "rename": "Rename",
+  "save": "Save",
+  "rename_account": "Rename Account",
+  "more_options": "More options",
+  "stake": "Stake",
+  "unstake": "Unstake",
+  "withdraw": "Withdraw",
+  "confirm_sign": "Confirm & Sign"
 }

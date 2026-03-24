@@ -151,6 +151,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             onPress={() => setSubScreen('send')}
             activeOpacity={0.7}
+            accessibilityLabel="Send tokens"
             style={{
               flex: 1,
               backgroundColor: Colors.accent,
@@ -166,6 +167,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             onPress={() => setSubScreen('receive')}
             activeOpacity={0.7}
+            accessibilityLabel="Receive tokens"
             style={{
               flex: 1,
               backgroundColor: Colors.purpleDark,
@@ -184,6 +186,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             onPress={() => setSubScreen('buy')}
             activeOpacity={0.7}
+            accessibilityLabel="Buy REEF"
             style={{
               flex: 1,
               backgroundColor: 'rgba(255,255,255,0.1)',
@@ -204,6 +207,7 @@ export default function HomeScreen() {
           <TouchableOpacity
             onPress={() => setSubScreen('dapp')}
             activeOpacity={0.7}
+            accessibilityLabel="Open dApp browser"
             style={{
               flex: 1,
               backgroundColor: 'rgba(255,255,255,0.1)',

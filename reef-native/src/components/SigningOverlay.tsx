@@ -175,7 +175,9 @@ export default function SigningOverlay({children}: SigningOverlayProps) {
             </Text>
             <TouchableOpacity
               onPress={handleCancel}
-              disabled={isProcessing}>
+              disabled={isProcessing}
+              accessibilityLabel="Close"
+              accessibilityRole="button">
               <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
                 <Path d="M6 18L18 6M6 6l12 12" stroke={Colors.textLight} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
               </Svg>

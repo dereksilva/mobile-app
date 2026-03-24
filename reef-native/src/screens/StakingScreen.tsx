@@ -892,6 +892,7 @@ function ActiveTab({
           <TouchableOpacity
             onPress={onStake}
             activeOpacity={0.7}
+            accessibilityLabel="Stake REEF tokens"
             style={{
               backgroundColor: Colors.accent,
               borderRadius: 24,
