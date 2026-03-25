@@ -18,6 +18,8 @@ import {useTranslation} from 'react-i18next';
 import Clipboard from '@react-native-clipboard/clipboard';
 import {useAccounts} from '../hooks/useAccounts';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
+import Svg, {Rect, Defs, LinearGradient as SvgLinearGradient, Stop} from 'react-native-svg';
 
 interface MnemonicGenerateScreenProps {
   onDone: () => void;
@@ -30,6 +32,8 @@ export default function MnemonicGenerateScreen({
 }: MnemonicGenerateScreenProps) {
   const {t} = useTranslation();
   const {generateNewAccount, createAccount} = useAccounts();
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const [step, setStep] = useState<1 | 2>(1);
   const [mnemonic, setMnemonic] = useState('');
@@ -71,24 +75,62 @@ export default function MnemonicGenerateScreen({
 
   const words = mnemonic.split(' ');
 
+  /* ── Light-mode gradient CTA helper ── */
+  const GradientButton = ({onPress, disabled, label}: {onPress: () => void; disabled?: boolean; label: string}) => (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.8}
+      style={{
+        height: 64,
+        borderRadius: 9999,
+        overflow: 'hidden',
+        justifyContent: 'center',
+        alignItems: 'center',
+        opacity: disabled ? 0.45 : 1,
+      }}>
+      <Svg
+        style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+        viewBox="0 0 1 1"
+        preserveAspectRatio="none">
+        <Defs>
+          <SvgLinearGradient id="mnemonicCtaGrad" x1="0" y1="0" x2="0.3" y2="1">
+            <Stop offset="0" stopColor="#b70054" />
+            <Stop offset="1" stopColor="#4e00cd" />
+          </SvgLinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="1" height="1" fill="url(#mnemonicCtaGrad)" />
+      </Svg>
+      <Text style={{fontSize: 16, fontWeight: '700', color: '#fff', zIndex: 1}}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+
   if (step === 1) {
     return (
       <ScrollView
-        style={{flex: 1, backgroundColor: Colors.primaryBg}}
+        style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}
         contentContainerStyle={{padding: 24}}>
         {/* Header */}
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: 24,
           }}>
-          <Text style={{fontSize: 20, fontWeight: '700', color: Colors.text}}>
+          <TouchableOpacity onPress={onCancel} style={{marginRight: 12}}>
+            <Text style={{color: isLight ? '#4e00cd' : Colors.textLight, fontSize: 22}}>
+              {'\u2190'}
+            </Text>
+          </TouchableOpacity>
+          <Text style={{fontSize: 20, fontWeight: '700', color: isLight ? '#2c024d' : Colors.text, flex: 1}}>
             {t('create_new_account')}
           </Text>
           <TouchableOpacity onPress={onCancel}>
-            <Text style={{color: Colors.textLight, fontSize: 16}}>✕</Text>
+            <Text style={{color: isLight ? '#494457' : Colors.textLight, fontSize: 16}}>
+              {'\u2715'}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -96,9 +138,10 @@ export default function MnemonicGenerateScreen({
         <Text
           style={{
             fontSize: 12,
-            fontWeight: '600',
-            color: Colors.textLight,
-            letterSpacing: 0.5,
+            fontWeight: '700',
+            color: isLight ? '#494457' : Colors.textLight,
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
             marginBottom: 12,
           }}>
           {t('generated_2_word')}
@@ -107,12 +150,12 @@ export default function MnemonicGenerateScreen({
         {/* Word grid */}
         <View
           style={{
-            backgroundColor: Colors.cardBg,
-            borderRadius: 14,
+            backgroundColor: isLight ? 'rgba(255,255,255,0.4)' : Colors.cardBg,
+            borderRadius: isLight ? 32 : 14,
             padding: 16,
             marginBottom: 16,
             borderWidth: 1,
-            borderColor: Colors.grey,
+            borderColor: isLight ? 'rgba(78,0,205,0.05)' : Colors.grey,
           }}>
           <View
             style={{
@@ -124,13 +167,13 @@ export default function MnemonicGenerateScreen({
               <View
                 key={i}
                 style={{
-                  backgroundColor: Colors.primaryBg,
-                  borderRadius: 8,
+                  backgroundColor: isLight ? 'rgba(78,0,205,0.06)' : Colors.primaryBg,
+                  borderRadius: isLight ? 9999 : 8,
                   paddingHorizontal: 12,
                   paddingVertical: 6,
                 }}>
-                <Text style={{color: Colors.text, fontSize: 14}}>
-                  <Text style={{color: Colors.textLight}}>{i + 1}. </Text>
+                <Text style={{color: isLight ? '#2c024d' : Colors.text, fontSize: 14}}>
+                  <Text style={{color: isLight ? '#494457' : Colors.textLight}}>{i + 1}. </Text>
                   {word}
                 </Text>
               </View>
@@ -146,8 +189,8 @@ export default function MnemonicGenerateScreen({
             alignSelf: 'flex-start',
             paddingVertical: 8,
             paddingHorizontal: 16,
-            backgroundColor: Colors.purpleDark,
-            borderRadius: 8,
+            backgroundColor: isLight ? '#4e00cd' : Colors.purpleDark,
+            borderRadius: isLight ? 9999 : 8,
             marginBottom: 20,
           }}>
           <Text style={{color: '#fff', fontSize: 13, fontWeight: '600'}}>
@@ -156,15 +199,22 @@ export default function MnemonicGenerateScreen({
         </TouchableOpacity>
 
         {/* Warning */}
-        <Text
+        <View
           style={{
-            fontSize: 13,
-            color: Colors.textLight,
-            lineHeight: 20,
+            backgroundColor: isLight ? 'rgba(78,0,205,0.06)' : 'transparent',
+            borderRadius: isLight ? 20 : 0,
+            padding: isLight ? 16 : 0,
             marginBottom: 20,
           }}>
-          {t('please_write_down')}
-        </Text>
+          <Text
+            style={{
+              fontSize: 13,
+              color: isLight ? '#494457' : Colors.textLight,
+              lineHeight: 20,
+            }}>
+            {t('please_write_down')}
+          </Text>
+        </View>
 
         {/* Checkbox */}
         <TouchableOpacity
@@ -181,8 +231,8 @@ export default function MnemonicGenerateScreen({
               height: 22,
               borderRadius: 4,
               borderWidth: 2,
-              borderColor: confirmed ? Colors.purple : Colors.grey,
-              backgroundColor: confirmed ? Colors.purple : 'transparent',
+              borderColor: confirmed ? (isLight ? '#4e00cd' : Colors.purple) : (isLight ? '#cbc3da' : Colors.grey),
+              backgroundColor: confirmed ? (isLight ? '#4e00cd' : Colors.purple) : 'transparent',
               justifyContent: 'center',
               alignItems: 'center',
               marginRight: 12,
@@ -190,35 +240,39 @@ export default function MnemonicGenerateScreen({
             }}>
             {confirmed && (
               <Text style={{color: '#fff', fontSize: 14, fontWeight: '700'}}>
-                ✓
+                {'\u2713'}
               </Text>
             )}
           </View>
-          <Text style={{flex: 1, fontSize: 13, color: Colors.text, lineHeight: 20}}>
+          <Text style={{flex: 1, fontSize: 13, color: isLight ? '#2c024d' : Colors.text, lineHeight: 20}}>
             {t('i_saved_mnemonic')}
           </Text>
         </TouchableOpacity>
 
         {/* Next button */}
-        <TouchableOpacity
-          onPress={handleNext}
-          disabled={!confirmed}
-          activeOpacity={0.7}
-          style={{
-            backgroundColor: confirmed ? Colors.purple : Colors.grey,
-            borderRadius: 12,
-            paddingVertical: 14,
-            alignItems: 'center',
-          }}>
-          <Text
+        {isLight ? (
+          <GradientButton onPress={handleNext} disabled={!confirmed} label={t('next_step')} />
+        ) : (
+          <TouchableOpacity
+            onPress={handleNext}
+            disabled={!confirmed}
+            activeOpacity={0.7}
             style={{
-              color: confirmed ? '#fff' : Colors.textLight,
-              fontSize: 16,
-              fontWeight: '600',
+              backgroundColor: confirmed ? Colors.purple : Colors.grey,
+              borderRadius: 12,
+              paddingVertical: 14,
+              alignItems: 'center',
             }}>
-            {t('next_step')}
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={{
+                color: confirmed ? '#fff' : Colors.textLight,
+                fontSize: 16,
+                fontWeight: '600',
+              }}>
+              {t('next_step')}
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     );
   }
@@ -226,7 +280,7 @@ export default function MnemonicGenerateScreen({
   // Step 2: Name entry
   return (
     <ScrollView
-      style={{flex: 1, backgroundColor: Colors.primaryBg}}
+      style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}
       contentContainerStyle={{padding: 24}}
       keyboardShouldPersistTaps="handled">
       <View
@@ -237,19 +291,24 @@ export default function MnemonicGenerateScreen({
           marginBottom: 24,
         }}>
         <TouchableOpacity onPress={() => setStep(1)}>
-          <Text style={{color: Colors.purple, fontSize: 16}}>← Back</Text>
+          <Text style={{color: isLight ? '#4e00cd' : Colors.purple, fontSize: 16}}>
+            {'\u2190'} Back
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={onCancel}>
-          <Text style={{color: Colors.textLight, fontSize: 16}}>✕</Text>
+          <Text style={{color: isLight ? '#494457' : Colors.textLight, fontSize: 16}}>
+            {'\u2715'}
+          </Text>
         </TouchableOpacity>
       </View>
 
       <Text
         style={{
           fontSize: 12,
-          fontWeight: '600',
-          color: Colors.textLight,
-          letterSpacing: 0.5,
+          fontWeight: '700',
+          color: isLight ? '#494457' : Colors.textLight,
+          letterSpacing: 1.2,
+          textTransform: 'uppercase',
           marginBottom: 8,
         }}>
         {t('descriptive_account_name')}
@@ -260,17 +319,18 @@ export default function MnemonicGenerateScreen({
         onChangeText={setName}
         autoFocus
         placeholder={t('name_your_account')}
-        placeholderTextColor={Colors.textLight}
+        placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
         style={{
           width: '100%',
-          backgroundColor: Colors.cardBg,
-          borderRadius: 12,
-          paddingHorizontal: 16,
-          paddingVertical: 14,
+          backgroundColor: isLight ? '#fff' : Colors.cardBg,
+          borderRadius: isLight ? 32 : 12,
+          paddingHorizontal: isLight ? 24 : 16,
+          paddingVertical: isLight ? undefined : 14,
+          height: isLight ? 64 : undefined,
           fontSize: 16,
-          color: Colors.text,
+          color: isLight ? '#2c024d' : Colors.text,
           borderWidth: 1,
-          borderColor: Colors.grey,
+          borderColor: isLight ? 'rgba(78,0,205,0.05)' : Colors.grey,
           marginBottom: 24,
         }}
       />
@@ -279,7 +339,10 @@ export default function MnemonicGenerateScreen({
       <Text
         style={{
           fontSize: 12,
-          color: Colors.textLight,
+          fontWeight: '700',
+          color: isLight ? '#494457' : Colors.textLight,
+          letterSpacing: 1.2,
+          textTransform: 'uppercase',
           marginBottom: 4,
         }}>
         Address
@@ -288,38 +351,46 @@ export default function MnemonicGenerateScreen({
         style={{
           fontSize: 13,
           fontFamily: 'monospace',
-          color: Colors.text,
-          backgroundColor: Colors.cardBg,
-          borderRadius: 8,
+          color: isLight ? '#2c024d' : Colors.text,
+          backgroundColor: isLight ? 'rgba(255,255,255,0.4)' : Colors.cardBg,
+          borderRadius: isLight ? 20 : 8,
           padding: 12,
           marginBottom: 32,
           borderWidth: 1,
-          borderColor: Colors.grey,
+          borderColor: isLight ? 'rgba(78,0,205,0.05)' : Colors.grey,
         }}>
         {address}
       </Text>
 
       {/* Create */}
-      <TouchableOpacity
-        onPress={handleCreate}
-        disabled={!name.trim() || isSaving}
-        activeOpacity={0.7}
-        style={{
-          backgroundColor:
-            name.trim() && !isSaving ? Colors.purple : Colors.grey,
-          borderRadius: 12,
-          paddingVertical: 14,
-          alignItems: 'center',
-        }}>
-        <Text
+      {isLight ? (
+        <GradientButton
+          onPress={handleCreate}
+          disabled={!name.trim() || isSaving}
+          label={isSaving ? t('loading') : t('add_the_account')}
+        />
+      ) : (
+        <TouchableOpacity
+          onPress={handleCreate}
+          disabled={!name.trim() || isSaving}
+          activeOpacity={0.7}
           style={{
-            color: name.trim() && !isSaving ? '#fff' : Colors.textLight,
-            fontSize: 16,
-            fontWeight: '600',
+            backgroundColor:
+              name.trim() && !isSaving ? Colors.purple : Colors.grey,
+            borderRadius: 12,
+            paddingVertical: 14,
+            alignItems: 'center',
           }}>
-          {isSaving ? t('loading') : t('add_the_account')}
-        </Text>
-      </TouchableOpacity>
+          <Text
+            style={{
+              color: name.trim() && !isSaving ? '#fff' : Colors.textLight,
+              fontSize: 16,
+              fontWeight: '600',
+            }}>
+            {isSaving ? t('loading') : t('add_the_account')}
+          </Text>
+        </TouchableOpacity>
+      )}
     </ScrollView>
   );
 }

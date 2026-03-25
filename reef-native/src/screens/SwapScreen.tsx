@@ -21,7 +21,7 @@ import {
   Alert,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
-import Svg, {Path} from 'react-native-svg';
+import Svg, {Path, Rect, Defs, LinearGradient as SvgLinearGradient, Stop} from 'react-native-svg';
 import {ethers} from 'ethers';
 import {TokenBalance, Constants} from '../types';
 import {useTokenStore} from '../stores/useTokenStore';
@@ -37,6 +37,7 @@ import {
 import type {SwapStatusUpdate} from '../reef-chain/types';
 import {fetchAllPools} from '../reef-chain/poolsApi';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 import TokenSelectionModal from '../components/TokenSelectionModal';
 
 type SwapStatus =
@@ -64,6 +65,9 @@ export default function SwapScreen() {
   );
   const evmAddress = selectedAccount?.evmAddress ?? '';
   const providerConnected = useConnectionStore(s => s.providerConn);
+
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   // Fetch all pool tokens so the selection modal isn't limited to held tokens
   const [poolTokens, setPoolTokens] = useState<TokenBalance[]>([]);
@@ -392,6 +396,287 @@ export default function SwapScreen() {
     return bal.toLocaleString(undefined, {maximumFractionDigits: 4});
   };
 
+  // ─── Light Mode ────
+  if (isLight) {
+    return (
+      <ScrollView
+        style={{flex: 1, backgroundColor: '#fff7fe'}}
+        contentContainerStyle={{paddingBottom: 40}}
+        keyboardShouldPersistTaps="handled">
+        {/* Header */}
+        <View style={{flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 60, paddingBottom: 18}}>
+          <Svg width={16} height={16} viewBox="0 0 24 24">
+            <Path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" stroke="#2c024d" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+          <Text style={{fontSize: 20, fontWeight: '700', color: '#2c024d', letterSpacing: -0.5, marginLeft: 12}}>
+            Swap Tokens
+          </Text>
+        </View>
+
+        {/* From Token Selector */}
+        <View style={{paddingHorizontal: 20}}>
+          <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)', borderRadius: 32, borderWidth: 1, borderColor: 'rgba(78, 0, 205, 0.05)', padding: 25, marginBottom: 4}}>
+            <Text style={{fontSize: 12, fontWeight: '700', color: '#494457', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 14}}>
+              From
+            </Text>
+            {tokenFrom && (
+              <Text style={{fontSize: 11, color: '#8e8a99', marginBottom: 8}}>
+                {t('balance')}: {formatBalance(fromBalance)}
+              </Text>
+            )}
+            <TouchableOpacity
+              onPress={() => setShowFromModal(true)}
+              disabled={isInProgress}
+              activeOpacity={0.7}
+              style={{flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 32, height: 56, paddingHorizontal: 20, marginBottom: 12}}>
+              <View style={{width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(78, 0, 205, 0.08)', justifyContent: 'center', alignItems: 'center', marginRight: 10}}>
+                <Text style={{fontSize: 13, fontWeight: '700', color: '#4e00cd'}}>{tokenFrom?.symbol?.charAt(0) ?? '?'}</Text>
+              </View>
+              <Text style={{fontSize: 15, fontWeight: '600', color: '#2c024d', flex: 1}}>{tokenFrom?.symbol ?? t('select')}</Text>
+              <Text style={{color: '#cbc3da', fontSize: 12}}>▼</Text>
+            </TouchableOpacity>
+            <TextInput
+              value={amountFrom}
+              onChangeText={handleAmountFromChange}
+              placeholder="0.00"
+              placeholderTextColor="#cbc3da"
+              keyboardType="decimal-pad"
+              editable={!isInProgress && !!tokenFrom}
+              style={{backgroundColor: '#fff', borderRadius: 32, height: 64, paddingLeft: 24, fontSize: 14, color: '#2c024d'}}
+            />
+            {tokenFrom && (
+              <TouchableOpacity
+                onPress={() => handleAmountFromChange(fromBalance.toString())}
+                disabled={isInProgress}
+                activeOpacity={0.7}
+                style={{alignSelf: 'flex-end', marginTop: 10}}>
+                <Text style={{fontSize: 11, fontWeight: '700', color: '#4e00cd', letterSpacing: 0.5}}>MAX</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Swap Direction Toggle */}
+          <View style={{alignItems: 'center', marginVertical: 4, zIndex: 1}}>
+            <TouchableOpacity
+              onPress={handleSwapDirection}
+              disabled={isInProgress}
+              activeOpacity={0.7}
+              style={{width: 52, height: 52, borderRadius: 26, overflow: 'hidden', justifyContent: 'center', alignItems: 'center'}}>
+              <Svg style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}} viewBox="0 0 1 1" preserveAspectRatio="none">
+                <Defs>
+                  <SvgLinearGradient id="swapDirGrad" x1="0" y1="0" x2="0.3" y2="1">
+                    <Stop offset="0" stopColor="#b70054" />
+                    <Stop offset="1" stopColor="#4e00cd" />
+                  </SvgLinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="1" height="1" fill="url(#swapDirGrad)" />
+              </Svg>
+              <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+                <Path d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5" stroke="#fff" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+            </TouchableOpacity>
+          </View>
+
+          {/* To Token Selector */}
+          <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)', borderRadius: 32, borderWidth: 1, borderColor: 'rgba(78, 0, 205, 0.05)', padding: 25, marginBottom: 4}}>
+            <Text style={{fontSize: 12, fontWeight: '700', color: '#494457', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 14}}>
+              To
+            </Text>
+            {tokenTo && (
+              <Text style={{fontSize: 11, color: '#8e8a99', marginBottom: 8}}>
+                {t('balance')}: {formatBalance(toBalance)}
+              </Text>
+            )}
+            <TouchableOpacity
+              onPress={() => setShowToModal(true)}
+              disabled={isInProgress}
+              activeOpacity={0.7}
+              style={{flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff', borderRadius: 32, height: 56, paddingHorizontal: 20, marginBottom: 12}}>
+              <View style={{width: 30, height: 30, borderRadius: 15, backgroundColor: 'rgba(78, 0, 205, 0.08)', justifyContent: 'center', alignItems: 'center', marginRight: 10}}>
+                <Text style={{fontSize: 13, fontWeight: '700', color: '#4e00cd'}}>{tokenTo?.symbol?.charAt(0) ?? '?'}</Text>
+              </View>
+              <Text style={{fontSize: 15, fontWeight: '600', color: '#2c024d', flex: 1}}>{tokenTo?.symbol ?? t('select')}</Text>
+              <Text style={{color: '#cbc3da', fontSize: 12}}>▼</Text>
+            </TouchableOpacity>
+            <TextInput
+              value={amountTo}
+              onChangeText={handleAmountToChange}
+              placeholder="0.00"
+              placeholderTextColor="#cbc3da"
+              keyboardType="decimal-pad"
+              editable={!isInProgress && !!tokenTo}
+              style={{backgroundColor: '#fff', borderRadius: 32, height: 64, paddingLeft: 24, fontSize: 14, color: '#2c024d'}}
+            />
+          </View>
+
+          {/* Pool Info */}
+          {tokenFrom && tokenTo && (
+            <View style={{backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(78, 0, 205, 0.05)', padding: 20, marginTop: 14}}>
+              <Text style={{fontSize: 12, fontWeight: '700', color: '#494457', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 12}}>
+                Pool Info
+              </Text>
+              {loadingReserves ? (
+                <Text style={{color: '#8e8a99', fontSize: 13}}>{t('loading_pool_data')}</Text>
+              ) : reserve1 && reserve2 ? (
+                <>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6}}>
+                    <Text style={{fontSize: 13, color: '#8e8a99'}}>{tokenFrom.symbol} Reserve</Text>
+                    <Text style={{fontSize: 13, color: '#2c024d', fontWeight: '500'}}>
+                      {formatBalance(parseFloat(ethers.utils.formatUnits(reserve1, tokenFrom.decimals)))}
+                    </Text>
+                  </View>
+                  <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                    <Text style={{fontSize: 13, color: '#8e8a99'}}>{tokenTo.symbol} Reserve</Text>
+                    <Text style={{fontSize: 13, color: '#2c024d', fontWeight: '500'}}>
+                      {formatBalance(parseFloat(ethers.utils.formatUnits(reserve2, tokenTo.decimals)))}
+                    </Text>
+                  </View>
+                </>
+              ) : (
+                <Text style={{color: '#d32f2f', fontSize: 13}}>{t('no_pool_data')}</Text>
+              )}
+            </View>
+          )}
+
+          {/* Slippage Setting */}
+          <TouchableOpacity
+            onPress={() => setShowSlippage(!showSlippage)}
+            activeOpacity={0.7}
+            style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 14, padding: 20, backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(78, 0, 205, 0.05)'}}>
+            <Text style={{fontSize: 13, color: '#8e8a99'}}>Slippage Tolerance</Text>
+            <Text style={{fontSize: 13, fontWeight: '700', color: '#4e00cd'}}>{slippageTolerance}% ▾</Text>
+          </TouchableOpacity>
+
+          {showSlippage && (
+            <View style={{flexDirection: 'row', gap: 8, marginTop: 10}}>
+              {[0.1, 0.5, 0.8, 1.0, 3.0].map(val => (
+                <TouchableOpacity
+                  key={val}
+                  onPress={() => { setSlippageTolerance(val); setShowSlippage(false); }}
+                  activeOpacity={0.7}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderRadius: 9999,
+                    alignItems: 'center',
+                    overflow: 'hidden',
+                    borderWidth: slippageTolerance === val ? 0 : 1,
+                    borderColor: 'rgba(78, 0, 205, 0.1)',
+                    backgroundColor: slippageTolerance === val ? undefined : '#fff',
+                  }}>
+                  {slippageTolerance === val && (
+                    <Svg style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}} viewBox="0 0 1 1" preserveAspectRatio="none">
+                      <Defs>
+                        <SvgLinearGradient id={`slipGrad${val}`} x1="0" y1="0" x2="0.3" y2="1">
+                          <Stop offset="0" stopColor="#b70054" />
+                          <Stop offset="1" stopColor="#4e00cd" />
+                        </SvgLinearGradient>
+                      </Defs>
+                      <Rect x="0" y="0" width="1" height="1" fill={`url(#slipGrad${val})`} />
+                    </Svg>
+                  )}
+                  <Text style={{fontSize: 12, fontWeight: '700', color: slippageTolerance === val ? '#fff' : '#2c024d'}}>
+                    {val}%
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Swap Status Stepper */}
+          {swapStatus !== 'ready' && swapStatus !== 'error' && (
+            <View style={{backgroundColor: 'rgba(255, 255, 255, 0.4)', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(78, 0, 205, 0.05)', padding: 20, marginTop: 16}}>
+              <SwapStepper status={swapStatus} />
+            </View>
+          )}
+
+          {/* Error Display */}
+          {swapStatus === 'error' && errorMsg && (
+            <View style={{backgroundColor: 'rgba(211, 47, 47, 0.06)', borderRadius: 20, padding: 18, marginTop: 16, borderLeftWidth: 4, borderLeftColor: '#d32f2f'}}>
+              <Text style={{color: '#d32f2f', fontSize: 14, fontWeight: '500'}}>{errorMsg}</Text>
+            </View>
+          )}
+
+          {/* Tx Hash */}
+          {txHash && (
+            <View style={{backgroundColor: 'rgba(255, 255, 255, 0.5)', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(78, 0, 205, 0.05)', padding: 16, marginTop: 14}}>
+              <Text style={{fontSize: 12, color: '#8e8a99', marginBottom: 4}}>TX Hash</Text>
+              <Text style={{fontSize: 12, fontFamily: 'monospace', color: '#2c024d'}} selectable numberOfLines={2}>{txHash}</Text>
+            </View>
+          )}
+
+          {/* CTA Button */}
+          {swapStatus === 'finalized' ? (
+            <TouchableOpacity
+              onPress={handleReset}
+              activeOpacity={0.7}
+              style={{marginTop: 24, height: 64, borderRadius: 9999, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', backgroundColor: '#4caf50'}}>
+              <Text style={{color: '#fff', fontSize: 16, fontWeight: '700'}}>
+                ✓ {t('done')}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleSwap}
+              disabled={!canSubmit || isInProgress}
+              activeOpacity={0.7}
+              style={{marginTop: 24, height: 64, borderRadius: 9999, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', opacity: canSubmit && !isInProgress ? 1 : 0.5}}>
+              <Svg style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}} viewBox="0 0 1 1" preserveAspectRatio="none">
+                <Defs>
+                  <SvgLinearGradient id="swapCtaGrad" x1="0" y1="0" x2="0.3" y2="1">
+                    <Stop offset="0" stopColor="#b70054" />
+                    <Stop offset="1" stopColor="#4e00cd" />
+                  </SvgLinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="1" height="1" fill="url(#swapCtaGrad)" />
+              </Svg>
+              <Text style={{color: '#fff', fontSize: 16, fontWeight: '700'}}>
+                {getButtonLabel()}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Error Retry */}
+          {swapStatus === 'error' && (
+            <TouchableOpacity
+              onPress={handleReset}
+              activeOpacity={0.7}
+              style={{marginTop: 14, height: 52, borderRadius: 9999, backgroundColor: 'rgba(255, 255, 255, 0.5)', borderWidth: 1, borderColor: 'rgba(78, 0, 205, 0.05)', justifyContent: 'center', alignItems: 'center'}}>
+              <Text style={{color: '#2c024d', fontSize: 15, fontWeight: '600'}}>{t('reload')}</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Token selection modals */}
+        <TokenSelectionModal
+          visible={showFromModal}
+          tokens={allTokens}
+          excludeAddress={tokenTo?.address}
+          onSelect={token => {
+            setTokenFrom(token);
+            setShowFromModal(false);
+            setAmountFrom('');
+            setAmountTo('');
+          }}
+          onClose={() => setShowFromModal(false)}
+        />
+        <TokenSelectionModal
+          visible={showToModal}
+          tokens={allTokens}
+          excludeAddress={tokenFrom?.address}
+          onSelect={token => {
+            setTokenTo(token);
+            setShowToModal(false);
+            setAmountFrom('');
+            setAmountTo('');
+          }}
+          onClose={() => setShowToModal(false)}
+        />
+      </ScrollView>
+    );
+  }
+
+  // ─── Dark Mode (existing design) ────
   return (
     <ScrollView
       style={{flex: 1, backgroundColor: Colors.primaryBg}}

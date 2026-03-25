@@ -277,7 +277,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "io.reef.reefMobileApp";
+				PRODUCT_BUNDLE_IDENTIFIER = io.reef.reefMobileApp;
 				PRODUCT_NAME = ReefNative;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -309,7 +309,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "io.reef.reefMobileApp";
+				PRODUCT_BUNDLE_IDENTIFIER = io.reef.reefMobileApp;
 				PRODUCT_NAME = ReefNative;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SWIFT_VERSION = 5.0;

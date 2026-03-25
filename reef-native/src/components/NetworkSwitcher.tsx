@@ -12,6 +12,7 @@ import {useTranslation} from 'react-i18next';
 import {useNetworkStore} from '../stores/useNetworkStore';
 import {NetworkName} from '../types';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 export default function NetworkSwitcher() {
   const {t} = useTranslation();
@@ -19,6 +20,8 @@ export default function NetworkSwitcher() {
   const isLocked = useNetworkStore(s => s.isLocked);
   const isSwitching = useNetworkStore(s => s.isSwitching);
   const setNetwork = useNetworkStore(s => s.setNetwork);
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const handleSwitch = (network: NetworkName) => {
     if (network === selectedNetwork) return;
@@ -38,7 +41,7 @@ export default function NetworkSwitcher() {
       <View
         style={{
           flexDirection: 'row',
-          backgroundColor: Colors.primaryBg,
+          backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.primaryBg,
           borderRadius: 12,
           padding: 4,
         }}>
@@ -51,14 +54,18 @@ export default function NetworkSwitcher() {
             borderRadius: 10,
             alignItems: 'center',
             backgroundColor:
-              selectedNetwork === NetworkName.MAINNET ? Colors.purple : 'transparent',
+              selectedNetwork === NetworkName.MAINNET
+                ? (isLight ? '#4e00cd' : Colors.purple)
+                : 'transparent',
           }}>
           <Text
             style={{
               fontSize: 14,
               fontWeight: '600',
               color:
-                selectedNetwork === NetworkName.MAINNET ? '#fff' : Colors.textLight,
+                selectedNetwork === NetworkName.MAINNET
+                  ? '#fff'
+                  : (isLight ? '#2c024d' : Colors.textLight),
             }}>
             {t('mainnet')}
           </Text>
@@ -73,14 +80,18 @@ export default function NetworkSwitcher() {
             borderRadius: 10,
             alignItems: 'center',
             backgroundColor:
-              selectedNetwork === NetworkName.TESTNET ? Colors.purple : 'transparent',
+              selectedNetwork === NetworkName.TESTNET
+                ? (isLight ? '#4e00cd' : Colors.purple)
+                : 'transparent',
           }}>
           <Text
             style={{
               fontSize: 14,
               fontWeight: '600',
               color:
-                selectedNetwork === NetworkName.TESTNET ? '#fff' : Colors.textLight,
+                selectedNetwork === NetworkName.TESTNET
+                  ? '#fff'
+                  : (isLight ? '#2c024d' : Colors.textLight),
             }}>
             {t('testnet')}
           </Text>
@@ -92,7 +103,7 @@ export default function NetworkSwitcher() {
         <Text
           style={{
             fontSize: 12,
-            color: Colors.textLight,
+            color: isLight ? '#494457' : Colors.textLight,
             textAlign: 'center',
             marginTop: 8,
           }}>

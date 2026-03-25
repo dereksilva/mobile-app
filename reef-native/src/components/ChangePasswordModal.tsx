@@ -22,6 +22,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import * as Storage from '../services/StorageService';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 interface ChangePasswordModalProps {
   visible: boolean;
@@ -35,6 +36,8 @@ export default function ChangePasswordModal({
   onClose,
 }: ChangePasswordModalProps) {
   const {t} = useTranslation();
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const [hasExistingPassword, setHasExistingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -161,7 +164,7 @@ export default function ChangePasswordModal({
           }}>
           <View
             style={{
-              backgroundColor: Colors.cardBg,
+              backgroundColor: isLight ? '#fff7fe' : Colors.cardBg,
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
               padding: 24,
@@ -176,7 +179,7 @@ export default function ChangePasswordModal({
                 marginBottom: 24,
               }}>
               <Text
-                style={{fontSize: 20, fontWeight: '700', color: Colors.text}}>
+                style={{fontSize: 20, fontWeight: '700', color: isLight ? '#2c024d' : Colors.text}}>
                 {mode === 'remove'
                   ? t('remove_password')
                   : hasExistingPassword
@@ -184,7 +187,7 @@ export default function ChangePasswordModal({
                     : t('set_password')}
               </Text>
               <TouchableOpacity onPress={onClose}>
-                <Text style={{fontSize: 28, color: Colors.textLight}}>×</Text>
+                <Text style={{fontSize: 28, color: isLight ? '#494457' : Colors.textLight}}>×</Text>
               </TouchableOpacity>
             </View>
 
@@ -195,7 +198,7 @@ export default function ChangePasswordModal({
                   style={{
                     fontSize: 11,
                     fontWeight: '600',
-                    color: Colors.textLight,
+                    color: isLight ? '#494457' : Colors.textLight,
                     letterSpacing: 0.5,
                     marginBottom: 8,
                   }}>
@@ -209,16 +212,16 @@ export default function ChangePasswordModal({
                   }}
                   secureTextEntry
                   placeholder={t('password')}
-                  placeholderTextColor={Colors.textLight}
+                  placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
                   style={{
-                    backgroundColor: Colors.primaryBg,
+                    backgroundColor: isLight ? '#fff' : Colors.primaryBg,
                     borderRadius: 12,
                     paddingHorizontal: 16,
                     paddingVertical: 12,
                     fontSize: 15,
-                    color: Colors.text,
+                    color: isLight ? '#2c024d' : Colors.text,
                     borderWidth: 1,
-                    borderColor: currentError ? Colors.error : Colors.grey,
+                    borderColor: currentError ? Colors.error : (isLight ? 'rgba(203,195,218,0.3)' : Colors.grey),
                   }}
                 />
                 {!!currentError && (
@@ -243,7 +246,7 @@ export default function ChangePasswordModal({
                     style={{
                       fontSize: 11,
                       fontWeight: '600',
-                      color: Colors.textLight,
+                      color: isLight ? '#494457' : Colors.textLight,
                       letterSpacing: 0.5,
                       marginBottom: 8,
                     }}>
@@ -264,16 +267,16 @@ export default function ChangePasswordModal({
                     }}
                     secureTextEntry
                     placeholder={t('password')}
-                    placeholderTextColor={Colors.textLight}
+                    placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
                     style={{
-                      backgroundColor: Colors.primaryBg,
+                      backgroundColor: isLight ? '#fff' : Colors.primaryBg,
                       borderRadius: 12,
                       paddingHorizontal: 16,
                       paddingVertical: 12,
                       fontSize: 15,
-                      color: Colors.text,
+                      color: isLight ? '#2c024d' : Colors.text,
                       borderWidth: 1,
-                      borderColor: newError ? Colors.error : Colors.grey,
+                      borderColor: newError ? Colors.error : (isLight ? 'rgba(203,195,218,0.3)' : Colors.grey),
                     }}
                   />
                   {!!newError && (
@@ -294,7 +297,7 @@ export default function ChangePasswordModal({
                     style={{
                       fontSize: 11,
                       fontWeight: '600',
-                      color: Colors.textLight,
+                      color: isLight ? '#494457' : Colors.textLight,
                       letterSpacing: 0.5,
                       marginBottom: 8,
                     }}>
@@ -308,16 +311,16 @@ export default function ChangePasswordModal({
                     }}
                     secureTextEntry
                     placeholder={t('repetitive_password')}
-                    placeholderTextColor={Colors.textLight}
+                    placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
                     style={{
-                      backgroundColor: Colors.primaryBg,
+                      backgroundColor: isLight ? '#fff' : Colors.primaryBg,
                       borderRadius: 12,
                       paddingHorizontal: 16,
                       paddingVertical: 12,
                       fontSize: 15,
-                      color: Colors.text,
+                      color: isLight ? '#2c024d' : Colors.text,
                       borderWidth: 1,
-                      borderColor: confirmError ? Colors.error : Colors.grey,
+                      borderColor: confirmError ? Colors.error : (isLight ? 'rgba(203,195,218,0.3)' : Colors.grey),
                     }}
                   />
                   {!!confirmError && (
@@ -339,7 +342,7 @@ export default function ChangePasswordModal({
               <Text
                 style={{
                   fontSize: 14,
-                  color: Colors.textLight,
+                  color: isLight ? '#494457' : Colors.textLight,
                   marginBottom: 24,
                   lineHeight: 20,
                 }}>
@@ -356,7 +359,7 @@ export default function ChangePasswordModal({
                 backgroundColor: canSubmit()
                   ? mode === 'remove'
                     ? Colors.error
-                    : Colors.purple
+                    : isLight ? '#4e00cd' : Colors.purple
                   : Colors.grey,
                 borderRadius: 12,
                 paddingVertical: 16,

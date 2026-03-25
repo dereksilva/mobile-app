@@ -28,6 +28,7 @@ import {useTranslation} from 'react-i18next';
 import {useAccountStore} from '../stores/useAccountStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
 import {useSigningStore} from '../stores/useSigningStore';
+import {useThemeStore} from '../stores/useThemeStore';
 import * as Storage from '../services/StorageService';
 import {Colors} from '../utils/colors';
 
@@ -106,6 +107,8 @@ export default function DAppBrowserScreen({
   const {t} = useTranslation();
   const selectedAddress = useAccountStore(s => s.selectedAddress);
   const networkName = useNetworkStore(s => s.selectedNetworkName);
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const webViewRef = useRef<WebView>(null);
   const [url, setUrl] = useState(initialUrl || '');
@@ -234,7 +237,7 @@ export default function DAppBrowserScreen({
   // Bookmarks view (shown when no URL loaded)
   if (showBookmarks) {
     return (
-      <View style={{flex: 1, backgroundColor: Colors.primaryBg}}>
+      <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}>
         {/* Header */}
         <View
           style={{
@@ -244,9 +247,9 @@ export default function DAppBrowserScreen({
             gap: 12,
           }}>
           <TouchableOpacity onPress={onBack}>
-            <Text style={{color: Colors.purple, fontSize: 16}}>← Back</Text>
+            <Text style={{color: isLight ? '#4e00cd' : Colors.purple, fontSize: 16}}>← Back</Text>
           </TouchableOpacity>
-          <Text style={{flex: 1, fontSize: 18, fontWeight: '700', color: Colors.text}}>
+          <Text style={{flex: 1, fontSize: 18, fontWeight: '700', color: isLight ? '#2c024d' : Colors.text}}>
             dApp Browser
           </Text>
         </View>
@@ -256,10 +259,10 @@ export default function DAppBrowserScreen({
           <View
             style={{
               flexDirection: 'row',
-              backgroundColor: Colors.cardBg,
+              backgroundColor: isLight ? '#fff' : Colors.cardBg,
               borderRadius: 12,
               borderWidth: 1,
-              borderColor: Colors.grey,
+              borderColor: isLight ? 'rgba(203,195,218,0.3)' : Colors.grey,
               overflow: 'hidden',
             }}>
             <TextInput
@@ -267,7 +270,7 @@ export default function DAppBrowserScreen({
               onChangeText={setUrl}
               onSubmitEditing={() => navigateToUrl(url)}
               placeholder="Enter dApp URL..."
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
               autoCapitalize="none"
               autoCorrect={false}
               keyboardType="url"
@@ -277,13 +280,13 @@ export default function DAppBrowserScreen({
                 paddingHorizontal: 16,
                 paddingVertical: 12,
                 fontSize: 14,
-                color: Colors.text,
+                color: isLight ? '#2c024d' : Colors.text,
               }}
             />
             <TouchableOpacity
               onPress={() => navigateToUrl(url)}
               style={{
-                backgroundColor: Colors.purple,
+                backgroundColor: isLight ? '#4e00cd' : Colors.purple,
                 paddingHorizontal: 16,
                 justifyContent: 'center',
               }}>
@@ -309,7 +312,7 @@ export default function DAppBrowserScreen({
                   networkName === 'mainnet' ? Colors.green : Colors.purple,
               }}
             />
-            <Text style={{fontSize: 12, color: Colors.textLight}}>
+            <Text style={{fontSize: 12, color: isLight ? '#494457' : Colors.textLight}}>
               Connected to {networkName}
               {selectedAddress
                 ? ` • ${selectedAddress.slice(0, 6)}...${selectedAddress.slice(-4)}`
@@ -324,7 +327,7 @@ export default function DAppBrowserScreen({
             style={{
               fontSize: 12,
               fontWeight: '600',
-              color: Colors.textLight,
+              color: isLight ? '#494457' : Colors.textLight,
               letterSpacing: 0.5,
               marginBottom: 12,
             }}>
@@ -338,12 +341,12 @@ export default function DAppBrowserScreen({
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: Colors.cardBg,
+                backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.cardBg,
                 borderRadius: 14,
                 padding: 16,
                 marginBottom: 8,
                 borderWidth: 1,
-                borderColor: Colors.grey,
+                borderColor: isLight ? 'rgba(203,195,218,0.15)' : Colors.grey,
               }}>
               <Text style={{fontSize: 28, marginRight: 14}}>{dapp.icon}</Text>
               <View style={{flex: 1}}>
@@ -351,20 +354,20 @@ export default function DAppBrowserScreen({
                   style={{
                     fontSize: 15,
                     fontWeight: '600',
-                    color: Colors.text,
+                    color: isLight ? '#2c024d' : Colors.text,
                   }}>
                   {dapp.name}
                 </Text>
                 <Text
                   style={{
                     fontSize: 12,
-                    color: Colors.textLight,
+                    color: isLight ? '#494457' : Colors.textLight,
                     marginTop: 2,
                   }}>
                   {dapp.url}
                 </Text>
               </View>
-              <Text style={{fontSize: 16, color: Colors.textLight}}>›</Text>
+              <Text style={{fontSize: 16, color: isLight ? '#494457' : Colors.textLight}}>›</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -374,7 +377,7 @@ export default function DAppBrowserScreen({
 
   // WebView browser view
   return (
-    <View style={{flex: 1, backgroundColor: Colors.primaryBg}}>
+    <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}>
       {/* Navigation bar */}
       <View
         style={{
@@ -382,9 +385,9 @@ export default function DAppBrowserScreen({
           alignItems: 'center',
           padding: 8,
           paddingHorizontal: 12,
-          backgroundColor: Colors.cardBg,
+          backgroundColor: isLight ? '#fff' : Colors.cardBg,
           borderBottomWidth: 1,
-          borderBottomColor: Colors.grey,
+          borderBottomColor: isLight ? 'rgba(203,195,218,0.2)' : Colors.grey,
           gap: 8,
         }}>
         {/* Navigation buttons */}
@@ -395,34 +398,34 @@ export default function DAppBrowserScreen({
             setCurrentUrl('');
           }}
           style={{padding: 4}}>
-          <Text style={{fontSize: 18}}>✕</Text>
+          <Text style={{fontSize: 18, color: isLight ? '#4e00cd' : undefined}}>✕</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => webViewRef.current?.goBack()}
           disabled={!canGoBack}
           style={{padding: 4, opacity: canGoBack ? 1 : 0.3}}>
-          <Text style={{fontSize: 18}}>◀</Text>
+          <Text style={{fontSize: 18, color: isLight ? '#4e00cd' : undefined}}>◀</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => webViewRef.current?.goForward()}
           disabled={!canGoForward}
           style={{padding: 4, opacity: canGoForward ? 1 : 0.3}}>
-          <Text style={{fontSize: 18}}>▶</Text>
+          <Text style={{fontSize: 18, color: isLight ? '#4e00cd' : undefined}}>▶</Text>
         </TouchableOpacity>
 
         {/* URL display */}
         <View
           style={{
             flex: 1,
-            backgroundColor: Colors.primaryBg,
+            backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.primaryBg,
             borderRadius: 8,
             paddingHorizontal: 10,
             paddingVertical: 6,
           }}>
           <Text
-            style={{fontSize: 12, color: Colors.text}}
+            style={{fontSize: 12, color: isLight ? '#2c024d' : Colors.text}}
             numberOfLines={1}>
             {currentUrl}
           </Text>
@@ -430,18 +433,18 @@ export default function DAppBrowserScreen({
 
         {/* Loading / Refresh */}
         {isLoading ? (
-          <ActivityIndicator size="small" color={Colors.purple} />
+          <ActivityIndicator size="small" color={isLight ? '#4e00cd' : Colors.purple} />
         ) : (
           <TouchableOpacity
             onPress={() => webViewRef.current?.reload()}
             style={{padding: 4}}>
-            <Text style={{fontSize: 16}}>↻</Text>
+            <Text style={{fontSize: 16, color: isLight ? '#4e00cd' : undefined}}>↻</Text>
           </TouchableOpacity>
         )}
 
         {/* External link */}
         <TouchableOpacity onPress={handleOpenExternal} style={{padding: 4}}>
-          <Text style={{fontSize: 14}}>↗</Text>
+          <Text style={{fontSize: 14, color: isLight ? '#4e00cd' : undefined}}>↗</Text>
         </TouchableOpacity>
       </View>
 
@@ -465,12 +468,12 @@ export default function DAppBrowserScreen({
               bottom: 0,
               justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: Colors.primaryBg,
+              backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg,
             }}>
-            <ActivityIndicator size="large" color={Colors.purple} />
+            <ActivityIndicator size="large" color={isLight ? '#4e00cd' : Colors.purple} />
             <Text
               style={{
-                color: Colors.textLight,
+                color: isLight ? '#494457' : Colors.textLight,
                 fontSize: 14,
                 marginTop: 12,
               }}>

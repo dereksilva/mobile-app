@@ -148,6 +148,7 @@ function TabNavigator() {
         component={AccountsScreen}
         options={{
           title: t('accounts'),
+          headerShown: !isLightMode,
           tabBarIcon: ({color}) => (
             <TabIcon d={ICON_PATHS.accounts} color={color} />
           ),
@@ -158,6 +159,7 @@ function TabNavigator() {
         component={StakingScreen}
         options={{
           title: 'Staking',
+          headerShown: !isLightMode,
           tabBarIcon: ({color}) => (
             <TabIcon d={ICON_PATHS.staking} color={color} />
           ),
@@ -169,6 +171,7 @@ function TabNavigator() {
         component={PoolsScreen}
         options={{
           title: t('pools'),
+          headerShown: !isLightMode,
           tabBarIcon: ({color}) => (
             <TabIcon d={ICON_PATHS.pools} color={color} />
           ),
@@ -179,6 +182,7 @@ function TabNavigator() {
         component={SettingsScreen}
         options={{
           title: t('settings'),
+          headerShown: !isLightMode,
           tabBarIcon: ({color}) => (
             <TabIcon d={ICON_PATHS.settings} color={color} />
           ),

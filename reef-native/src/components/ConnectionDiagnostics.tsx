@@ -14,6 +14,7 @@ import {useTranslation} from 'react-i18next';
 import {useConnectionStore} from '../stores/useConnectionStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 export default function ConnectionDiagnostics() {
   const {t} = useTranslation();
@@ -21,6 +22,8 @@ export default function ConnectionDiagnostics() {
   const providerConn = useConnectionStore(s => s.providerConn);
   const indexerConn = useConnectionStore(s => s.indexerConn);
   const network = useNetworkStore(s => s.selectedNetworkName);
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   return (
     <View>
@@ -28,7 +31,7 @@ export default function ConnectionDiagnostics() {
         style={{
           fontSize: 11,
           fontWeight: '600',
-          color: Colors.textLight,
+          color: isLight ? '#494457' : Colors.textLight,
           letterSpacing: 0.5,
           marginBottom: 12,
         }}>
@@ -40,18 +43,21 @@ export default function ConnectionDiagnostics() {
         connected={jsConn}
         connectedLabel={t('connected')}
         disconnectedLabel={t('disconnected')}
+        isLight={isLight}
       />
       <ConnectionRow
         label={t('provider_connection')}
         connected={providerConn}
         connectedLabel={t('connected')}
         disconnectedLabel={t('disconnected')}
+        isLight={isLight}
       />
       <ConnectionRow
         label={t('indexer_connection')}
         connected={indexerConn}
         connectedLabel={t('connected')}
         disconnectedLabel={t('disconnected')}
+        isLight={isLight}
       />
 
       {/* Network info */}
@@ -63,16 +69,16 @@ export default function ConnectionDiagnostics() {
           paddingVertical: 8,
           marginTop: 8,
           borderTopWidth: 1,
-          borderTopColor: Colors.grey,
+          borderTopColor: isLight ? 'rgba(203,195,218,0.2)' : Colors.grey,
         }}>
-        <Text style={{fontSize: 13, color: Colors.textLight}}>
+        <Text style={{fontSize: 13, color: isLight ? '#494457' : Colors.textLight}}>
           {t('network')}
         </Text>
         <Text
           style={{
             fontSize: 13,
             fontWeight: '600',
-            color: Colors.text,
+            color: isLight ? '#2c024d' : Colors.text,
             textTransform: 'capitalize',
           }}>
           {network}
@@ -87,11 +93,13 @@ function ConnectionRow({
   connected,
   connectedLabel,
   disconnectedLabel,
+  isLight,
 }: {
   label: string;
   connected: boolean;
   connectedLabel: string;
   disconnectedLabel: string;
+  isLight: boolean;
 }) {
   return (
     <View
@@ -101,7 +109,7 @@ function ConnectionRow({
         alignItems: 'center',
         paddingVertical: 8,
       }}>
-      <Text style={{fontSize: 13, color: Colors.textLight}}>{label}</Text>
+      <Text style={{fontSize: 13, color: isLight ? '#494457' : Colors.textLight}}>{label}</Text>
       <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
         <View
           style={{

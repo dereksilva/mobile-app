@@ -16,6 +16,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import {TokenBalance} from '../types';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 interface TokenSelectionModalProps {
   visible: boolean;
@@ -47,9 +48,11 @@ function formatBalance(balance: string, decimals: number): string {
 function TokenRow({
   token,
   onPress,
+  isLight,
 }: {
   token: TokenBalance;
   onPress: () => void;
+  isLight: boolean;
 }) {
   return (
     <TouchableOpacity
@@ -59,8 +62,9 @@ function TokenRow({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: Colors.grey,
+        backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.cardBg,
+        borderRadius: 12,
+        marginBottom: 6,
       }}>
       {/* Token icon placeholder */}
       <View
@@ -81,17 +85,17 @@ function TokenRow({
       {/* Token info */}
       <View style={{flex: 1}}>
         <Text
-          style={{fontSize: 15, fontWeight: '600', color: Colors.text}}
+          style={{fontSize: 15, fontWeight: '600', color: isLight ? '#2c024d' : Colors.text}}
           numberOfLines={1}>
           {token.name}
         </Text>
-        <Text style={{fontSize: 12, color: Colors.textLight, marginTop: 2}}>
+        <Text style={{fontSize: 12, color: isLight ? '#494457' : Colors.textLight, marginTop: 2}}>
           {token.symbol} · {shortenAddress(token.address)}
         </Text>
       </View>
 
       {/* Balance */}
-      <Text style={{fontSize: 14, fontWeight: '600', color: Colors.text}}>
+      <Text style={{fontSize: 14, fontWeight: '600', color: isLight ? '#2c024d' : Colors.text}}>
         {formatBalance(token.balance, token.decimals)}
       </Text>
     </TouchableOpacity>
@@ -107,6 +111,8 @@ export default function TokenSelectionModal({
 }: TokenSelectionModalProps) {
   const {t} = useTranslation();
   const [search, setSearch] = useState('');
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const filteredTokens = useMemo(() => {
     let filtered = tokens;
@@ -138,7 +144,7 @@ export default function TokenSelectionModal({
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={onClose}>
-      <View style={{flex: 1, backgroundColor: Colors.primaryBg}}>
+      <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}>
         {/* Header */}
         <View
           style={{
@@ -148,11 +154,11 @@ export default function TokenSelectionModal({
             padding: 20,
             paddingBottom: 12,
           }}>
-          <Text style={{fontSize: 20, fontWeight: '700', color: Colors.text}}>
+          <Text style={{fontSize: 20, fontWeight: '700', color: isLight ? '#2c024d' : Colors.text}}>
             {t('select')} {t('tokens')}
           </Text>
           <TouchableOpacity onPress={onClose}>
-            <Text style={{color: Colors.textLight, fontSize: 16}}>✕</Text>
+            <Text style={{color: isLight ? '#494457' : Colors.textLight, fontSize: 16}}>✕</Text>
           </TouchableOpacity>
         </View>
 
@@ -162,18 +168,18 @@ export default function TokenSelectionModal({
             value={search}
             onChangeText={setSearch}
             placeholder="Search by name, symbol or address..."
-            placeholderTextColor={Colors.textLight}
+            placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
             autoCapitalize="none"
             autoCorrect={false}
             style={{
-              backgroundColor: Colors.cardBg,
+              backgroundColor: isLight ? '#fff' : Colors.cardBg,
               borderRadius: 12,
               paddingHorizontal: 16,
               paddingVertical: 12,
               fontSize: 15,
-              color: Colors.text,
+              color: isLight ? '#2c024d' : Colors.text,
               borderWidth: 1,
-              borderColor: Colors.grey,
+              borderColor: isLight ? 'rgba(203,195,218,0.3)' : Colors.grey,
             }}
           />
         </View>
@@ -185,6 +191,7 @@ export default function TokenSelectionModal({
           renderItem={({item}) => (
             <TokenRow
               token={item}
+              isLight={isLight}
               onPress={() => {
                 onSelect(item);
                 setSearch('');
@@ -197,7 +204,7 @@ export default function TokenSelectionModal({
                 padding: 40,
                 alignItems: 'center',
               }}>
-              <Text style={{color: Colors.textLight, fontSize: 14}}>
+              <Text style={{color: isLight ? '#494457' : Colors.textLight, fontSize: 14}}>
                 {t('no_token_selected')}
               </Text>
             </View>

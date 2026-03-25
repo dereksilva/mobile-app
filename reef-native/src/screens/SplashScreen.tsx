@@ -7,6 +7,7 @@
 import React from 'react';
 import {View, Text, Image, ActivityIndicator} from 'react-native';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const reefLogo = require('../assets/images/reef.png');
@@ -17,11 +18,14 @@ interface SplashScreenProps {
 }
 
 export default function SplashScreen({error, onRetry}: SplashScreenProps) {
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
+
   return (
     <View
       style={{
         flex: 1,
-        backgroundColor: Colors.splashBg,
+        backgroundColor: isLight ? '#fff7fe' : Colors.splashBg,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 32,
@@ -41,7 +45,7 @@ export default function SplashScreen({error, onRetry}: SplashScreenProps) {
         style={{
           fontSize: 24,
           fontWeight: '700',
-          color: Colors.text,
+          color: isLight ? '#2c024d' : Colors.text,
           marginBottom: 8,
         }}>
         Reef Chain
@@ -51,12 +55,12 @@ export default function SplashScreen({error, onRetry}: SplashScreenProps) {
         <>
           <ActivityIndicator
             size="large"
-            color={Colors.purple}
+            color={isLight ? '#4e00cd' : Colors.purple}
             style={{marginTop: 24}}
           />
           <Text
             style={{
-              color: Colors.textLight,
+              color: isLight ? '#494457' : Colors.textLight,
               marginTop: 16,
               fontSize: 14,
             }}>
@@ -76,7 +80,7 @@ export default function SplashScreen({error, onRetry}: SplashScreenProps) {
           </Text>
           <Text
             style={{
-              color: Colors.textLight,
+              color: isLight ? '#494457' : Colors.textLight,
               fontSize: 12,
               textAlign: 'center',
               marginBottom: 24,
@@ -87,7 +91,7 @@ export default function SplashScreen({error, onRetry}: SplashScreenProps) {
             <Text
               onPress={onRetry}
               style={{
-                color: Colors.purple,
+                color: isLight ? '#4e00cd' : Colors.purple,
                 fontSize: 16,
                 fontWeight: '600',
                 paddingVertical: 12,

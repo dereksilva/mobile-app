@@ -15,11 +15,14 @@ import {useTranslation} from 'react-i18next';
 import {useWalletConnectStore} from '../stores/useWalletConnectStore';
 import {useAccountStore} from '../stores/useAccountStore';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 export default function WalletConnectSessionModal() {
   const {t} = useTranslation();
   const proposal = useWalletConnectStore(s => s.pendingProposal);
   const selectedAddress = useAccountStore(s => s.selectedAddress);
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   if (!proposal) return null;
 
@@ -40,11 +43,12 @@ export default function WalletConnectSessionModal() {
         }}>
         <View
           style={{
-            backgroundColor: Colors.cardBg,
+            backgroundColor: isLight ? '#fff7fe' : Colors.cardBg,
             borderRadius: 20,
             padding: 24,
             width: '100%',
             maxWidth: 360,
+            ...(isLight ? {borderWidth: 1, borderColor: 'rgba(78,0,205,0.05)'} : {}),
           }}>
           {/* dApp Icon */}
           <View style={{alignItems: 'center', marginBottom: 16}}>
@@ -55,7 +59,7 @@ export default function WalletConnectSessionModal() {
                   width: 64,
                   height: 64,
                   borderRadius: 16,
-                  backgroundColor: Colors.primaryBg,
+                  backgroundColor: isLight ? 'rgba(78,0,205,0.06)' : Colors.primaryBg,
                 }}
               />
             ) : (
@@ -85,7 +89,7 @@ export default function WalletConnectSessionModal() {
             style={{
               fontSize: 18,
               fontWeight: '700',
-              color: Colors.text,
+              color: isLight ? '#2c024d' : Colors.text,
               textAlign: 'center',
               marginBottom: 8,
             }}>
@@ -94,7 +98,7 @@ export default function WalletConnectSessionModal() {
           <Text
             style={{
               fontSize: 14,
-              color: Colors.textLight,
+              color: isLight ? '#494457' : Colors.textLight,
               textAlign: 'center',
               marginBottom: 20,
               lineHeight: 20,
@@ -123,15 +127,17 @@ export default function WalletConnectSessionModal() {
           {/* Connection details */}
           <View
             style={{
-              backgroundColor: Colors.primaryBg,
+              backgroundColor: isLight ? 'rgba(255,255,255,0.4)' : Colors.primaryBg,
               borderRadius: 12,
               padding: 14,
               marginBottom: 24,
+              ...(isLight ? {borderWidth: 1, borderColor: 'rgba(78,0,205,0.05)'} : {}),
             }}>
-            <DetailRow label="URL" value={proposal.proposerUrl} />
+            <DetailRow label="URL" value={proposal.proposerUrl} isLight={isLight} />
             <DetailRow
               label={t('address')}
               value={selectedAddress ? shortenAddress(selectedAddress) : '—'}
+              isLight={isLight}
             />
           </View>
 
@@ -146,13 +152,13 @@ export default function WalletConnectSessionModal() {
                 paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: 'center',
-                backgroundColor: Colors.primaryBg,
+                backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.primaryBg,
                 borderWidth: 1,
-                borderColor: Colors.grey,
+                borderColor: isLight ? 'rgba(203,195,218,0.3)' : Colors.grey,
               }}>
               <Text
                 style={{
-                  color: Colors.text,
+                  color: isLight ? '#2c024d' : Colors.text,
                   fontSize: 15,
                   fontWeight: '600',
                 }}>
@@ -169,7 +175,7 @@ export default function WalletConnectSessionModal() {
                 paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: 'center',
-                backgroundColor: Colors.accent,
+                backgroundColor: isLight ? '#4e00cd' : Colors.accent,
               }}>
               <Text
                 style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>
@@ -183,7 +189,7 @@ export default function WalletConnectSessionModal() {
   );
 }
 
-function DetailRow({label, value}: {label: string; value: string}) {
+function DetailRow({label, value, isLight}: {label: string; value: string; isLight: boolean}) {
   return (
     <View
       style={{
@@ -191,12 +197,12 @@ function DetailRow({label, value}: {label: string; value: string}) {
         justifyContent: 'space-between',
         paddingVertical: 6,
       }}>
-      <Text style={{fontSize: 13, color: Colors.textLight}}>{label}</Text>
+      <Text style={{fontSize: 13, color: isLight ? '#494457' : Colors.textLight}}>{label}</Text>
       <Text
         style={{
           fontSize: 13,
           fontWeight: '500',
-          color: Colors.text,
+          color: isLight ? '#2c024d' : Colors.text,
           maxWidth: '60%',
         }}
         numberOfLines={1}>

@@ -5,6 +5,7 @@
  */
 
 import React, {useState, useEffect} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -59,6 +60,7 @@ export default function AccountsScreen() {
   const {t} = useTranslation();
   const theme = useThemeStore(s => s.theme);
   const isLight = theme === 'light';
+  const insets = useSafeAreaInsets();
   const {accounts, selectedAddress, selectAccount, loadAccounts, claimEvm, renameAccount, deleteAccount} =
     useAccounts();
 
@@ -326,7 +328,7 @@ export default function AccountsScreen() {
     return (
       <ScrollView
         style={{flex: 1, backgroundColor: '#fff7fe'}}
-        contentContainerStyle={{paddingHorizontal: 24, paddingTop: 8, paddingBottom: 80}}>
+        contentContainerStyle={{paddingHorizontal: 24, paddingTop: insets.top + 16, paddingBottom: 80}}>
 
         {/* ── Hero Section ── */}
         <View style={{marginBottom: 32}}>
@@ -600,6 +602,51 @@ export default function AccountsScreen() {
                 </TouchableOpacity>
               );
             })}
+
+            {/* ── Add Account Button ── */}
+            <TouchableOpacity
+              onPress={() => setSubScreen('add')}
+              activeOpacity={0.8}
+              style={{
+                height: 64,
+                borderRadius: 9999,
+                overflow: 'hidden',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 10,
+                shadowColor: '#4e00cd',
+                shadowOffset: {width: 0, height: 20},
+                shadowOpacity: 0.15,
+                shadowRadius: 40,
+                elevation: 8,
+              }}>
+              <Svg
+                style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+                viewBox="0 0 1 1"
+                preserveAspectRatio="none">
+                <Defs>
+                  <SvgLinearGradient id="addAcctGrad" x1="0" y1="0" x2="0.3" y2="1">
+                    <Stop offset="0" stopColor="#b70054" />
+                    <Stop offset="1" stopColor="#4e00cd" />
+                  </SvgLinearGradient>
+                </Defs>
+                <Rect x="0" y="0" width="1" height="1" fill="url(#addAcctGrad)" />
+              </Svg>
+              {/* Plus icon */}
+              <Svg width={18} height={18} viewBox="0 0 24 24" fill="none" style={{zIndex: 1}}>
+                <Path
+                  d="M12 4.5v15m7.5-7.5h-15"
+                  stroke="#fff"
+                  strokeWidth={2.2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+              <Text style={{fontSize: 18, fontWeight: '800', color: '#fff', zIndex: 1}}>
+                Add Account
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
 

@@ -12,6 +12,7 @@ import React from 'react';
 import {View, Text, TouchableOpacity, Modal} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 export interface ChainMetadata {
   chain: string;
@@ -38,6 +39,8 @@ export default function MetadataApprovalModal({
   onReject,
 }: MetadataApprovalModalProps) {
   const {t} = useTranslation();
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   if (!metadata) return null;
 
@@ -56,7 +59,7 @@ export default function MetadataApprovalModal({
         }}>
         <View
           style={{
-            backgroundColor: Colors.cardBg,
+            backgroundColor: isLight ? '#fff7fe' : Colors.cardBg,
             borderRadius: 20,
             padding: 24,
             width: '100%',
@@ -81,7 +84,7 @@ export default function MetadataApprovalModal({
             style={{
               fontSize: 18,
               fontWeight: '700',
-              color: Colors.text,
+              color: isLight ? '#2c024d' : Colors.text,
               textAlign: 'center',
               marginBottom: 8,
             }}>
@@ -90,7 +93,7 @@ export default function MetadataApprovalModal({
           <Text
             style={{
               fontSize: 14,
-              color: Colors.textLight,
+              color: isLight ? '#494457' : Colors.textLight,
               textAlign: 'center',
               marginBottom: 20,
               lineHeight: 20,
@@ -102,36 +105,41 @@ export default function MetadataApprovalModal({
           {/* Metadata details */}
           <View
             style={{
-              backgroundColor: Colors.primaryBg,
+              backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.primaryBg,
               borderRadius: 12,
               padding: 14,
               marginBottom: 20,
             }}>
-            <MetadataRow label="Chain" value={metadata.chain} />
-            <MetadataRow label="Symbol" value={metadata.tokenSymbol} />
+            <MetadataRow label="Chain" value={metadata.chain} isLight={isLight} />
+            <MetadataRow label="Symbol" value={metadata.tokenSymbol} isLight={isLight} />
             <MetadataRow
               label="Decimals"
               value={String(metadata.tokenDecimals)}
+              isLight={isLight}
             />
             <MetadataRow
               label="SS58 Format"
               value={String(metadata.ss58Format)}
+              isLight={isLight}
             />
             {isUpgrade ? (
               <MetadataRow
                 label="Version"
                 value={`${currentVersion} → ${metadata.specVersion}`}
                 highlight
+                isLight={isLight}
               />
             ) : (
               <MetadataRow
                 label="Version"
                 value={String(metadata.specVersion)}
+                isLight={isLight}
               />
             )}
             <MetadataRow
               label="Genesis"
               value={`${metadata.genesisHash.slice(0, 10)}...${metadata.genesisHash.slice(-8)}`}
+              isLight={isLight}
             />
           </View>
 
@@ -145,13 +153,13 @@ export default function MetadataApprovalModal({
                 paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: 'center',
-                backgroundColor: Colors.primaryBg,
+                backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.primaryBg,
                 borderWidth: 1,
-                borderColor: Colors.grey,
+                borderColor: isLight ? 'rgba(203,195,218,0.3)' : Colors.grey,
               }}>
               <Text
                 style={{
-                  color: Colors.text,
+                  color: isLight ? '#2c024d' : Colors.text,
                   fontSize: 15,
                   fontWeight: '600',
                 }}>
@@ -167,7 +175,7 @@ export default function MetadataApprovalModal({
                 paddingVertical: 14,
                 borderRadius: 12,
                 alignItems: 'center',
-                backgroundColor: Colors.purple,
+                backgroundColor: isLight ? '#4e00cd' : Colors.purple,
               }}>
               <Text style={{color: '#fff', fontSize: 15, fontWeight: '600'}}>
                 Approve
@@ -184,10 +192,12 @@ function MetadataRow({
   label,
   value,
   highlight,
+  isLight,
 }: {
   label: string;
   value: string;
   highlight?: boolean;
+  isLight: boolean;
 }) {
   return (
     <View
@@ -196,12 +206,12 @@ function MetadataRow({
         justifyContent: 'space-between',
         paddingVertical: 6,
       }}>
-      <Text style={{fontSize: 13, color: Colors.textLight}}>{label}</Text>
+      <Text style={{fontSize: 13, color: isLight ? '#494457' : Colors.textLight}}>{label}</Text>
       <Text
         style={{
           fontSize: 13,
           fontWeight: '600',
-          color: highlight ? Colors.purple : Colors.text,
+          color: highlight ? Colors.purple : (isLight ? '#2c024d' : Colors.text),
         }}>
         {value}
       </Text>

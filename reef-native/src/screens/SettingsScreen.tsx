@@ -11,6 +11,7 @@
  */
 
 import React, {useState, useEffect, useCallback} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -70,6 +71,8 @@ export default function SettingsScreen() {
 
   // Stores
   const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
+  const insets = useSafeAreaInsets();
   const toggleTheme = useThemeStore(s => s.toggleTheme);
   const displayBalance = useAppConfigStore(s => s.displayBalance);
   const toggleDisplayBalance = useAppConfigStore(s => s.toggleDisplayBalance);
@@ -147,7 +150,7 @@ export default function SettingsScreen() {
   return (
     <ScrollView
       style={{flex: 1, backgroundColor: Colors.primaryBg}}
-      contentContainerStyle={{paddingBottom: 40}}>
+      contentContainerStyle={{paddingBottom: 40, paddingTop: isLight ? insets.top : 0}}>
       {/* Header */}
       <TouchableOpacity
         onPress={handleTitleTap}

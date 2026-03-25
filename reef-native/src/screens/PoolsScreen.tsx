@@ -10,6 +10,7 @@
  */
 
 import React, {useState, useMemo, useEffect, useCallback} from 'react';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {
   View,
   Text,
@@ -26,6 +27,7 @@ import {useSwapStore} from '../stores/useSwapStore';
 import {useAccountStore} from '../stores/useAccountStore';
 import {fetchAllPools, DexPool} from '../reef-chain/poolsApi';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 type SubScreen = 'list' | 'detail';
 
@@ -37,6 +39,10 @@ export default function PoolsScreen() {
   const setTokenFrom = useSwapStore(s => s.setTokenFrom);
   const setTokenTo = useSwapStore(s => s.setTokenTo);
   const selectedAddress = useAccountStore(s => s.selectedAddress);
+
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
+  const insets = useSafeAreaInsets();
 
   const [dexPools, setDexPools] = useState<DexPool[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,19 +149,20 @@ export default function PoolsScreen() {
         onBack={() => setSubScreen('list')}
         onSwap={() => handleSwapFromPool(selectedPool)}
         hasBalance={userHasBalance(selectedPool)}
+        isLight={isLight}
       />
     );
   }
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.primaryBg}}>
+    <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}>
       {/* Header */}
-      <View style={{padding: 16, paddingBottom: 0}}>
+      <View style={{padding: 16, paddingTop: isLight ? insets.top + 16 : 16, paddingBottom: 0}}>
         <Text
           style={{
             fontSize: 22,
             fontWeight: '700',
-            color: Colors.text,
+            color: isLight ? '#2c024d' : Colors.text,
             marginBottom: 16,
           }}>
           {t('pools')}
@@ -166,10 +173,23 @@ export default function PoolsScreen() {
           value={search}
           onChangeText={setSearch}
           placeholder="Search pools..."
-          placeholderTextColor={Colors.textLight}
+          placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
           autoCapitalize="none"
           autoCorrect={false}
-          style={{
+          style={isLight ? {
+            backgroundColor: '#fff',
+            borderRadius: 32,
+            height: 56,
+            paddingHorizontal: 24,
+            fontSize: 14,
+            color: '#2c024d',
+            shadowColor: '#000',
+            shadowOffset: {width: 0, height: 1},
+            shadowOpacity: 0.05,
+            shadowRadius: 2,
+            elevation: 1,
+            marginBottom: 4,
+          } : {
             backgroundColor: Colors.cardBg,
             borderRadius: 12,
             paddingHorizontal: 16,
@@ -187,7 +207,7 @@ export default function PoolsScreen() {
           <Text
             style={{
               fontSize: 12,
-              color: Colors.textLight,
+              color: isLight ? '#494457' : Colors.textLight,
               marginBottom: 8,
               marginLeft: 4,
             }}>
@@ -212,16 +232,17 @@ export default function PoolsScreen() {
               setSubScreen('detail');
             }}
             onSwap={() => handleSwapFromPool(item)}
+            isLight={isLight}
           />
         )}
         ListEmptyComponent={
           <View style={{padding: 40, alignItems: 'center'}}>
             {loading ? (
               <>
-                <ActivityIndicator size="large" color={Colors.purple} />
+                <ActivityIndicator size="large" color={isLight ? '#4e00cd' : Colors.purple} />
                 <Text
                   style={{
-                    color: Colors.textLight,
+                    color: isLight ? '#494457' : Colors.textLight,
                     fontSize: 14,
                     marginTop: 12,
                   }}>
@@ -229,7 +250,7 @@ export default function PoolsScreen() {
                 </Text>
               </>
             ) : (
-              <Text style={{color: Colors.textLight, fontSize: 14}}>
+              <Text style={{color: isLight ? '#494457' : Colors.textLight, fontSize: 14}}>
                 {t('no_pool_data')}
               </Text>
             )}
@@ -248,9 +269,10 @@ interface PoolCardProps {
   hasBalance: boolean;
   onPress: () => void;
   onSwap: () => void;
+  isLight: boolean;
 }
 
-function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
+function PoolCard({pool, hasBalance, onPress, onSwap, isLight}: PoolCardProps) {
   const formatValue = (val: string): string => {
     const num = parseFloat(val);
     if (isNaN(num)) return val;
@@ -263,7 +285,14 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.7}
-      style={{
+      style={isLight ? {
+        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+        borderRadius: 24,
+        borderWidth: 1,
+        borderColor: 'rgba(203, 195, 218, 0.15)',
+        padding: 20,
+        marginBottom: 10,
+      } : {
         backgroundColor: Colors.cardBg,
         borderRadius: 20,
         padding: 16,
@@ -288,7 +317,7 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
               width: 36,
               height: 36,
               borderRadius: 18,
-              backgroundColor: Colors.purple + '20',
+              backgroundColor: isLight ? 'rgba(78, 0, 205, 0.12)' : Colors.purple + '20',
               justifyContent: 'center',
               alignItems: 'center',
               zIndex: 1,
@@ -303,7 +332,7 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
               width: 36,
               height: 36,
               borderRadius: 18,
-              backgroundColor: Colors.purpleDark + '20',
+              backgroundColor: isLight ? 'rgba(78, 0, 205, 0.12)' : Colors.purpleDark + '20',
               justifyContent: 'center',
               alignItems: 'center',
               marginLeft: -12,
@@ -322,11 +351,11 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
         {/* Pool names */}
         <View style={{flex: 1}}>
           <Text
-            style={{fontSize: 15, fontWeight: '600', color: Colors.text}}
+            style={{fontSize: 15, fontWeight: '600', color: isLight ? '#2c024d' : Colors.text}}
             numberOfLines={1}>
             {pool.token1.name} – {pool.token2.name}
           </Text>
-          <Text style={{fontSize: 12, color: Colors.textLight, marginTop: 2}}>
+          <Text style={{fontSize: 12, color: isLight ? '#494457' : Colors.textLight, marginTop: 2}}>
             {pool.token1.symbol}/{pool.token2.symbol}
           </Text>
         </View>
@@ -339,7 +368,12 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
               onSwap();
             }}
             activeOpacity={0.7}
-            style={{
+            style={isLight ? {
+              backgroundColor: '#4e00cd',
+              borderRadius: 9999,
+              paddingHorizontal: 14,
+              paddingVertical: 8,
+            } : {
               backgroundColor: Colors.accent,
               borderRadius: 8,
               paddingHorizontal: 14,
@@ -355,26 +389,26 @@ function PoolCard({pool, hasBalance, onPress, onSwap}: PoolCardProps) {
       {/* Stats row */}
       <View style={{flexDirection: 'row', gap: 16}}>
         <View style={{flex: 1}}>
-          <Text style={{fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
+          <Text style={isLight ? {fontSize: 12, fontWeight: '700', color: '#494457', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 2} : {fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
             TVL
           </Text>
-          <Text style={{fontSize: 14, fontWeight: '600', color: Colors.text}}>
+          <Text style={{fontSize: 14, fontWeight: '600', color: isLight ? '#2c024d' : Colors.text}}>
             {formatValue(pool.reserve1)}
           </Text>
         </View>
         <View style={{flex: 1}}>
-          <Text style={{fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
+          <Text style={isLight ? {fontSize: 12, fontWeight: '700', color: '#494457', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 2} : {fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
             {pool.token1.symbol}
           </Text>
-          <Text style={{fontSize: 13, color: Colors.text}}>
+          <Text style={{fontSize: 13, color: isLight ? '#2c024d' : Colors.text}}>
             {formatReserve(pool.reserve1, pool.token1.decimals)}
           </Text>
         </View>
         <View style={{flex: 1}}>
-          <Text style={{fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
+          <Text style={isLight ? {fontSize: 12, fontWeight: '700', color: '#494457', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 2} : {fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
             {pool.token2.symbol}
           </Text>
-          <Text style={{fontSize: 13, color: Colors.text}}>
+          <Text style={{fontSize: 13, color: isLight ? '#2c024d' : Colors.text}}>
             {formatReserve(pool.reserve2, pool.token2.decimals)}
           </Text>
         </View>
@@ -401,13 +435,14 @@ interface PoolDetailProps {
   onBack: () => void;
   onSwap: () => void;
   hasBalance: boolean;
+  isLight: boolean;
 }
 
-function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
+function PoolDetail({pool, onBack, onSwap, hasBalance, isLight}: PoolDetailProps) {
   const {t} = useTranslation();
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.primaryBg, padding: 16}}>
+    <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg, padding: 16}}>
       {/* Header */}
       <View
         style={{
@@ -431,7 +466,7 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
               width: 56,
               height: 56,
               borderRadius: 28,
-              backgroundColor: Colors.purple + '20',
+              backgroundColor: isLight ? 'rgba(78, 0, 205, 0.12)' : Colors.purple + '20',
               justifyContent: 'center',
               alignItems: 'center',
               zIndex: 1,
@@ -446,7 +481,7 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
               width: 56,
               height: 56,
               borderRadius: 28,
-              backgroundColor: Colors.purpleDark + '20',
+              backgroundColor: isLight ? 'rgba(78, 0, 205, 0.12)' : Colors.purpleDark + '20',
               justifyContent: 'center',
               alignItems: 'center',
               marginLeft: -16,
@@ -461,17 +496,24 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
             </Text>
           </View>
         </View>
-        <Text style={{fontSize: 20, fontWeight: '700', color: Colors.text}}>
+        <Text style={{fontSize: 20, fontWeight: '700', color: isLight ? '#2c024d' : Colors.text}}>
           {pool.token1.symbol}/{pool.token2.symbol}
         </Text>
-        <Text style={{fontSize: 14, color: Colors.textLight, marginTop: 4}}>
+        <Text style={{fontSize: 14, color: isLight ? '#494457' : Colors.textLight, marginTop: 4}}>
           {pool.token1.name} – {pool.token2.name}
         </Text>
       </View>
 
       {/* Reserves card */}
       <View
-        style={{
+        style={isLight ? {
+          backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          borderRadius: 24,
+          borderWidth: 1,
+          borderColor: 'rgba(203, 195, 218, 0.15)',
+          padding: 20,
+          marginBottom: 16,
+        } : {
           backgroundColor: Colors.cardBg,
           borderRadius: 20,
           padding: 20,
@@ -483,7 +525,14 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
           elevation: 2,
         }}>
         <Text
-          style={{
+          style={isLight ? {
+            fontSize: 12,
+            fontWeight: '700',
+            color: '#494457',
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            marginBottom: 16,
+          } : {
             fontSize: 12,
             fontWeight: '600',
             color: Colors.textLight,
@@ -496,28 +545,39 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
         <DetailRow
           label={pool.token1.symbol}
           value={formatReserve(pool.reserve1, pool.token1.decimals)}
+          isLight={isLight}
         />
         <DetailRow
           label={pool.token2.symbol}
           value={formatReserve(pool.reserve2, pool.token2.decimals)}
+          isLight={isLight}
         />
         {pool.totalSupply && (
           <DetailRow
             label="LP Supply"
             value={formatReserve(pool.totalSupply, 18)}
+            isLight={isLight}
           />
         )}
         {pool.userPoolBalance && parseFloat(pool.userPoolBalance) > 0 && (
           <DetailRow
             label="Your LP"
             value={formatReserve(pool.userPoolBalance, 18)}
+            isLight={isLight}
           />
         )}
       </View>
 
       {/* Contract address */}
       <View
-        style={{
+        style={isLight ? {
+          backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          borderRadius: 24,
+          borderWidth: 1,
+          borderColor: 'rgba(203, 195, 218, 0.15)',
+          padding: 16,
+          marginBottom: 20,
+        } : {
           backgroundColor: Colors.cardBg,
           borderRadius: 20,
           padding: 16,
@@ -529,7 +589,14 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
           elevation: 2,
         }}>
         <Text
-          style={{
+          style={isLight ? {
+            fontSize: 12,
+            fontWeight: '700',
+            color: '#494457',
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            marginBottom: 8,
+          } : {
             fontSize: 12,
             fontWeight: '600',
             color: Colors.textLight,
@@ -541,7 +608,7 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
           style={{
             fontSize: 12,
             fontFamily: 'monospace',
-            color: Colors.text,
+            color: isLight ? '#2c024d' : Colors.text,
           }}
           selectable>
           {pool.address}
@@ -553,7 +620,12 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
         <TouchableOpacity
           onPress={onSwap}
           activeOpacity={0.7}
-          style={{
+          style={isLight ? {
+            backgroundColor: '#4e00cd',
+            borderRadius: 9999,
+            paddingVertical: 16,
+            alignItems: 'center',
+          } : {
             backgroundColor: Colors.accent,
             borderRadius: 12,
             paddingVertical: 16,
@@ -568,7 +640,7 @@ function PoolDetail({pool, onBack, onSwap, hasBalance}: PoolDetailProps) {
   );
 }
 
-function DetailRow({label, value}: {label: string; value: string}) {
+function DetailRow({label, value, isLight}: {label: string; value: string; isLight: boolean}) {
   return (
     <View
       style={{
@@ -576,10 +648,10 @@ function DetailRow({label, value}: {label: string; value: string}) {
         justifyContent: 'space-between',
         paddingVertical: 8,
         borderBottomWidth: 1,
-        borderBottomColor: Colors.grey,
+        borderBottomColor: isLight ? 'rgba(203, 195, 218, 0.15)' : Colors.grey,
       }}>
-      <Text style={{fontSize: 14, color: Colors.textLight}}>{label}</Text>
-      <Text style={{fontSize: 14, fontWeight: '600', color: Colors.text}}>
+      <Text style={{fontSize: 14, color: isLight ? '#494457' : Colors.textLight}}>{label}</Text>
+      <Text style={{fontSize: 14, fontWeight: '600', color: isLight ? '#2c024d' : Colors.text}}>
         {value}
       </Text>
     </View>

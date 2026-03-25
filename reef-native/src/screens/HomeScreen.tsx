@@ -35,6 +35,7 @@ import Svg, {
 } from 'react-native-svg';
 import {Colors, useColors} from '../utils/colors';
 import {useThemeStore} from '../stores/useThemeStore';
+import {useStakingStore} from '../stores/useStakingStore';
 import SendScreen from './SendScreen';
 import SendNFTScreen from './SendNFTScreen';
 import ReceiveScreen from './ReceiveScreen';
@@ -58,6 +59,7 @@ export default function HomeScreen() {
   const txHistoryData = useTokenStore(s => s.txHistory);
   const txHistory = txHistoryData.data ?? [];
   const reefPrice = useTokenStore(s => s.reefPrice);
+  const stakingApy = useStakingStore(s => s.estimatedApy);
   const displayBalance = useAppConfigStore(s => s.displayBalance);
   const toggleDisplayBalance = useAppConfigStore(s => s.toggleDisplayBalance);
 
@@ -366,7 +368,7 @@ export default function HomeScreen() {
               lineHeight: 20,
               paddingBottom: 16,
             }}>
-              Contribute to the reef{'\n'}ecosystem and earn up{'\n'}to 12% APR.
+              Contribute to the reef{'\n'}ecosystem and earn up to{'\n'}{stakingApy > 0 ? `${stakingApy.toFixed(0)}%` : ''} APR.
             </Text>
             <View style={{
               alignSelf: 'flex-start',

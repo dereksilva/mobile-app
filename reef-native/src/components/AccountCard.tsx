@@ -8,6 +8,7 @@ import {View, Text, TouchableOpacity} from 'react-native';
 import Svg, {Circle} from 'react-native-svg';
 import {ReefAccount} from '../types';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 interface AccountCardProps {
   account: ReefAccount;
@@ -40,6 +41,11 @@ export default function AccountCard({
   onMore,
   showBalance = true,
 }: AccountCardProps) {
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
+
+  const dotColor = isLight ? 'rgba(73,68,87,0.5)' : 'rgba(255,255,255,0.7)';
+
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -50,12 +56,13 @@ export default function AccountCard({
         overflow: 'hidden',
         marginBottom: 12,
         borderWidth: isSelected ? 2 : 0,
-        borderColor: Colors.purple,
+        borderColor: isLight ? '#4e00cd' : Colors.purple,
       }}>
       <View
         style={{
-          backgroundColor: Colors.purpleDark,
+          backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.purpleDark,
           padding: 16,
+          ...(isLight ? {borderWidth: 1, borderColor: 'rgba(203,195,218,0.15)'} : {}),
         }}>
         {/* Header: avatar + name */}
         <View
@@ -70,26 +77,26 @@ export default function AccountCard({
               width: 40,
               height: 40,
               borderRadius: 20,
-              backgroundColor: Colors.accent,
+              backgroundColor: isLight ? 'rgba(78,0,205,0.12)' : Colors.accent,
               justifyContent: 'center',
               alignItems: 'center',
               marginRight: 12,
             }}>
-            <Text style={{color: '#fff', fontWeight: '700', fontSize: 16}}>
+            <Text style={{color: isLight ? '#4e00cd' : '#fff', fontWeight: '700', fontSize: 16}}>
               {account.name.charAt(0).toUpperCase()}
             </Text>
           </View>
 
           <View style={{flex: 1}}>
             <Text
-              style={{color: '#fff', fontSize: 16, fontWeight: '700'}}
+              style={{color: isLight ? '#2c024d' : '#fff', fontSize: 16, fontWeight: '700'}}
               numberOfLines={1}>
               {account.name}
             </Text>
             {isSelected && (
               <Text
                 style={{
-                  color: 'rgba(255,255,255,0.6)',
+                  color: isLight ? 'rgba(73,68,87,0.6)' : 'rgba(255,255,255,0.6)',
                   fontSize: 11,
                   marginTop: 2,
                 }}>
@@ -114,9 +121,9 @@ export default function AccountCard({
                 marginRight: 8,
               }}>
               <Svg width={20} height={20} viewBox="0 0 20 20">
-                <Circle cx="4" cy="10" r="2" fill="rgba(255,255,255,0.7)" />
-                <Circle cx="10" cy="10" r="2" fill="rgba(255,255,255,0.7)" />
-                <Circle cx="16" cy="10" r="2" fill="rgba(255,255,255,0.7)" />
+                <Circle cx="4" cy="10" r="2" fill={dotColor} />
+                <Circle cx="10" cy="10" r="2" fill={dotColor} />
+                <Circle cx="16" cy="10" r="2" fill={dotColor} />
               </Svg>
             </TouchableOpacity>
           )}
@@ -125,7 +132,7 @@ export default function AccountCard({
           {account.isEvmClaimed ? (
             <View
               style={{
-                backgroundColor: Colors.green,
+                backgroundColor: isLight ? '#4e00cd' : Colors.green,
                 paddingHorizontal: 8,
                 paddingVertical: 3,
                 borderRadius: 10,
@@ -137,14 +144,14 @@ export default function AccountCard({
           ) : (
             <View
               style={{
-                backgroundColor: 'rgba(255,255,255,0.15)',
+                backgroundColor: isLight ? 'rgba(78,0,205,0.08)' : 'rgba(255,255,255,0.15)',
                 paddingHorizontal: 8,
                 paddingVertical: 3,
                 borderRadius: 10,
               }}>
               <Text
                 style={{
-                  color: 'rgba(255,255,255,0.6)',
+                  color: isLight ? '#494457' : 'rgba(255,255,255,0.6)',
                   fontSize: 10,
                   fontWeight: '600',
                 }}>
@@ -157,7 +164,7 @@ export default function AccountCard({
         {/* Address */}
         <Text
           style={{
-            color: 'rgba(255,255,255,0.7)',
+            color: isLight ? 'rgba(73,68,87,0.7)' : 'rgba(255,255,255,0.7)',
             fontSize: 12,
             fontFamily: 'monospace',
             marginBottom: showBalance ? 8 : 0,
@@ -169,7 +176,7 @@ export default function AccountCard({
         {showBalance && (
           <Text
             style={{
-              color: '#fff',
+              color: isLight ? '#2c024d' : '#fff',
               fontSize: 20,
               fontWeight: '700',
             }}>
@@ -181,7 +188,7 @@ export default function AccountCard({
         {account.evmAddress && (
           <Text
             style={{
-              color: 'rgba(255,255,255,0.5)',
+              color: isLight ? 'rgba(73,68,87,0.5)' : 'rgba(255,255,255,0.5)',
               fontSize: 11,
               fontFamily: 'monospace',
               marginTop: 4,
@@ -199,7 +206,7 @@ export default function AccountCard({
             }}
             activeOpacity={0.7}
             style={{
-              backgroundColor: Colors.purple,
+              backgroundColor: isLight ? '#4e00cd' : Colors.purple,
               borderRadius: 10,
               paddingVertical: 8,
               paddingHorizontal: 16,

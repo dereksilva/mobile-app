@@ -23,6 +23,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import Svg, {Path} from 'react-native-svg';
 import {useWalletConnectStore} from '../stores/useWalletConnectStore';
+import {useThemeStore} from '../stores/useThemeStore';
 import {WCSession} from '../types';
 import * as WalletConnectService from '../services/WalletConnectService';
 import {Colors} from '../utils/colors';
@@ -56,6 +57,8 @@ export default function WalletConnectScreen({
   const {t} = useTranslation();
   const sessions = useWalletConnectStore(s => s.sessions);
   const isInitialized = useWalletConnectStore(s => s.isInitialized);
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const [showPairInput, setShowPairInput] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -106,7 +109,7 @@ export default function WalletConnectScreen({
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.primaryBg}}>
+    <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}>
       {/* Header */}
       <View
         style={{
@@ -117,10 +120,10 @@ export default function WalletConnectScreen({
           paddingBottom: 8,
         }}>
         <TouchableOpacity onPress={onBack} style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-          <WCIcon d="M15.75 19.5L8.25 12l7.5-7.5" color={Colors.purple} size={16} />
-          <Text style={{color: Colors.purple, fontSize: 16}}>Back</Text>
+          <WCIcon d="M15.75 19.5L8.25 12l7.5-7.5" color={isLight ? '#4e00cd' : Colors.purple} size={16} />
+          <Text style={{color: isLight ? '#4e00cd' : Colors.purple, fontSize: 16}}>Back</Text>
         </TouchableOpacity>
-        <Text style={{fontSize: 18, fontWeight: '700', color: Colors.text}}>
+        <Text style={{fontSize: 18, fontWeight: '700', color: isLight ? '#2c024d' : Colors.text}}>
           WalletConnect
         </Text>
         <View style={{width: 50}} />
@@ -132,7 +135,7 @@ export default function WalletConnectScreen({
           onPress={() => setShowScanner(true)}
           activeOpacity={0.7}
           style={{
-            backgroundColor: Colors.purpleDark,
+            backgroundColor: isLight ? '#4e00cd' : Colors.purpleDark,
             borderRadius: 12,
             paddingVertical: 14,
             paddingHorizontal: 16,
@@ -152,7 +155,7 @@ export default function WalletConnectScreen({
           activeOpacity={0.7}
           style={{
             flex: 1,
-            backgroundColor: Colors.purple,
+            backgroundColor: isLight ? '#4e00cd' : Colors.purple,
             borderRadius: 12,
             paddingVertical: 14,
             alignItems: 'center',
@@ -172,17 +175,17 @@ export default function WalletConnectScreen({
         <View style={{paddingHorizontal: 16, paddingBottom: 12}}>
           <View
             style={{
-              backgroundColor: Colors.cardBg,
+              backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.cardBg,
               borderRadius: 14,
               padding: 16,
               borderWidth: 1,
-              borderColor: Colors.grey,
+              borderColor: isLight ? 'rgba(203,195,218,0.15)' : Colors.grey,
             }}>
             <Text
               style={{
                 fontSize: 11,
                 fontWeight: '600',
-                color: Colors.textLight,
+                color: isLight ? '#494457' : Colors.textLight,
                 letterSpacing: 0.5,
                 marginBottom: 8,
               }}>
@@ -192,16 +195,16 @@ export default function WalletConnectScreen({
               value={pairUri}
               onChangeText={setPairUri}
               placeholder="wc:..."
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor={isLight ? '#cbc3da' : Colors.textLight}
               autoCapitalize="none"
               autoCorrect={false}
               style={{
-                backgroundColor: Colors.primaryBg,
+                backgroundColor: isLight ? '#fff' : Colors.primaryBg,
                 borderRadius: 10,
                 paddingHorizontal: 14,
                 paddingVertical: 12,
                 fontSize: 14,
-                color: Colors.text,
+                color: isLight ? '#2c024d' : Colors.text,
                 fontFamily: 'monospace',
                 marginBottom: 12,
               }}
@@ -212,7 +215,7 @@ export default function WalletConnectScreen({
               activeOpacity={0.7}
               style={{
                 backgroundColor:
-                  isPairing || !pairUri.trim() ? Colors.grey : Colors.purple,
+                  isPairing || !pairUri.trim() ? Colors.grey : (isLight ? '#4e00cd' : Colors.purple),
                 borderRadius: 10,
                 paddingVertical: 12,
                 alignItems: 'center',
@@ -233,7 +236,7 @@ export default function WalletConnectScreen({
       {/* Init status */}
       {!isInitialized && (
         <View style={{padding: 16, alignItems: 'center'}}>
-          <Text style={{color: Colors.textLight, fontSize: 14}}>
+          <Text style={{color: isLight ? '#494457' : Colors.textLight, fontSize: 14}}>
             {t('loading')}...
           </Text>
         </View>
@@ -244,17 +247,17 @@ export default function WalletConnectScreen({
         data={sessions}
         keyExtractor={item => item.topic}
         renderItem={({item}) => (
-          <SessionCard session={item} onDisconnect={handleDisconnect} />
+          <SessionCard session={item} onDisconnect={handleDisconnect} isLight={isLight} />
         )}
         ListEmptyComponent={
           isInitialized ? (
             <View style={{padding: 40, alignItems: 'center'}}>
               <View style={{marginBottom: 12}}>
-                <WCIcon d={WC_ICONS.link} color={Colors.textLight} size={40} />
+                <WCIcon d={WC_ICONS.link} color={isLight ? '#494457' : Colors.textLight} size={40} />
               </View>
               <Text
                 style={{
-                  color: Colors.textLight,
+                  color: isLight ? '#494457' : Colors.textLight,
                   fontSize: 15,
                   textAlign: 'center',
                   lineHeight: 22,
@@ -263,7 +266,7 @@ export default function WalletConnectScreen({
               </Text>
               <Text
                 style={{
-                  color: Colors.textLight,
+                  color: isLight ? '#494457' : Colors.textLight,
                   fontSize: 13,
                   textAlign: 'center',
                   marginTop: 8,
@@ -294,9 +297,10 @@ export default function WalletConnectScreen({
 interface SessionCardProps {
   session: WCSession;
   onDisconnect: (session: WCSession) => void;
+  isLight: boolean;
 }
 
-function SessionCard({session, onDisconnect}: SessionCardProps) {
+function SessionCard({session, onDisconnect, isLight}: SessionCardProps) {
   const shortenAddress = (addr: string): string => {
     if (addr.length <= 16) return addr;
     return `${addr.slice(0, 8)}...${addr.slice(-8)}`;
@@ -307,12 +311,12 @@ function SessionCard({session, onDisconnect}: SessionCardProps) {
   return (
     <View
       style={{
-        backgroundColor: Colors.cardBg,
-        borderRadius: 14,
+        backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.cardBg,
         padding: 16,
         marginBottom: 10,
-        borderWidth: 1,
-        borderColor: Colors.grey,
+        ...(isLight
+          ? {borderRadius: 24, borderWidth: 1, borderColor: 'rgba(203,195,218,0.15)'}
+          : {borderRadius: 12, borderWidth: 1, borderColor: Colors.grey}),
       }}>
       {/* dApp header */}
       <View
@@ -329,7 +333,7 @@ function SessionCard({session, onDisconnect}: SessionCardProps) {
               width: 40,
               height: 40,
               borderRadius: 10,
-              backgroundColor: Colors.primaryBg,
+              backgroundColor: isLight ? 'rgba(78,0,205,0.06)' : Colors.primaryBg,
               marginRight: 12,
             }}
           />
@@ -354,12 +358,12 @@ function SessionCard({session, onDisconnect}: SessionCardProps) {
         {/* Name & URL */}
         <View style={{flex: 1}}>
           <Text
-            style={{fontSize: 15, fontWeight: '600', color: Colors.text}}
+            style={{fontSize: 15, fontWeight: '600', color: isLight ? '#2c024d' : Colors.text}}
             numberOfLines={1}>
             {session.peerMeta.name}
           </Text>
           <Text
-            style={{fontSize: 12, color: Colors.textLight, marginTop: 2}}
+            style={{fontSize: 12, color: isLight ? '#494457' : Colors.textLight, marginTop: 2}}
             numberOfLines={1}>
             {session.peerMeta.url}
           </Text>

@@ -18,6 +18,7 @@ import {
 import {useTranslation} from 'react-i18next';
 import * as Storage from '../services/StorageService';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 interface AuthUrlEntry {
   url: string;
@@ -31,6 +32,8 @@ interface AuthUrlManagerProps {
 export default function AuthUrlManager({onBack}: AuthUrlManagerProps) {
   const {t} = useTranslation();
   const [entries, setEntries] = useState<AuthUrlEntry[]>([]);
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const loadEntries = useCallback(() => {
     const allUrls = Storage.getAllAuthUrls();
@@ -77,7 +80,7 @@ export default function AuthUrlManager({onBack}: AuthUrlManagerProps) {
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.primaryBg}}>
+    <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}>
       {/* Header */}
       <View
         style={{
@@ -87,14 +90,14 @@ export default function AuthUrlManager({onBack}: AuthUrlManagerProps) {
           gap: 12,
         }}>
         <TouchableOpacity onPress={onBack}>
-          <Text style={{color: Colors.purple, fontSize: 16}}>← Back</Text>
+          <Text style={{color: isLight ? '#4e00cd' : Colors.purple, fontSize: 16}}>← Back</Text>
         </TouchableOpacity>
         <Text
           style={{
             flex: 1,
             fontSize: 18,
             fontWeight: '700',
-            color: Colors.text,
+            color: isLight ? '#2c024d' : Colors.text,
           }}>
           Authorized Websites
         </Text>
@@ -108,18 +111,18 @@ export default function AuthUrlManager({onBack}: AuthUrlManagerProps) {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: Colors.cardBg,
+              backgroundColor: isLight ? 'rgba(255,255,255,0.5)' : Colors.cardBg,
               marginHorizontal: 16,
               marginBottom: 4,
               padding: 14,
               borderRadius: 14,
               borderWidth: 1,
-              borderColor: Colors.grey,
+              borderColor: isLight ? 'rgba(203,195,218,0.15)' : Colors.grey,
             }}>
             {/* URL */}
             <View style={{flex: 1, marginRight: 12}}>
               <Text
-                style={{fontSize: 14, color: Colors.text}}
+                style={{fontSize: 14, color: isLight ? '#2c024d' : Colors.text}}
                 numberOfLines={1}>
                 {item.url}
               </Text>
@@ -137,8 +140,8 @@ export default function AuthUrlManager({onBack}: AuthUrlManagerProps) {
             <Switch
               value={item.isAllowed}
               onValueChange={val => handleToggle(item.url, val)}
-              trackColor={{false: Colors.grey, true: Colors.purple + '60'}}
-              thumbColor={item.isAllowed ? Colors.purple : '#f4f3f4'}
+              trackColor={{false: Colors.grey, true: (isLight ? '#4e00cd' : Colors.purple) + '60'}}
+              thumbColor={item.isAllowed ? (isLight ? '#4e00cd' : Colors.purple) : '#f4f3f4'}
             />
 
             {/* Delete */}
@@ -154,7 +157,7 @@ export default function AuthUrlManager({onBack}: AuthUrlManagerProps) {
             <Text style={{fontSize: 36, marginBottom: 12}}>🌐</Text>
             <Text
               style={{
-                color: Colors.textLight,
+                color: isLight ? '#494457' : Colors.textLight,
                 fontSize: 14,
                 textAlign: 'center',
               }}>

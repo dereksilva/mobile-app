@@ -18,7 +18,7 @@ interface ThemeState {
 }
 
 export const useThemeStore = create<ThemeState>((set, get) => ({
-  theme: 'dark', // dark by default
+  theme: 'light', // light by default
 
   setTheme: (mode: ThemeMode) => {
     setValue(StorageKey.THEME, mode);

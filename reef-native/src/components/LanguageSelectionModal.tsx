@@ -11,6 +11,7 @@ import {View, Text, TouchableOpacity, Modal} from 'react-native';
 import {useTranslation} from 'react-i18next';
 import {useLocaleStore, SupportedLanguage} from '../stores/useLocaleStore';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 
 interface LanguageSelectionModalProps {
   visible: boolean;
@@ -36,6 +37,8 @@ export default function LanguageSelectionModal({
   const {t, i18n} = useTranslation();
   const selectedLanguage = useLocaleStore(s => s.selectedLanguage);
   const setLanguage = useLocaleStore(s => s.setLanguage);
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
 
   const handleSelectLanguage = (lang: SupportedLanguage) => {
     setLanguage(lang);
@@ -57,7 +60,7 @@ export default function LanguageSelectionModal({
         }}>
         <View
           style={{
-            backgroundColor: Colors.cardBg,
+            backgroundColor: isLight ? '#fff7fe' : Colors.cardBg,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             padding: 24,
@@ -71,11 +74,11 @@ export default function LanguageSelectionModal({
               alignItems: 'center',
               marginBottom: 24,
             }}>
-            <Text style={{fontSize: 20, fontWeight: '700', color: Colors.text}}>
+            <Text style={{fontSize: 20, fontWeight: '700', color: isLight ? '#2c024d' : Colors.text}}>
               {t('select_language')}
             </Text>
             <TouchableOpacity onPress={onClose}>
-              <Text style={{fontSize: 28, color: Colors.textLight}}>×</Text>
+              <Text style={{fontSize: 28, color: isLight ? '#494457' : Colors.textLight}}>×</Text>
             </TouchableOpacity>
           </View>
 
@@ -92,20 +95,24 @@ export default function LanguageSelectionModal({
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   backgroundColor: isSelected
-                    ? Colors.purple + '10'
-                    : Colors.primaryBg,
+                    ? (isLight ? 'rgba(78,0,205,0.06)' : Colors.purple + '10')
+                    : (isLight ? 'rgba(255,255,255,0.5)' : Colors.primaryBg),
                   borderRadius: 12,
                   padding: 16,
                   marginBottom: 10,
                   borderWidth: 1,
-                  borderColor: isSelected ? Colors.accent : Colors.grey,
+                  borderColor: isSelected
+                    ? (isLight ? '#4e00cd' : Colors.accent)
+                    : (isLight ? 'rgba(203,195,218,0.15)' : Colors.grey),
                 }}>
                 <View>
                   <Text
                     style={{
                       fontSize: 16,
                       fontWeight: '600',
-                      color: isSelected ? Colors.accent : Colors.text,
+                      color: isSelected
+                        ? (isLight ? '#4e00cd' : Colors.accent)
+                        : (isLight ? '#2c024d' : Colors.text),
                     }}>
                     {lang.nativeLabel}
                   </Text>
@@ -113,7 +120,7 @@ export default function LanguageSelectionModal({
                     <Text
                       style={{
                         fontSize: 12,
-                        color: Colors.textLight,
+                        color: isLight ? '#494457' : Colors.textLight,
                         marginTop: 2,
                       }}>
                       {t(lang.labelKey)}
@@ -126,7 +133,7 @@ export default function LanguageSelectionModal({
                       width: 24,
                       height: 24,
                       borderRadius: 12,
-                      backgroundColor: Colors.accent,
+                      backgroundColor: isLight ? '#4e00cd' : Colors.accent,
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}>
