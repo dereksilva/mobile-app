@@ -29,8 +29,15 @@ import {useAccountStore} from '../stores/useAccountStore';
 import {useConnectionStore} from '../stores/useConnectionStore';
 import {sendToken} from '../reef-chain/transferApi';
 import {isValidSubstrateAddress, isValidEvmAddress} from '../reef-chain/accountApi';
-import Svg, {Path, Rect} from 'react-native-svg';
+import Svg, {
+  Path,
+  Rect,
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  Stop,
+} from 'react-native-svg';
 import {Colors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 import TokenSelectionModal from '../components/TokenSelectionModal';
 import QRScannerModal from '../components/QRScannerModal';
 
@@ -66,6 +73,8 @@ const NATIVE_FEE_BUFFER = 3;
 
 export default function SendScreen({onClose, initialToken}: SendScreenProps) {
   const {t} = useTranslation();
+  const theme = useThemeStore(s => s.theme);
+  const isLight = theme === 'light';
   const tokensData = useTokenStore(s => s.selectedErc20s);
   const tokens = tokensData.data ?? [];
   const selectedAddress = useAccountStore(s => s.selectedAddress);
@@ -291,6 +300,514 @@ export default function SendScreen({onClose, initialToken}: SendScreenProps) {
     return bal.toLocaleString(undefined, {maximumFractionDigits: 4});
   };
 
+  // ─── Computed USD estimate ─────────────────────────────────────────────────
+  const usdEstimate = useMemo(() => {
+    if (!selectedToken || amountNum <= 0) return '0.00';
+    const usd = amountNum * (selectedToken.price ?? 0);
+    return usd.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  }, [amountNum, selectedToken]);
+
+  // ─── Light Mode: Figma "Send Tokens" design ──────────────────────────────
+  if (isLight) {
+    return (
+      <ScrollView
+        style={{flex: 1, backgroundColor: '#fff7fe'}}
+        contentContainerStyle={{paddingHorizontal: 24, paddingTop: 24, paddingBottom: 80}}
+        keyboardShouldPersistTaps="handled">
+
+        {/* ── Header ── */}
+        <View style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 16,
+          marginBottom: 32,
+        }}>
+          <TouchableOpacity
+            onPress={onClose}
+            disabled={isInProgress}
+            hitSlop={{top: 12, bottom: 12, left: 12, right: 12}}>
+            <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
+              <Path
+                d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                stroke="#2c024d"
+                strokeWidth={2.2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </Svg>
+          </TouchableOpacity>
+          <Text style={{
+            fontSize: 20,
+            fontWeight: '700',
+            color: '#2c024d',
+            letterSpacing: -0.5,
+          }}>
+            {t('send_tokens')}
+          </Text>
+        </View>
+
+        {/* ── Section: Token Selection Card (glassmorphism) ── */}
+        <TouchableOpacity
+          onPress={() => setShowTokenModal(true)}
+          disabled={isInProgress}
+          activeOpacity={0.8}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+            borderRadius: 32,
+            borderWidth: 1,
+            borderColor: 'rgba(78, 0, 205, 0.05)',
+            padding: 25,
+            gap: 8,
+            shadowColor: '#4e00cd',
+            shadowOffset: {width: 0, height: 20},
+            shadowOpacity: 0.08,
+            shadowRadius: 40,
+            elevation: 4,
+            marginBottom: 32,
+          }}>
+          {/* Label row: SELECTED ASSET + chevron */}
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+            <Text style={{
+              fontSize: 12,
+              fontWeight: '700',
+              color: '#494457',
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+            }}>
+              Selected Asset
+            </Text>
+            <Svg width={12} height={8} viewBox="0 0 12 8" fill="none">
+              <Path d="M1 1.5L6 6.5L11 1.5" stroke="#494457" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          </View>
+
+          {/* Token details row */}
+          <View style={{flexDirection: 'row', alignItems: 'center', gap: 16}}>
+            {/* Token icon with gradient border ring */}
+            <View style={{width: 56, height: 56, borderRadius: 28, overflow: 'hidden', justifyContent: 'center', alignItems: 'center'}}>
+              <Svg style={{position: 'absolute'}} width={56} height={56} viewBox="0 0 56 56">
+                <Defs>
+                  <SvgLinearGradient id="tokenBorderGrad" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                    <Stop offset="0" stopColor="#4e00cd" />
+                    <Stop offset="1" stopColor="#b70054" />
+                  </SvgLinearGradient>
+                </Defs>
+                <Rect width={56} height={56} rx={28} fill="url(#tokenBorderGrad)" />
+              </Svg>
+              {/* Inner white circle */}
+              <View style={{
+                width: 52,
+                height: 52,
+                borderRadius: 26,
+                backgroundColor: '#fff',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1,
+              }}>
+                <Text style={{fontSize: 18, fontWeight: '800', color: '#4e00cd'}}>
+                  {selectedToken?.symbol?.charAt(0) ?? '?'}
+                </Text>
+              </View>
+            </View>
+
+            {/* Name + chain */}
+            <View style={{flexShrink: 1}}>
+              <Text style={{fontSize: 24, fontWeight: '800', color: '#2c024d', lineHeight: 30}}>
+                {selectedToken?.symbol ?? '—'}
+              </Text>
+              <Text style={{fontSize: 14, fontWeight: '500', color: '#494457', lineHeight: 20}}>
+                {selectedToken?.name ?? t('select')}
+              </Text>
+            </View>
+
+            {/* Balance */}
+            <View style={{flex: 1, alignItems: 'flex-end'}}>
+              <Text style={{fontSize: 16, fontWeight: '700', color: '#2c024d', lineHeight: 24}}>
+                {selectedToken ? formatBalance(tokenBalance) : '—'}
+              </Text>
+              <Text style={{
+                fontSize: 12,
+                fontWeight: '600',
+                color: '#b70054',
+                letterSpacing: -0.6,
+                textTransform: 'uppercase',
+                lineHeight: 16,
+              }}>
+                Available Balance
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* ── Section: Destination Address ── */}
+        <View style={{gap: 16, marginBottom: 32}}>
+          <Text style={{
+            fontSize: 12,
+            fontWeight: '700',
+            color: '#494457',
+            letterSpacing: 1.2,
+            textTransform: 'uppercase',
+            paddingHorizontal: 8,
+          }}>
+            Send to address
+          </Text>
+
+          {/* Input + action buttons container */}
+          <View style={{position: 'relative'}}>
+            <TextInput
+              value={toAddress}
+              onChangeText={setToAddress}
+              placeholder="Enter Reef or EVM address"
+              placeholderTextColor="#cbc3da"
+              autoCapitalize="none"
+              autoCorrect={false}
+              editable={!isInProgress}
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 32,
+                height: 64,
+                paddingLeft: 24,
+                paddingRight: 128,
+                fontSize: 13,
+                color: '#2c024d',
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 1},
+                shadowOpacity: 0.05,
+                shadowRadius: 2,
+                elevation: 1,
+                borderWidth: toAddress.trim() && validationStatus === 'addressNotValid' ? 1 : 0,
+                borderColor: toAddress.trim() && validationStatus === 'addressNotValid'
+                  ? Colors.error
+                  : 'transparent',
+              }}
+            />
+            {/* Action buttons positioned inside the input */}
+            <View style={{
+              position: 'absolute',
+              right: 12,
+              top: 12,
+              flexDirection: 'row',
+              gap: 8,
+            }}>
+              {/* QR scan button — gradient circle */}
+              <TouchableOpacity
+                onPress={() => setShowScanner(true)}
+                disabled={isInProgress}
+                activeOpacity={0.8}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Svg style={{position: 'absolute'}} width={40} height={40} viewBox="0 0 40 40">
+                  <Defs>
+                    <SvgLinearGradient id="qrBtnGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                      <Stop offset="0" stopColor="#b70054" />
+                      <Stop offset="1" stopColor="#4e00cd" />
+                    </SvgLinearGradient>
+                  </Defs>
+                  <Rect width={40} height={40} rx={20} fill="url(#qrBtnGrad)" />
+                </Svg>
+                <Svg width={15} height={15} viewBox="0 0 24 24" fill="none" style={{zIndex: 1}}>
+                  <Path
+                    d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"
+                    stroke="#fff"
+                    strokeWidth={1.8}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <Path
+                    d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"
+                    stroke="#fff"
+                    strokeWidth={1.8}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              </TouchableOpacity>
+
+              {/* Paste button — light purple pill */}
+              <TouchableOpacity
+                onPress={handlePaste}
+                disabled={isInProgress}
+                activeOpacity={0.7}
+                style={{
+                  backgroundColor: 'rgba(78, 0, 205, 0.1)',
+                  borderRadius: 9999,
+                  height: 40,
+                  paddingHorizontal: 16,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text style={{
+                  fontSize: 12,
+                  fontWeight: '700',
+                  color: '#4e00cd',
+                  letterSpacing: 0.6,
+                  textTransform: 'uppercase',
+                }}>
+                  Paste
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* ── Section: Amount Input ── */}
+        <View style={{gap: 24, paddingBottom: 32}}>
+          {/* Label row: AMOUNT TO SEND + MAX */}
+          <View style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 8,
+          }}>
+            <Text style={{
+              fontSize: 12,
+              fontWeight: '700',
+              color: '#494457',
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+            }}>
+              Amount to send
+            </Text>
+            <TouchableOpacity onPress={handleMax} disabled={isInProgress} activeOpacity={0.7}>
+              <Text style={{fontSize: 12, fontWeight: '700', color: '#b70054'}}>
+                MAX
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Amount card (glassmorphism) */}
+          <View style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+            borderRadius: 32,
+            borderWidth: 1,
+            borderColor: 'rgba(78, 0, 205, 0.05)',
+            padding: 33,
+            alignItems: 'center',
+            gap: 8,
+          }}>
+            {/* Amount row: input + token symbol */}
+            <View style={{flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center'}}>
+              <TextInput
+                value={amount}
+                onChangeText={text => {
+                  if (/^\d*\.?\d*$/.test(text)) {
+                    setAmount(text);
+                  }
+                }}
+                placeholder="0.00"
+                placeholderTextColor="#cbc3da"
+                keyboardType="decimal-pad"
+                editable={!isInProgress}
+                textAlign="center"
+                style={{
+                  fontSize: 48,
+                  fontWeight: '800',
+                  color: amount ? '#2c024d' : '#cbc3da',
+                  paddingVertical: 0,
+                  paddingHorizontal: 0,
+                  minWidth: 120,
+                  maxWidth: 220,
+                }}
+              />
+              <Text style={{
+                fontSize: 20,
+                fontWeight: '700',
+                color: 'rgba(78, 0, 205, 0.6)',
+                marginLeft: 8,
+                marginBottom: 8,
+              }}>
+                {selectedToken?.symbol ?? 'REEF'}
+              </Text>
+            </View>
+
+            {/* USD estimate */}
+            <Text style={{fontSize: 14, color: 'rgba(73, 68, 87, 0.7)'}}>
+              ≈ ${usdEstimate} USD
+            </Text>
+          </View>
+
+          {/* Percentage presets */}
+          <View style={{flexDirection: 'row', justifyContent: 'space-between', gap: 8}}>
+            {[25, 50, 75, 100].map(pct => (
+              <TouchableOpacity
+                key={pct}
+                onPress={() => setAmount(((maxTransfer * pct) / 100).toString())}
+                disabled={isInProgress || maxTransfer <= 0}
+                activeOpacity={0.7}
+                style={{
+                  flex: 1,
+                  height: 48,
+                  borderRadius: 9999,
+                  borderWidth: 1,
+                  borderColor: 'rgba(78, 0, 205, 0.1)',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text style={{fontSize: 12, fontWeight: '700', color: '#494457'}}>
+                  {pct}%
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* ── Transaction Status Stepper ── */}
+        {sendStatus !== 'ready' && sendStatus !== 'error' && (
+          <View style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: 24,
+            borderWidth: 1,
+            borderColor: 'rgba(78, 0, 205, 0.05)',
+            padding: 20,
+            marginBottom: 24,
+          }}>
+            <TransactionStepper status={sendStatus} />
+          </View>
+        )}
+
+        {/* ── Error Display ── */}
+        {sendStatus === 'error' && errorMsg && (
+          <View style={{
+            backgroundColor: 'rgba(220, 38, 38, 0.08)',
+            borderRadius: 24,
+            padding: 20,
+            marginBottom: 24,
+            borderLeftWidth: 4,
+            borderLeftColor: Colors.error,
+          }}>
+            <Text style={{color: Colors.error, fontSize: 14, fontWeight: '500'}}>
+              {errorMsg}
+            </Text>
+          </View>
+        )}
+
+        {/* ── Tx Hash ── */}
+        {txHash && (
+          <View style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+            borderRadius: 24,
+            borderWidth: 1,
+            borderColor: 'rgba(78, 0, 205, 0.05)',
+            padding: 16,
+            marginBottom: 24,
+          }}>
+            <Text style={{fontSize: 12, color: '#494457', marginBottom: 4}}>TX Hash</Text>
+            <Text style={{fontSize: 12, fontFamily: 'monospace', color: '#2c024d'}} selectable numberOfLines={2}>
+              {txHash}
+            </Text>
+          </View>
+        )}
+
+        {/* ── CTA Button: Review Transaction / Done ── */}
+        {sendStatus === 'finalized' ? (
+          <TouchableOpacity
+            onPress={handleDone}
+            activeOpacity={0.8}
+            style={{
+              height: 64,
+              borderRadius: 9999,
+              overflow: 'hidden',
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: Colors.green,
+            }}>
+            <Text style={{fontSize: 18, fontWeight: '800', color: '#fff'}}>
+              ✓ {t('done')}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={handleSend}
+            disabled={!canSubmit || isInProgress}
+            activeOpacity={0.8}
+            style={{
+              height: 64,
+              borderRadius: 9999,
+              overflow: 'hidden',
+              justifyContent: 'center',
+              alignItems: 'center',
+              opacity: canSubmit && !isInProgress ? 1 : 0.5,
+              shadowColor: '#b70054',
+              shadowOffset: {width: 0, height: 20},
+              shadowOpacity: canSubmit && !isInProgress ? 0.3 : 0,
+              shadowRadius: 40,
+              elevation: canSubmit && !isInProgress ? 12 : 0,
+            }}>
+            {/* Gradient background */}
+            <Svg
+              style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+              viewBox="0 0 1 1"
+              preserveAspectRatio="none">
+              <Defs>
+                <SvgLinearGradient id="sendCtaGrad" x1="0" y1="0" x2="0.3" y2="1">
+                  <Stop offset="0" stopColor="#b70054" />
+                  <Stop offset="1" stopColor="#4e00cd" />
+                </SvgLinearGradient>
+              </Defs>
+              <Rect x="0" y="0" width="1" height="1" fill="url(#sendCtaGrad)" />
+            </Svg>
+            <Text style={{fontSize: 18, fontWeight: '800', color: '#fff', zIndex: 1}}>
+              {sendStatus === 'ready' && validationStatus === 'ready'
+                ? 'Review Transaction'
+                : getButtonLabel()}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {/* ── Error Retry ── */}
+        {sendStatus === 'error' && (
+          <TouchableOpacity
+            onPress={() => {
+              setSendStatus('ready');
+              setErrorMsg(null);
+            }}
+            activeOpacity={0.7}
+            style={{
+              marginTop: 16,
+              height: 56,
+              borderRadius: 9999,
+              borderWidth: 1,
+              borderColor: 'rgba(78, 0, 205, 0.1)',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={{fontSize: 15, fontWeight: '600', color: '#2c024d'}}>
+              {t('reload')}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        <View style={{height: 40}} />
+
+        {/* Modals */}
+        <TokenSelectionModal
+          visible={showTokenModal}
+          tokens={tokens}
+          excludeAddress={selectedToken?.address}
+          onSelect={token => {
+            setSelectedToken(token);
+            setShowTokenModal(false);
+            setAmount('');
+          }}
+          onClose={() => setShowTokenModal(false)}
+        />
+        <QRScannerModal
+          visible={showScanner}
+          hint={t('scan_address')}
+          onScan={handleScanAddress}
+          onClose={() => setShowScanner(false)}
+        />
+      </ScrollView>
+    );
+  }
+
+  // ─── Dark Mode (existing design) ────────────────────────────────────────────
   return (
     <ScrollView
       style={{flex: 1, backgroundColor: Colors.primaryBg}}

@@ -12,7 +12,10 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
+
+const reefLogo = require('../assets/images/reef.png');
 import {useTranslation} from 'react-i18next';
 import * as Storage from '../services/StorageService';
 import {useBiometrics} from '../hooks/useBiometrics';
@@ -78,18 +81,11 @@ export default function AuthScreen({onAuthenticated}: AuthScreenProps) {
         paddingHorizontal: 32,
       }}>
       {/* Logo */}
-      <View
-        style={{
-          width: 96,
-          height: 96,
-          borderRadius: 48,
-          backgroundColor: Colors.purple,
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: 40,
-        }}>
-        <Text style={{color: '#fff', fontSize: 36, fontWeight: '700'}}>R</Text>
-      </View>
+      <Image
+        source={reefLogo}
+        style={{width: 96, height: 96, borderRadius: 48, marginBottom: 40}}
+        resizeMode="contain"
+      />
 
       <Text
         style={{

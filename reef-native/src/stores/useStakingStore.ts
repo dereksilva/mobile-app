@@ -12,12 +12,13 @@ import type {
 
 export type StakingFlow =
   | 'idle'
-  | 'amount'      // entering stake amount
-  | 'validators'  // selecting validators
-  | 'confirm'     // reviewing before submit
-  | 'submitting'  // tx in progress
-  | 'success'     // tx finalized
-  | 'error';      // tx failed
+  | 'amount'            // entering stake amount
+  | 'validators'        // selecting validators
+  | 'confirm'           // reviewing before submit
+  | 'edit-nominations'  // editing nominated validators standalone
+  | 'submitting'        // tx in progress
+  | 'success'           // tx finalized
+  | 'error';            // tx failed
 
 interface StakingState {
   // Network staking info

@@ -198,10 +198,33 @@ export default function StakingScreen() {
   }, [validators.length, setValidators, setLoadingValidators]);
 
   useEffect(() => {
-    if (activeTab === 'validators' || flow === 'validators') {
+    if (activeTab === 'validators' || flow === 'validators' || flow === 'edit-nominations') {
       loadValidators();
     }
   }, [activeTab, flow, loadValidators]);
+
+  // Handle editing nominations standalone (no bonding)
+  const handleEditNominations = () => {
+    setSelectedValidators(nominations ?? []);
+    setFlow('edit-nominations');
+    setErrorMessage(null);
+    setTxHash(null);
+    loadValidators();
+  };
+
+  const handleSubmitNominations = async () => {
+    if (!selectedAddress || selectedValidators.length === 0) return;
+    setFlow('submitting');
+    try {
+      await stakeNominate(selectedAddress, selectedValidators);
+      Alert.alert('Success', 'Nominations updated successfully.');
+      loadStakingData();
+      resetFlow();
+    } catch (err: any) {
+      setErrorMessage(err.message ?? 'Failed to update nominations');
+      setFlow('error');
+    }
+  };
 
   // Handle starting the stake flow
   const handleStartStake = () => {
@@ -382,6 +405,21 @@ export default function StakingScreen() {
         loading={loadingValidators}
         onConfirm={handleConfirmValidators}
         onBack={() => setFlow('amount')}
+      />
+    );
+  }
+
+  if (flow === 'edit-nominations') {
+    return (
+      <ValidatorSelectView
+        validators={validators}
+        selectedValidators={selectedValidators}
+        onToggle={toggleValidator}
+        loading={loadingValidators}
+        onConfirm={handleSubmitNominations}
+        onBack={resetFlow}
+        title="Edit Nominations"
+        confirmLabel="Update Nominations"
       />
     );
   }
@@ -691,6 +729,7 @@ export default function StakingScreen() {
             onStake={handleStartStake}
             onUnstake={handleUnstake}
             onWithdraw={handleWithdraw}
+            onEditNominations={handleEditNominations}
           />
         </View>
       </ScrollView>
@@ -806,6 +845,7 @@ function ActiveTab({
   onStake,
   onUnstake,
   onWithdraw,
+  onEditNominations,
 }: {
   reefToken: any;
   reefPrice: number;
@@ -820,6 +860,7 @@ function ActiveTab({
   onStake: () => void;
   onUnstake: () => void;
   onWithdraw: () => void;
+  onEditNominations: () => void;
 }) {
   if (loading) {
     return (
@@ -953,6 +994,31 @@ function ActiveTab({
               label="Nominated"
               value={`${nominations.length} validator${nominations.length !== 1 ? 's' : ''}`}
             />
+          )}
+
+          {/* Edit Nominations button */}
+          {nominations && nominations.length > 0 && (
+            <TouchableOpacity
+              onPress={onEditNominations}
+              activeOpacity={0.7}
+              style={{
+                marginTop: 12,
+                backgroundColor: Colors.purple + '15',
+                borderRadius: 10,
+                paddingVertical: 10,
+                alignItems: 'center',
+                borderWidth: 1,
+                borderColor: Colors.purple + '40',
+              }}>
+              <Text
+                style={{
+                  color: Colors.purple,
+                  fontSize: 13,
+                  fontWeight: '600',
+                }}>
+                Edit Nominations
+              </Text>
+            </TouchableOpacity>
           )}
 
           {/* Unstake / Withdraw buttons */}
@@ -1571,6 +1637,8 @@ function ValidatorSelectView({
   loading,
   onConfirm,
   onBack,
+  title = 'Select Validators',
+  confirmLabel,
 }: {
   validators: ValidatorInfo[];
   selectedValidators: string[];
@@ -1578,6 +1646,8 @@ function ValidatorSelectView({
   loading: boolean;
   onConfirm: () => void;
   onBack: () => void;
+  title?: string;
+  confirmLabel?: string;
 }) {
   const [search, setSearch] = useState('');
 
@@ -1636,7 +1706,7 @@ function ValidatorSelectView({
             color: Colors.text,
             marginBottom: 4,
           }}>
-          Select Validators
+          {title}
         </Text>
         <Text
           style={{
@@ -1774,8 +1844,7 @@ function ValidatorSelectView({
               fontSize: 16,
               fontWeight: '600',
             }}>
-            Continue with {selectedValidators.length} Validator
-            {selectedValidators.length !== 1 ? 's' : ''}
+            {confirmLabel ?? `Continue with ${selectedValidators.length} Validator${selectedValidators.length !== 1 ? 's' : ''}`}
           </Text>
         </TouchableOpacity>
       </View>

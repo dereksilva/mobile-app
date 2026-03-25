@@ -46,7 +46,7 @@ import {useAppConfigStore} from '../stores/useAppConfigStore';
 import {useLocaleStore} from '../stores/useLocaleStore';
 import {useWalletConnectStore} from '../stores/useWalletConnectStore';
 import {useBiometrics} from '../hooks/useBiometrics';
-import {useColors} from '../utils/colors';
+import {Colors, useColors} from '../utils/colors';
 import {useThemeStore} from '../stores/useThemeStore';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import LanguageSelectionModal from '../components/LanguageSelectionModal';

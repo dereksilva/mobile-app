@@ -10,7 +10,7 @@
  * - Inline navigation to Send, SendNFT, and Receive screens
  */
 
-import React, {useState, useMemo} from 'react';
+import React, {useState, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -19,13 +19,22 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import {TokenBalance, NFT, TransactionRecord} from '../types';
 import {useAccountStore} from '../stores/useAccountStore';
 import {useTokenStore} from '../stores/useTokenStore';
 import {useAppConfigStore} from '../stores/useAppConfigStore';
-import Svg, {Path} from 'react-native-svg';
-import {Colors} from '../utils/colors';
+import Svg, {
+  Path,
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  RadialGradient,
+  Stop,
+  Rect,
+} from 'react-native-svg';
+import {Colors, useColors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 import SendScreen from './SendScreen';
 import SendNFTScreen from './SendNFTScreen';
 import ReceiveScreen from './ReceiveScreen';
@@ -37,6 +46,7 @@ type HomeTab = 'tokens' | 'nfts' | 'activity';
 
 export default function HomeScreen() {
   const {t} = useTranslation();
+  const navigation = useNavigation();
 
   const selectedAddress = useAccountStore(s => s.selectedAddress);
   const accountsData = useAccountStore(s => s.accounts);
@@ -111,6 +121,271 @@ export default function HomeScreen() {
     return <DAppBrowserScreen onBack={() => setSubScreen('home')} />;
   }
 
+  const theme = useThemeStore.getState().theme;
+  const isLight = theme === 'light';
+
+  // Shared tab content
+  const tabContent = (
+    <>
+      {activeTab === 'tokens' && (
+        <TokenList
+          tokens={tokens}
+          displayBalance={displayBalance}
+          onSend={token => {
+            setSendToken(token);
+            setSubScreen('send');
+          }}
+        />
+      )}
+      {activeTab === 'nfts' && (
+        <NFTGrid
+          nfts={nfts}
+          onSend={nft => {
+            setSendNft(nft);
+            setSubScreen('sendNft');
+          }}
+        />
+      )}
+      {activeTab === 'activity' && <ActivityList txHistory={txHistory} />}
+    </>
+  );
+
+  const balanceString = displayBalance
+    ? `$${totalUsdBalance.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`
+    : '••••••';
+
+  // ─── Light Mode: Fluid Ecosystem design ────────────────────────────────────
+  if (isLight) {
+    const actionButtons = [
+      {
+        label: 'Send',
+        icon: 'M6 18L18 6M18 6H9M18 6V15',
+        onPress: () => setSubScreen('send'),
+      },
+      {
+        label: 'Receive',
+        icon: 'M18 6L6 18M6 18H15M6 18V9',
+        onPress: () => setSubScreen('receive'),
+      },
+      {
+        label: 'Buy',
+        icon: 'M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z',
+        onPress: () => setSubScreen('buy'),
+      },
+      {
+        label: 'dApps',
+        icon: 'M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z',
+        onPress: () => setSubScreen('dapp'),
+      },
+    ];
+
+    return (
+      <ScrollView
+        style={{flex: 1, backgroundColor: '#fff7fe'}}
+        contentContainerStyle={{paddingHorizontal: 24, paddingBottom: 40, gap: 40}}>
+
+        {/* ── Balance Section ── */}
+        <View style={{
+          alignItems: 'center',
+          paddingVertical: 40,
+          borderRadius: 48,
+          overflow: 'hidden',
+          gap: 8,
+        }}>
+          {/* Radial gradient background */}
+          <Svg
+            style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+            viewBox="0 0 342 196"
+            preserveAspectRatio="none">
+            <Defs>
+              <RadialGradient id="balanceGrad" cx="171" cy="98" r="197" gradientUnits="userSpaceOnUse">
+                <Stop offset="0" stopColor="#b70054" stopOpacity={0.15} />
+                <Stop offset="0.5" stopColor="#4e00cd" stopOpacity={0.05} />
+                <Stop offset="1" stopColor="#4e00cd" stopOpacity={0} />
+              </RadialGradient>
+            </Defs>
+            <Rect x="0" y="0" width="342" height="196" fill="url(#balanceGrad)" />
+          </Svg>
+
+          <Text style={{
+            fontSize: 14,
+            fontWeight: '400',
+            letterSpacing: 1.4,
+            textTransform: 'uppercase',
+            color: '#494457',
+          }}>
+            Total Balance
+          </Text>
+          <TouchableOpacity onPress={toggleDisplayBalance} activeOpacity={0.7}>
+            <Text style={{
+              fontSize: 48,
+              fontWeight: '800',
+              color: '#2c024d',
+              letterSpacing: -2.4,
+              paddingBottom: 4,
+            }}>
+              {balanceString}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Quick Actions ── */}
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          {actionButtons.map(btn => (
+            <TouchableOpacity
+              key={btn.label}
+              onPress={btn.onPress}
+              activeOpacity={0.8}
+              style={{alignItems: 'center', gap: 8, paddingHorizontal: 8.75}}>
+              <View style={{
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                overflow: 'hidden',
+                justifyContent: 'center',
+                alignItems: 'center',
+                shadowColor: '#4e00cd',
+                shadowOffset: {width: 0, height: 10},
+                shadowOpacity: 0.2,
+                shadowRadius: 15,
+                elevation: 8,
+              }}>
+                {/* Gradient background */}
+                <Svg
+                  style={{position: 'absolute', top: 0, left: 0}}
+                  width={56}
+                  height={56}
+                  viewBox="0 0 56 56">
+                  <Defs>
+                    <SvgLinearGradient id={`btnGrad-${btn.label}`} x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                      <Stop offset="0" stopColor="#b70054" />
+                      <Stop offset="1" stopColor="#4e00cd" />
+                    </SvgLinearGradient>
+                  </Defs>
+                  <Rect width="56" height="56" rx="28" fill={`url(#btnGrad-${btn.label})`} />
+                </Svg>
+                {/* Icon */}
+                <Svg width={16} height={16} viewBox="0 0 24 24" fill="none" style={{zIndex: 1}}>
+                  <Path d={btn.icon} stroke="#fff" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+                </Svg>
+              </View>
+              <Text style={{fontSize: 12, fontWeight: '600', color: '#494457'}}>
+                {btn.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* ── Content Tabs Section ── */}
+        <View style={{gap: 24, paddingTop: 8}}>
+          {/* Tab bar */}
+          <View style={{
+            flexDirection: 'row',
+            gap: 32,
+            borderBottomWidth: 1,
+            borderBottomColor: 'rgba(203, 195, 218, 0.2)',
+            paddingHorizontal: 8,
+          }}>
+            {(['tokens', 'nfts', 'activity'] as HomeTab[]).map(tab => (
+              <TouchableOpacity
+                key={tab}
+                onPress={() => setActiveTab(tab)}
+                activeOpacity={0.7}
+                style={{
+                  paddingBottom: 18,
+                  borderBottomWidth: 2,
+                  borderBottomColor: activeTab === tab ? '#4e00cd' : 'transparent',
+                  marginBottom: -1,
+                }}>
+                <Text style={{
+                  fontSize: 14,
+                  fontWeight: activeTab === tab ? '600' : '500',
+                  color: activeTab === tab ? '#4e00cd' : 'rgba(73, 68, 87, 0.6)',
+                  letterSpacing: 0.35,
+                  textTransform: 'uppercase',
+                }}>
+                  {t(tab)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* Tab content */}
+          {tabContent}
+        </View>
+
+        {/* ── Stake & Earn Promotional Card ── */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('Staking' as never)}
+          style={{
+            borderRadius: 32,
+            overflow: 'hidden',
+            paddingHorizontal: 32,
+            paddingTop: 40,
+            paddingBottom: 32,
+            shadowColor: '#4e00cd',
+            shadowOffset: {width: 0, height: 20},
+            shadowOpacity: 0.2,
+            shadowRadius: 25,
+            elevation: 12,
+          }}>
+          {/* Gradient background */}
+          <Svg
+            style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0}}
+            viewBox="0 0 1 1"
+            preserveAspectRatio="none">
+            <Defs>
+              <SvgLinearGradient id="promoGrad" x1="0" y1="0" x2="0.7" y2="1">
+                <Stop offset="0" stopColor="#4e00cd" />
+                <Stop offset="1" stopColor="#b70054" />
+              </SvgLinearGradient>
+            </Defs>
+            <Rect x="0" y="0" width="1" height="1" fill="url(#promoGrad)" />
+          </Svg>
+          {/* Decorative 4-point star */}
+          <View style={{position: 'absolute', bottom: -40, right: -40, opacity: 0.15}}>
+            <Svg width={192} height={192} viewBox="0 0 192 192" fill="none">
+              <Path
+                d="M96 0C96 53.019 138.981 96 192 96C138.981 96 96 138.981 96 192C96 138.981 53.019 96 0 96C53.019 96 96 53.019 96 0Z"
+                fill="white"
+              />
+            </Svg>
+          </View>
+          {/* Card content */}
+          <View style={{gap: 8, maxWidth: 205}}>
+            <Text style={{fontSize: 24, fontWeight: '700', color: '#fff', lineHeight: 30}}>
+              Stake & Earn{'\n'}Rewards
+            </Text>
+            <Text style={{
+              fontSize: 14,
+              color: 'rgba(255,255,255,0.8)',
+              lineHeight: 20,
+              paddingBottom: 16,
+            }}>
+              Contribute to the reef{'\n'}ecosystem and earn up{'\n'}to 12% APR.
+            </Text>
+            <View style={{
+              alignSelf: 'flex-start',
+              backgroundColor: '#fff',
+              borderRadius: 9999,
+              paddingHorizontal: 24,
+              paddingVertical: 8,
+            }}>
+              <Text style={{fontSize: 14, fontWeight: '600', color: '#4e00cd'}}>
+                Start Staking
+              </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </ScrollView>
+    );
+  }
+
+  // ─── Dark Mode: existing layout ────────────────────────────────────────────
   return (
     <ScrollView
       style={{flex: 1, backgroundColor: Colors.primaryBg}}
@@ -134,12 +409,7 @@ export default function HomeScreen() {
               marginBottom: 4,
               letterSpacing: -0.5,
             }}>
-            {displayBalance
-              ? `$${totalUsdBalance.toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`
-              : '••••••'}
+            {balanceString}
           </Text>
         </TouchableOpacity>
         <Text style={{fontSize: 13, color: 'rgba(255,255,255,0.6)', marginBottom: 24}}>
@@ -262,28 +532,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Tab content */}
-      {activeTab === 'tokens' && (
-        <TokenList
-          tokens={tokens}
-          displayBalance={displayBalance}
-          onSend={token => {
-            setSendToken(token);
-            setSubScreen('send');
-          }}
-        />
-      )}
-
-      {activeTab === 'nfts' && (
-        <NFTGrid
-          nfts={nfts}
-          onSend={nft => {
-            setSendNft(nft);
-            setSubScreen('sendNft');
-          }}
-        />
-      )}
-
-      {activeTab === 'activity' && <ActivityList txHistory={txHistory} />}
+      {tabContent}
 
       <View style={{height: 20}} />
     </ScrollView>
@@ -302,6 +551,8 @@ function TokenList({
   onSend: (token: TokenBalance) => void;
 }) {
   const {t} = useTranslation();
+  const theme = useThemeStore.getState().theme;
+  const isLight = theme === 'light';
 
   if (tokens.length === 0) {
     return (
@@ -314,7 +565,7 @@ function TokenList({
   }
 
   return (
-    <View>
+    <View style={{gap: isLight ? 16 : 10}}>
       {tokens.map((token, index) => {
         const balance =
           parseFloat(token.balance) / Math.pow(10, token.decimals);
@@ -326,59 +577,86 @@ function TokenList({
             onPress={() => onSend(token)}
             activeOpacity={0.7}
             style={{
-              backgroundColor: Colors.cardBg,
-              borderRadius: 16,
-              padding: 16,
-              marginBottom: 10,
+              backgroundColor: isLight ? 'rgba(255, 247, 254, 0.6)' : Colors.cardBg,
+              borderRadius: isLight ? 48 : 16,
+              padding: isLight ? 17 : 16,
               flexDirection: 'row',
               alignItems: 'center',
-              shadowColor: '#000',
-              shadowOffset: {width: 0, height: 1},
-              shadowOpacity: 0.04,
-              shadowRadius: 4,
-              elevation: 1,
+              justifyContent: isLight ? 'space-between' : undefined,
+              ...(isLight
+                ? {
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.4)',
+                    shadowColor: '#000',
+                    shadowOffset: {width: 0, height: 1},
+                    shadowOpacity: 0.05,
+                    shadowRadius: 2,
+                  }
+                : {
+                    shadowColor: '#000',
+                    shadowOffset: {width: 0, height: 1},
+                    shadowOpacity: 0.04,
+                    shadowRadius: 4,
+                    elevation: 1,
+                  }),
             }}>
-            {/* Token icon */}
-            <View
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                backgroundColor: Colors.accent + '18',
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginRight: 12,
-              }}>
-              <Text
+            {/* Left side: icon + info */}
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 16}}>
+              {/* Token icon */}
+              <View
                 style={{
-                  fontSize: 16,
-                  fontWeight: '700',
-                  color: Colors.accent,
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  backgroundColor: isLight ? 'rgba(78, 0, 205, 0.12)' : Colors.accent + '18',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}>
-                {token.symbol.charAt(0)}
-              </Text>
-            </View>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '700',
+                    color: isLight ? '#4e00cd' : Colors.accent,
+                  }}>
+                  {token.symbol.charAt(0)}
+                </Text>
+              </View>
 
-            {/* Token info */}
-            <View style={{flex: 1}}>
-              <Text
-                style={{fontSize: 15, fontWeight: '600', color: Colors.text}}
-                numberOfLines={1}>
-                {token.name}
-              </Text>
-              <Text
-                style={{fontSize: 12, color: Colors.textLight, marginTop: 2}}>
-                {token.symbol}
-              </Text>
+              {/* Token info */}
+              <View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '700',
+                    color: isLight ? '#2c024d' : Colors.text,
+                    lineHeight: 24,
+                  }}
+                  numberOfLines={1}>
+                  {token.name}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: isLight ? '#494457' : Colors.textLight,
+                    lineHeight: 16,
+                  }}>
+                  {token.symbol}
+                </Text>
+              </View>
             </View>
 
             {/* Balance */}
             <View style={{alignItems: 'flex-end'}}>
               <Text
-                style={{fontSize: 15, fontWeight: '600', color: Colors.text}}>
+                style={{
+                  fontSize: 16,
+                  fontWeight: '700',
+                  color: isLight ? '#2c024d' : Colors.text,
+                  lineHeight: 24,
+                }}>
                 {displayBalance
                   ? balance.toLocaleString(undefined, {
-                      maximumFractionDigits: 4,
+                      maximumFractionDigits: 2,
                     })
                   : '••••'}
               </Text>
@@ -386,8 +664,8 @@ function TokenList({
                 <Text
                   style={{
                     fontSize: 12,
-                    color: Colors.textLight,
-                    marginTop: 2,
+                    color: isLight ? '#494457' : Colors.textLight,
+                    lineHeight: 16,
                   }}>
                   ${usdValue.toFixed(2)}
                 </Text>
