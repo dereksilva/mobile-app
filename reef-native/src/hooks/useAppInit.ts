@@ -17,6 +17,7 @@ import {useAppConfigStore} from '../stores/useAppConfigStore';
 import {useLocaleStore} from '../stores/useLocaleStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
 import {useAccountStore} from '../stores/useAccountStore';
+import {useThemeStore} from '../stores/useThemeStore';
 import * as Storage from '../services/StorageService';
 import {initReefState} from '../reef-chain/initReefState';
 import {reefState} from '@reef-chain/util-lib';
@@ -33,6 +34,7 @@ export function useAppInit() {
       // 1. Load persisted settings
       useAppConfigStore.getState().loadFromStorage();
       useLocaleStore.getState().loadFromStorage();
+      useThemeStore.getState().loadFromStorage();
 
       // 2. Check first launch
       const firstLaunchValue = Storage.getValue(StorageKey.FIRST_LAUNCH);

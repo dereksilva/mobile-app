@@ -413,7 +413,7 @@ function NFTCard({nft, onSend}: {nft: NFT; onSend: (nft: NFT) => void}) {
       activeOpacity={0.7}
       style={{
         width: '47%',
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         borderRadius: 14,
         overflow: 'hidden',
         borderWidth: 1,
@@ -574,9 +574,9 @@ function ActivityList({txHistory}: {txHistory: TransactionRecord[]}) {
     <View>
       {txHistory.map((tx, index) => (
         <View
-          key={tx.hash || `tx-${index}`}
+          key={`${tx.hash || 'tx'}-${index}`}
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 14,
             padding: 14,
             marginBottom: 8,

@@ -12,7 +12,8 @@ import StakingScreen from '../screens/StakingScreen';
 import PoolsScreen from '../screens/PoolsScreen';
 import SwapScreen from '../screens/SwapScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import {Colors} from '../utils/colors';
+import {Colors, useColors} from '../utils/colors';
+import {useThemeStore} from '../stores/useThemeStore';
 import {useNetworkStore} from '../stores/useNetworkStore';
 import {NetworkName} from '../types';
 import {useChainData} from '../hooks/useChainData';
@@ -163,6 +164,9 @@ function TabNavigator() {
 }
 
 export default function Navigation() {
+  // Subscribe to theme changes so the entire navigation tree re-renders
+  const _theme = useThemeStore(s => s.theme);
+
   // Subscribe to @reef-chain/util-lib observable streams.
   // Populates token, NFT, tx history, and account balance stores.
   useChainData();

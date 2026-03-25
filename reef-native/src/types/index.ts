@@ -188,4 +188,5 @@ export enum StorageKey {
   FIRST_LAUNCH = 'first_launch',
   NAVIGATE_ON_ACCOUNT_SWITCH = 'navigate_on_account_switch',
   DEVELOPER_MODE = 'developer_mode',
+  THEME = 'theme',
 }

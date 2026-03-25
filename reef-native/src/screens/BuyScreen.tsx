@@ -4,7 +4,7 @@
  *
  * Two buy options:
  * 1. Binance Connect — fiat-to-crypto with redirect to Binance checkout
- * 2. StealthEx — crypto-to-crypto exchange
+ * 2. LetsExchange — crypto-to-crypto exchange
  *
  * On testnet: shows manual faucet instructions instead.
  */
@@ -38,8 +38,8 @@ type BuyMethod = 'select' | 'stealthex';
 const ALCHEMY_PAY_URL =
   'https://ramp.alchemypay.org/?appId=dkSs37G15U8I4pm2&crypto=REEF&fiat=USD&fiatAmount=433&merchantOrderNo=1754981505038&network=REEF&timestamp=1754981505053&sign=zRe2miL4QFCUuYNC6QIEKNl9F/orvf4gNSAj9xDNkVE%3D#/index';
 
-// StealthEx partner link
-const STEALTHEX_URL = 'https://stealthex.io/?to=reef';
+// LetsExchange partner link
+const LETSEXCHANGE_URL = 'https://letsexchange.io/?ref_id=VXHhFPuZQyBcjTfk&coin_from=USDC-erc20&coin_to=REEF';
 
 export default function BuyScreen({onBack}: BuyScreenProps) {
   const {t} = useTranslation();
@@ -55,9 +55,8 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
     handleOpenExternal(ALCHEMY_PAY_URL);
   };
 
-  const handleStealthEx = () => {
-    setBuyMethod('stealthex');
-    setWebViewUrl(STEALTHEX_URL);
+  const handleLetsExchange = () => {
+    handleOpenExternal(LETSEXCHANGE_URL);
   };
 
   const handleOpenExternal = (url: string) => {
@@ -96,7 +95,7 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
               color: Colors.text,
             }}
             numberOfLines={1}>
-            StealthEx
+            LetsExchange
           </Text>
           <TouchableOpacity onPress={() => handleOpenExternal(webViewUrl)}>
             <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
@@ -327,9 +326,9 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
               </Text>
             </TouchableOpacity>
 
-            {/* StealthEx */}
+            {/* LetsExchange */}
             <TouchableOpacity
-              onPress={handleStealthEx}
+              onPress={handleLetsExchange}
               activeOpacity={0.7}
               style={{
                 backgroundColor: Colors.cardBg,
@@ -374,7 +373,7 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
                       color: Colors.textLight,
                       marginTop: 2,
                     }}>
-                    via StealthEx
+                    via LetsExchange
                   </Text>
                 </View>
                 <Text style={{fontSize: 16, color: Colors.textLight}}>›</Text>

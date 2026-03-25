@@ -7,7 +7,8 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {InitState} from './src/types';
 import {useAppInit} from './src/hooks/useAppInit';
-import {Colors} from './src/utils/colors';
+import {Colors, useColors} from './src/utils/colors';
+import {useThemeStore} from './src/stores/useThemeStore';
 
 import SplashScreen from './src/screens/SplashScreen';
 import AuthScreen from './src/screens/AuthScreen';
@@ -105,6 +106,10 @@ export default function App() {
     markAuthenticated,
   } = useAppInit();
 
+  // Subscribe to theme so the entire tree re-renders on toggle
+  const theme = useThemeStore(s => s.theme);
+  const C = useColors();
+
   const [introComplete, setIntroComplete] = useState(false);
   const [passwordCreated, setPasswordCreated] = useState(false);
 
@@ -184,8 +189,8 @@ export default function App() {
       <GestureHandlerRootView style={{flex: 1}}>
         <SafeAreaProvider>
           <StatusBar
-            barStyle="dark-content"
-            backgroundColor={Colors.primaryBg}
+            barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+            backgroundColor={C.primaryBg}
           />
           <SigningOverlay>
             {renderContent()}

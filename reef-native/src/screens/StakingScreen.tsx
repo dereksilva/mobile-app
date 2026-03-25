@@ -621,7 +621,7 @@ export default function StakingScreen() {
               borderRadius: 10,
               alignItems: 'center',
               backgroundColor:
-                activeTab === tab.key ? '#fff' : 'transparent',
+                activeTab === tab.key ? Colors.cardBg : 'transparent',
               ...(activeTab === tab.key
                 ? {
                     shadowColor: '#000',
@@ -637,7 +637,7 @@ export default function StakingScreen() {
                 fontSize: 14,
                 fontWeight: activeTab === tab.key ? '600' : '400',
                 color:
-                  activeTab === tab.key ? Colors.text : Colors.textLight,
+                  activeTab === tab.key ? Colors.purple : Colors.textLight,
               }}>
               {tab.label}
             </Text>
@@ -1144,7 +1144,7 @@ function ValidatorsTab({
                 paddingHorizontal: 14,
                 paddingVertical: 8,
                 borderRadius: 8,
-                backgroundColor: sortBy === s ? Colors.purple : '#fff',
+                backgroundColor: sortBy === s ? Colors.purple : Colors.cardBg,
                 borderWidth: 1,
                 borderColor: sortBy === s ? Colors.purple : Colors.grey,
               }}>
@@ -1152,7 +1152,7 @@ function ValidatorsTab({
                 style={{
                   fontSize: 12,
                   fontWeight: '600',
-                  color: sortBy === s ? '#fff' : Colors.text,
+                  color: sortBy === s ? '#fff' : Colors.purple,
                 }}>
                 {s === 'stake' ? 'By Stake' : 'By Commission'}
               </Text>
@@ -2094,7 +2094,7 @@ function ValidatorCard({
 
         <View style={{flex: 1}}>
           <Text
-            style={{fontSize: 14, fontWeight: '600', color: Colors.text}}
+            style={{fontSize: 14, fontWeight: '600', color: Colors.purpleLight}}
             numberOfLines={1}>
             {validator.identity ?? shortenAddress(validator.address)}
           </Text>
@@ -2139,7 +2139,7 @@ function ValidatorCard({
             style={{fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
             Commission
           </Text>
-          <Text style={{fontSize: 13, fontWeight: '600', color: Colors.text}}>
+          <Text style={{fontSize: 13, fontWeight: '600', color: Colors.purpleLight}}>
             {validator.commission.toFixed(1)}%
           </Text>
         </View>
@@ -2148,7 +2148,7 @@ function ValidatorCard({
             style={{fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
             Total Staked
           </Text>
-          <Text style={{fontSize: 13, fontWeight: '600', color: Colors.text}}>
+          <Text style={{fontSize: 13, fontWeight: '600', color: Colors.purpleLight}}>
             {formatReef(validator.totalStake)}
           </Text>
         </View>
@@ -2157,7 +2157,7 @@ function ValidatorCard({
             style={{fontSize: 11, color: Colors.textLight, marginBottom: 2}}>
             Nominators
           </Text>
-          <Text style={{fontSize: 13, fontWeight: '600', color: Colors.text}}>
+          <Text style={{fontSize: 13, fontWeight: '600', color: Colors.purpleLight}}>
             {validator.nominatorCount}
           </Text>
         </View>
