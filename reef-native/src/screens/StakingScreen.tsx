@@ -711,7 +711,7 @@ export default function StakingScreen() {
           }}>
           <View
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               borderRadius: 16,
               padding: 24,
               width: '100%',
@@ -1121,7 +1121,7 @@ function ValidatorsTab({
           placeholderTextColor={Colors.textLight}
           autoCapitalize="none"
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 12,
@@ -1226,7 +1226,7 @@ function NominatorsTab({
         {data.length === 0 ? (
           <View
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               borderRadius: 16,
               padding: 32,
               alignItems: 'center',
@@ -1282,7 +1282,7 @@ function NominatorsTab({
             ) : (
               <View
                 style={{
-                  backgroundColor: '#fff',
+                  backgroundColor: Colors.cardBg,
                   borderRadius: 12,
                   padding: 14,
                   marginBottom: 8,
@@ -1372,7 +1372,7 @@ function StakeAmountView({
       {/* Amount input */}
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 16,
           padding: 20,
           borderWidth: 1,
@@ -1458,7 +1458,7 @@ function StakeAmountView({
       {!isExisting && (
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 16,
             padding: 20,
             borderWidth: 1,
@@ -1654,7 +1654,7 @@ function ValidatorSelectView({
           placeholderTextColor={Colors.textLight}
           autoCapitalize="none"
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 12,
@@ -1680,7 +1680,7 @@ function ValidatorSelectView({
               alignItems: 'center',
               backgroundColor: selectedValidators.includes(item.address)
                 ? Colors.purple + '10'
-                : '#fff',
+                : Colors.cardBg,
               marginHorizontal: 16,
               marginBottom: 8,
               borderRadius: 12,
@@ -1830,7 +1830,7 @@ function StakeConfirmView({
       {/* Amount card */}
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 16,
           padding: 20,
           borderWidth: 1,
@@ -1869,7 +1869,7 @@ function StakeConfirmView({
       {validators.length > 0 && (
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 16,
             padding: 20,
             borderWidth: 1,
@@ -2065,7 +2065,7 @@ function ValidatorCard({
   return (
     <View
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         borderRadius: 12,
         padding: 14,
         marginBottom: 8,

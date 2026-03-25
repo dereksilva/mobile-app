@@ -124,7 +124,7 @@ export default function SignatureControls({
             editable={!isProcessing}
             style={{
               width: '100%',
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               borderRadius: 12,
               paddingHorizontal: 16,
               paddingVertical: 14,
@@ -230,7 +230,7 @@ export default function SignatureControls({
           activeOpacity={0.7}
           style={{
             flex: 3,
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 12,
             paddingVertical: 14,
             alignItems: 'center',

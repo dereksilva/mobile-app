@@ -75,7 +75,7 @@ export default function BuyScreen({onBack}: BuyScreenProps) {
             flexDirection: 'row',
             alignItems: 'center',
             padding: 12,
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderBottomWidth: 1,
             borderBottomColor: Colors.grey,
             gap: 12,

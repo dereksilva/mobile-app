@@ -210,7 +210,7 @@ export default function SigningOverlay({children}: SigningOverlayProps) {
           {metadata?.chainName && (
             <View
               style={{
-                backgroundColor: '#fff',
+                backgroundColor: Colors.cardBg,
                 borderRadius: 10,
                 paddingHorizontal: 12,
                 paddingVertical: 8,

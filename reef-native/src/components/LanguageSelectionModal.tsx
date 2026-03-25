@@ -57,7 +57,7 @@ export default function LanguageSelectionModal({
         }}>
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             padding: 24,

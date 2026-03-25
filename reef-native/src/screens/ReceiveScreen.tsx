@@ -83,7 +83,7 @@ export default function ReceiveScreen({
         <View
           style={{
             flexDirection: 'row',
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 12,
             padding: 4,
             marginBottom: 24,
@@ -155,7 +155,7 @@ export default function ReceiveScreen({
       {/* Address display */}
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 12,
           padding: 16,
           width: '100%',

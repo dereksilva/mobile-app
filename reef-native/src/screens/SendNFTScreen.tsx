@@ -218,7 +218,7 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
       {/* NFT preview card */}
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 14,
           padding: 16,
           marginBottom: 20,
@@ -275,7 +275,7 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
             keyboardType="number-pad"
             editable={!isInProgress}
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               borderRadius: 12,
               paddingHorizontal: 16,
               paddingVertical: 14,
@@ -312,7 +312,7 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
           editable={!isInProgress}
           style={{
             flex: 1,
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 12,
             paddingHorizontal: 16,
             paddingVertical: 14,
@@ -392,7 +392,7 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
       {txHash && (
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 12,
             padding: 12,
             marginBottom: 20,
@@ -464,7 +464,7 @@ export default function SendNFTScreen({nft, onClose}: SendNFTScreenProps) {
           activeOpacity={0.7}
           style={{
             marginTop: 12,
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 12,
             paddingVertical: 14,
             alignItems: 'center',

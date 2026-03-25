@@ -256,7 +256,7 @@ export default function DAppBrowserScreen({
           <View
             style={{
               flexDirection: 'row',
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               borderRadius: 12,
               borderWidth: 1,
               borderColor: Colors.grey,
@@ -338,7 +338,7 @@ export default function DAppBrowserScreen({
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                backgroundColor: '#fff',
+                backgroundColor: Colors.cardBg,
                 borderRadius: 14,
                 padding: 16,
                 marginBottom: 8,
@@ -382,7 +382,7 @@ export default function DAppBrowserScreen({
           alignItems: 'center',
           padding: 8,
           paddingHorizontal: 12,
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderBottomWidth: 1,
           borderBottomColor: Colors.grey,
           gap: 8,

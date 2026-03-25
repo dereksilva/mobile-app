@@ -112,7 +112,7 @@ export default function JsonImportScreen({
         placeholderTextColor={Colors.textLight}
         style={{
           width: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 12,
           paddingHorizontal: 16,
           paddingVertical: 14,
@@ -149,7 +149,7 @@ export default function JsonImportScreen({
         placeholderTextColor={Colors.textLight}
         style={{
           width: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 12,
           paddingHorizontal: 16,
           paddingVertical: 14,
@@ -194,7 +194,7 @@ export default function JsonImportScreen({
         placeholderTextColor={Colors.textLight}
         style={{
           width: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 12,
           paddingHorizontal: 16,
           paddingVertical: 14,

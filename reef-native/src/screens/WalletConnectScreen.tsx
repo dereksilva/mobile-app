@@ -172,7 +172,7 @@ export default function WalletConnectScreen({
         <View style={{paddingHorizontal: 16, paddingBottom: 12}}>
           <View
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               borderRadius: 14,
               padding: 16,
               borderWidth: 1,
@@ -307,7 +307,7 @@ function SessionCard({session, onDisconnect}: SessionCardProps) {
   return (
     <View
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         borderRadius: 14,
         padding: 16,
         marginBottom: 10,

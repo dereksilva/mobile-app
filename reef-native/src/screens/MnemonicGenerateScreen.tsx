@@ -107,7 +107,7 @@ export default function MnemonicGenerateScreen({
         {/* Word grid */}
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 14,
             padding: 16,
             marginBottom: 16,
@@ -263,7 +263,7 @@ export default function MnemonicGenerateScreen({
         placeholderTextColor={Colors.textLight}
         style={{
           width: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 12,
           paddingHorizontal: 16,
           paddingVertical: 14,
@@ -289,7 +289,7 @@ export default function MnemonicGenerateScreen({
           fontSize: 13,
           fontFamily: 'monospace',
           color: Colors.text,
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 8,
           padding: 12,
           marginBottom: 32,

@@ -59,7 +59,7 @@ export default function MethodDataDisplay({
   return (
     <View
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         borderRadius: 12,
         padding: 16,
         borderWidth: 1,

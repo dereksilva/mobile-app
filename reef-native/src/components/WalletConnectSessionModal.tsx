@@ -40,7 +40,7 @@ export default function WalletConnectSessionModal() {
         }}>
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 20,
             padding: 24,
             width: '100%',

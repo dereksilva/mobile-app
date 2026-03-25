@@ -27,7 +27,7 @@ function OptionButton({title, subtitle, onPress}: OptionButtonProps) {
       onPress={onPress}
       activeOpacity={0.7}
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         borderRadius: 14,
         padding: 18,
         marginBottom: 12,

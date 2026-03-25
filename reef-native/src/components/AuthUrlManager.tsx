@@ -108,7 +108,7 @@ export default function AuthUrlManager({onBack}: AuthUrlManagerProps) {
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               marginHorizontal: 16,
               marginBottom: 4,
               padding: 14,

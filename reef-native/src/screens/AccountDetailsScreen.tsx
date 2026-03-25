@@ -36,7 +36,7 @@ function ActionButton({title, color, onPress}: ActionButtonProps) {
       onPress={onPress}
       activeOpacity={0.7}
       style={{
-        backgroundColor: '#fff',
+        backgroundColor: Colors.cardBg,
         borderRadius: 12,
         padding: 16,
         marginBottom: 8,
@@ -140,7 +140,7 @@ export default function AccountDetailsScreen({
       {/* Full addresses */}
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 12,
           padding: 16,
           marginBottom: 16,

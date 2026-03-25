@@ -564,7 +564,7 @@ export default function SwapScreen() {
                 borderRadius: 8,
                 alignItems: 'center',
                 backgroundColor:
-                  slippageTolerance === val ? Colors.purple : '#fff',
+                  slippageTolerance === val ? Colors.purple : Colors.cardBg,
                 borderWidth: 1,
                 borderColor:
                   slippageTolerance === val ? Colors.purple : Colors.grey,

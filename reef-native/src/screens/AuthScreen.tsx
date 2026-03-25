@@ -117,7 +117,7 @@ export default function AuthScreen({onAuthenticated}: AuthScreenProps) {
         returnKeyType="done"
         style={{
           width: '100%',
-          backgroundColor: '#fff',
+          backgroundColor: Colors.cardBg,
           borderRadius: 12,
           paddingHorizontal: 16,
           paddingVertical: 14,

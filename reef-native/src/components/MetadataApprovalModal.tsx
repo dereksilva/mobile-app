@@ -56,7 +56,7 @@ export default function MetadataApprovalModal({
         }}>
         <View
           style={{
-            backgroundColor: '#fff',
+            backgroundColor: Colors.cardBg,
             borderRadius: 20,
             padding: 24,
             width: '100%',

@@ -166,7 +166,7 @@ export default function TokenSelectionModal({
             autoCapitalize="none"
             autoCorrect={false}
             style={{
-              backgroundColor: '#fff',
+              backgroundColor: Colors.cardBg,
               borderRadius: 12,
               paddingHorizontal: 16,
               paddingVertical: 12,
