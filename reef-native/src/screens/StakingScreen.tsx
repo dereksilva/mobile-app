@@ -1901,6 +1901,7 @@ function StakeAmountView({
 }) {
   const theme = useThemeStore(s => s.theme);
   const isLightMode = theme === 'light';
+  const insets = useSafeAreaInsets();
   const amountNum = parseFloat(stakeAmount) || 0;
   const usdValue = amountNum * reefPrice;
 
@@ -1914,7 +1915,7 @@ function StakeAmountView({
   // ─── Light Mode: Figma "Stake More REEF" design ─────────────────────────
   if (isLightMode) {
     return (
-      <View style={{flex: 1, backgroundColor: '#fff7fe'}}>
+      <View style={{flex: 1, backgroundColor: '#fff7fe', paddingTop: insets.top}}>
         {/* ── Top Navigation ── */}
         <View
           style={{
@@ -1938,15 +1939,6 @@ function StakeAmountView({
               />
             </Svg>
           </TouchableOpacity>
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: '700',
-              color: '#2c024d',
-              letterSpacing: -0.4,
-            }}>
-            Staking
-          </Text>
         </View>
 
         <ScrollView
@@ -2678,6 +2670,7 @@ function ValidatorSelectView({
   title?: string;
   confirmLabel?: string;
 }) {
+  const insets = useSafeAreaInsets();
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -2721,7 +2714,7 @@ function ValidatorSelectView({
   }
 
   return (
-    <View style={{flex: 1, backgroundColor: Colors.primaryBg}}>
+    <View style={{flex: 1, backgroundColor: Colors.primaryBg, paddingTop: insets.top}}>
       {/* Header */}
       <View style={{padding: 16, paddingBottom: 0}}>
         <TouchableOpacity onPress={onBack} style={{marginBottom: 16}}>

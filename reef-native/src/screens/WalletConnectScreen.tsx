@@ -21,6 +21,7 @@ import {
   Image,
 } from 'react-native';
 import {useTranslation} from 'react-i18next';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Svg, {Path} from 'react-native-svg';
 import {useWalletConnectStore} from '../stores/useWalletConnectStore';
 import {useThemeStore} from '../stores/useThemeStore';
@@ -55,6 +56,7 @@ export default function WalletConnectScreen({
   onBack,
 }: WalletConnectScreenProps) {
   const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
   const sessions = useWalletConnectStore(s => s.sessions);
   const isInitialized = useWalletConnectStore(s => s.isInitialized);
   const theme = useThemeStore(s => s.theme);
@@ -109,7 +111,7 @@ export default function WalletConnectScreen({
   };
 
   return (
-    <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg}}>
+    <View style={{flex: 1, backgroundColor: isLight ? '#fff7fe' : Colors.primaryBg, paddingTop: insets.top}}>
       {/* Header */}
       <View
         style={{
