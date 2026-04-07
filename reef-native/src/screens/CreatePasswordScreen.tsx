@@ -3,7 +3,7 @@
  * Shown after the intro carousel on first launch.
  */
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,19 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Image,
+  Switch,
 } from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import * as Storage from '../services/StorageService';
 import {Colors} from '../utils/colors';
 import {useThemeStore} from '../stores/useThemeStore';
+import {useAppConfigStore} from '../stores/useAppConfigStore';
+import {useBiometrics} from '../hooks/useBiometrics';
 import Svg, {Rect, Defs, LinearGradient as SvgLinearGradient, Stop} from 'react-native-svg';
+
+const reefLogo = require('../assets/images/R-Token.png');
 
 const MIN_PASSWORD_LENGTH = 6;
 
@@ -29,12 +36,21 @@ export default function CreatePasswordScreen({
   onPasswordCreated,
 }: CreatePasswordScreenProps) {
   const {t} = useTranslation();
+  const insets = useSafeAreaInsets();
   const theme = useThemeStore(s => s.theme);
   const isLight = theme === 'light';
+  const setBiometricAuth = useAppConfigStore(s => s.setBiometricAuth);
+  const {isAvailable: bioAvailable, checkAvailability, authenticate} =
+    useBiometrics();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [enableBiometric, setEnableBiometric] = useState(false);
+
+  useEffect(() => {
+    checkAvailability();
+  }, [checkAvailability]);
 
   const handleCreate = async () => {
     setError(null);
@@ -51,6 +67,13 @@ export default function CreatePasswordScreen({
 
     setIsSaving(true);
     await Storage.savePasswordSecure(password);
+
+    if (enableBiometric && bioAvailable) {
+      // Trigger enrollment by writing the biometric sentinel.
+      const ok = await authenticate();
+      setBiometricAuth(ok);
+    }
+
     setIsSaving(false);
 
     onPasswordCreated();
@@ -82,24 +105,17 @@ export default function CreatePasswordScreen({
           flexGrow: 1,
           justifyContent: 'center',
           paddingHorizontal: 32,
+          paddingTop: insets.top + 24,
+          paddingBottom: insets.bottom + 24,
         }}
         keyboardShouldPersistTaps="handled">
         {/* Logo */}
         <View style={{alignItems: 'center', marginBottom: 40}}>
-          <View
-            style={{
-              width: 80,
-              height: 80,
-              borderRadius: 40,
-              backgroundColor: isLight ? '#4e00cd' : Colors.purple,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginBottom: 24,
-            }}>
-            <Text style={{color: '#fff', fontSize: 32, fontWeight: '700'}}>
-              R
-            </Text>
-          </View>
+          <Image
+            source={reefLogo}
+            style={{width: 96, height: 96, marginBottom: 24}}
+            resizeMode="contain"
+          />
 
           <Text
             style={{
@@ -229,6 +245,34 @@ export default function CreatePasswordScreen({
             marginBottom: 8,
           }}
         />
+
+        {/* Biometric opt-in */}
+        {bioAvailable && (
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginTop: 12,
+              marginBottom: 4,
+            }}>
+            <Text
+              style={{
+                flex: 1,
+                fontSize: 14,
+                fontWeight: '600',
+                color: isLight ? '#2c024d' : Colors.text,
+              }}>
+              {t('enable_biometric_authentication')}
+            </Text>
+            <Switch
+              value={enableBiometric}
+              onValueChange={setEnableBiometric}
+              trackColor={{false: '#cbc3da', true: isLight ? '#4e00cd' : Colors.purple}}
+              thumbColor="#fff"
+            />
+          </View>
+        )}
 
         {/* Error */}
         {error && (
