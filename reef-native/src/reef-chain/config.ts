@@ -25,7 +25,7 @@ export const NETWORK_CONFIG: Record<NetworkName, NetworkConfig> = {
     eventsUrl: 'wss://events.reefscan.info',
     genesisHash:
       '0x7834781d38e4798d548e34ec947d19deea29df148a7bf32484b7b24dacf8d4b7',
-    routerAddress: '0x641e34931C03751BFED14C4E0e0Ea77a3B037e2D',
+    routerAddress: '0x641e34931C03751bFeD14c4E0e0ea77A3B037E2d',
     factoryAddress: '0x380a9033500154872813F6E1120a81ed6c0760a8',
   },
   [NetworkName.TESTNET]: {
@@ -37,8 +37,8 @@ export const NETWORK_CONFIG: Record<NetworkName, NetworkConfig> = {
     eventsUrl: 'wss://events-testnet.reefscan.info',
     genesisHash:
       '0xb414a8602b2251fa538d38a9322391500bd0324bc7ac6048845f6f31f1e1b948',
-    routerAddress: '0x0bC239e5ECcdF84598B1dfDe0e560e3DAa1173EA',
-    factoryAddress: '0xcA36bA38f2776184242d3dB56294683685e3a2EA',
+    routerAddress: '0x0Bc239E5eCcDF84598b1DfDE0e560E3daA1173ea',
+    factoryAddress: '0xcA36Ba38f2776184242d3DB56294683685E3a2eA',
   },
 };
 
