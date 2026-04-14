@@ -5,6 +5,7 @@
 
 import {Observable, Subject} from 'rxjs';
 import {Contract} from 'ethers';
+import {Signer as ReefEvmSigner} from '@reef-chain/evm-provider';
 import {getApi, getProvider} from './networkApi';
 import {reefSigner} from './signer';
 import {REEF_TOKEN_ADDRESS, STORAGE_LIMIT} from './config';
@@ -117,8 +118,14 @@ async function sendErc20(
 
   subject.next({status: 'signing'});
 
-  const signer = provider.api.createType('AccountId', fromAddress);
-  const contract = new Contract(tokenAddress, ERC20_ABI, provider as any);
+  // Reef EVM signer wraps provider + substrate address + our promise-based
+  // reefSigner (which routes approval through SigningOverlay).
+  const evmSigner = new ReefEvmSigner(
+    provider as any,
+    fromAddress,
+    reefSigner,
+  );
+  const contract = new Contract(tokenAddress, ERC20_ABI, evmSigner as any);
 
   subject.next({status: 'sending'});
 
@@ -164,10 +171,18 @@ export function sendNft(
 
       subject.next({status: 'signing'});
 
+      // Reef EVM signer wraps provider + substrate address + our
+      // promise-based reefSigner for contract write ops.
+      const evmSigner = new ReefEvmSigner(
+        provider as any,
+        fromAddress,
+        reefSigner,
+      );
+
       const contract = new Contract(
         nftContractAddress,
         ERC1155_ABI,
-        provider as any,
+        evmSigner as any,
       );
 
       subject.next({status: 'sending'});

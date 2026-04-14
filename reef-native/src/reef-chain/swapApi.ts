@@ -5,7 +5,9 @@
 
 import {Observable, Subject} from 'rxjs';
 import {Contract, BigNumber} from 'ethers';
+import {Signer as ReefEvmSigner} from '@reef-chain/evm-provider';
 import {getProvider, getNetworkConfig} from './networkApi';
+import {reefSigner} from './signer';
 import {STORAGE_LIMIT} from './config';
 import {ERC20_ABI, REEFSWAP_ROUTER_ABI, REEFSWAP_PAIR_ABI, REEFSWAP_FACTORY_ABI} from './abi';
 import type {TokenWithAmount, SwapSettings, SwapStatusUpdate} from './types';
@@ -30,13 +32,22 @@ export function executeSwap(
       const config = getNetworkConfig();
       const routerAddress = config.routerAddress;
 
+      // Create a Reef EVM Signer that wraps the Substrate account +
+      // our promise-based reefSigner (which routes approval through the
+      // SigningOverlay). Write operations on contracts require this.
+      const evmSigner = new ReefEvmSigner(
+        provider as any,
+        signerAddress,
+        reefSigner,
+      );
+
       // Step 1: Approve token1 spending
       subject.next({status: 'approving'});
 
       const token1Contract = new Contract(
         token1.address,
         ERC20_ABI,
-        provider as any,
+        evmSigner as any,
       );
 
       const allowance = await token1Contract.allowance(
@@ -62,7 +73,7 @@ export function executeSwap(
       const routerContract = new Contract(
         routerAddress,
         REEFSWAP_ROUTER_ABI,
-        provider as any,
+        evmSigner as any,
       );
 
       const amountOutMin = calculateAmountWithSlippage(
