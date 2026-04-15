@@ -322,7 +322,7 @@ export default function SwapScreen() {
 
   // Execute swap
   const handleSwap = () => {
-    if (!canSubmit || !tokenFrom || !tokenTo || !evmAddress) return;
+    if (!canSubmit || !tokenFrom || !tokenTo || !evmAddress || !selectedAddress) return;
 
     setSwapStatus('approving');
     setErrorMsg(null);
@@ -345,9 +345,11 @@ export default function SwapScreen() {
     }
 
     // Unsubscribe any previous swap before starting a new one
+    // NOTE: executeSwap expects the Substrate SS58 address (for signing),
+    // not the EVM hex address.
     swapSubRef.current?.unsubscribe();
     swapSubRef.current = executeSwap(
-      evmAddress,
+      selectedAddress,
       {address: tokenFrom.address, decimals: tokenFrom.decimals, amount: amountFromBN},
       {address: tokenTo.address, decimals: tokenTo.decimals, amount: amountToBN},
       {slippageTolerance, deadline},

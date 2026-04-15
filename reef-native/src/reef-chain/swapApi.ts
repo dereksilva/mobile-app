@@ -15,9 +15,11 @@ import type {TokenWithAmount, SwapSettings, SwapStatusUpdate} from './types';
 /**
  * Execute a token swap via Reefswap router.
  * Returns Observable of swap progress updates.
+ *
+ * @param substrateAddress The caller's SS58 Substrate address (used for signing)
  */
 export function executeSwap(
-  signerAddress: string,
+  substrateAddress: string,
   token1: TokenWithAmount,
   token2: TokenWithAmount,
   settings: SwapSettings,
@@ -35,11 +37,18 @@ export function executeSwap(
       // Create a Reef EVM Signer that wraps the Substrate account +
       // our promise-based reefSigner (which routes approval through the
       // SigningOverlay). Write operations on contracts require this.
+      // NOTE: ReefEvmSigner requires a Substrate SS58 address, NOT an EVM
+      // hex address — it throws "expect substrate address" otherwise.
       const evmSigner = new ReefEvmSigner(
         provider as any,
-        signerAddress,
+        substrateAddress,
         reefSigner,
       );
+
+      // Resolve the EVM address that the signer will use to send txs —
+      // this is needed as the `to` param for the swap and the owner
+      // param for ERC20 allowance lookups.
+      const evmAddress = await evmSigner.getAddress();
 
       // Step 1: Approve token1 spending
       subject.next({status: 'approving'});
@@ -51,7 +60,7 @@ export function executeSwap(
       );
 
       const allowance = await token1Contract.allowance(
-        signerAddress,
+        evmAddress,
         routerAddress,
       );
 
@@ -90,7 +99,7 @@ export function executeSwap(
           token1.amount,
           amountOutMin,
           path,
-          signerAddress,
+          evmAddress,
           deadline,
           {customData: {storageLimit: STORAGE_LIMIT}},
         );
