@@ -132,27 +132,15 @@ async function sendErc20(
   // Don't hardcode storageLimit — let Reef's EvmSigner auto-estimate with
   // its 3.1x safety multiplier. Hardcoding 2000 can cause silent reverts
   // on tokens that need more storage (proxies, fee-on-transfer, etc).
+  //
+  // We also don't call .wait() — handleTxResponse inside the EvmSigner
+  // already rejects on EVM.ExecutedFailed / ExtrinsicFailed before this
+  // await resolves. The receipt-based wait() call uses a separate scanner
+  // that can hang indefinitely.
   const tx = await contract.transfer(toAddress, amount);
 
-  subject.next({
-    status: 'broadcast',
-    txHash: tx.hash,
-  });
-
-  const receipt = await tx.wait();
-
-  if (receipt.status === 0) {
-    // The extrinsic landed but the inner EVM call reverted — surface it.
-    throw new Error(
-      'Token transfer reverted on-chain. The tx may have run out of storage/gas limit.',
-    );
-  }
-
-  subject.next({
-    status: 'finalized',
-    txHash: tx.hash,
-    blockHash: receipt.blockHash,
-  });
+  subject.next({status: 'broadcast', txHash: tx.hash});
+  subject.next({status: 'finalized', txHash: tx.hash});
 
   subject.complete();
 }
@@ -195,6 +183,8 @@ export function sendNft(
 
       // Let the EvmSigner auto-estimate gas + storage rather than
       // hardcoding a value too small for NFT transfers on some contracts.
+      // Skip .wait() — handleTxResponse already validates success before
+      // this await resolves; .wait() uses a separate scanner that hangs.
       const tx = await contract.safeTransferFrom(
         fromEvmAddress,
         toAddress,
@@ -203,24 +193,8 @@ export function sendNft(
         '0x',
       );
 
-      subject.next({
-        status: 'broadcast',
-        txHash: tx.hash,
-      });
-
-      const receipt = await tx.wait();
-
-      if (receipt.status === 0) {
-        throw new Error(
-          'NFT transfer reverted on-chain. The tx may have run out of storage/gas limit.',
-        );
-      }
-
-      subject.next({
-        status: 'finalized',
-        txHash: tx.hash,
-        blockHash: receipt.blockHash,
-      });
+      subject.next({status: 'broadcast', txHash: tx.hash});
+      subject.next({status: 'finalized', txHash: tx.hash});
 
       subject.complete();
     } catch (error: any) {
