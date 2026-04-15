@@ -25,7 +25,12 @@ export const NETWORK_CONFIG: Record<NetworkName, NetworkConfig> = {
     eventsUrl: 'wss://events.reefscan.info',
     genesisHash:
       '0x7834781d38e4798d548e34ec947d19deea29df148a7bf32484b7b24dacf8d4b7',
-    routerAddress: '0x641e34931C03751bFeD14c4E0e0ea77A3B037E2d',
+    // Canonical Reefswap mainnet router (EIP-55 checksummed).
+    // Source: https://docs.reef.io + on-chain verification of working swaps.
+    // The previous address '0x641e34931C03751bFeD14c4E0e0ea77A3B037E2d' was
+    // a typo that had been present since the initial port — same prefix but
+    // different suffix, so swaps silently hit the wrong (or no) contract.
+    routerAddress: '0x641e34931C03751BFED14C4087bA395303bEd1A5',
     factoryAddress: '0x380a9033500154872813F6E1120a81ed6c0760a8',
   },
   [NetworkName.TESTNET]: {

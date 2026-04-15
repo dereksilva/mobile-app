@@ -90,14 +90,21 @@ export function executeSwap(
         from: evmAddress,
       });
 
+      // Approve must write the allowance storage slot, which costs ~64
+      // bytes. estimateResources sometimes returns 0 for simple approves;
+      // we enforce a minimum to match what Reefswap web uses.
+      const APPROVE_STORAGE_MIN = 64;
+      const estimatedStorage = approveResources.storage.lt(0)
+        ? 0
+        : approveResources.storage.toNumber();
+      const approveStorage = Math.max(estimatedStorage, APPROVE_STORAGE_MIN);
+
       const approveExtrinsic = api.tx.evm.call(
         approveTx.to!,
         approveTx.data!,
         reefToBN(approveTx.value || 0),
         reefToBN(approveResources.gas),
-        approveResources.storage.lt(0)
-          ? reefToBN(0)
-          : reefToBN(approveResources.storage),
+        reefToBN(approveStorage),
       );
 
       // Build swap calldata.
