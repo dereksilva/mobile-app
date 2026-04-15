@@ -1,15 +1,37 @@
 /**
  * Swap API — DEX swap operations via Reefswap router.
- * Ports swapApi.ts and math utilities from reef-mobile-js.
+ *
+ * Matches the pattern used by reef-chain/react-lib's `onSwap` hook
+ * (the one powering the Reefswap web app on mainnet):
+ *
+ *   1. Populate the approve + trade calldata via ethers.populateTransaction
+ *   2. Build both as substrate `evm.call` extrinsics manually
+ *   3. Wrap them in `utility.batchAll([...])` so they execute atomically
+ *   4. Sign and send the single batched extrinsic
+ *
+ * Why batchAll instead of two separate contract calls?
+ *   - With two sequential extrinsics, `estimateResources` for the trade
+ *     runs before the approve has landed on-chain. The simulation sees
+ *     0 allowance, reverts, and returns garbage gas/storage — the real
+ *     on-chain swap then runs out of budget and reverts silently.
+ *   - Batching executes both atomically in one block with hardcoded
+ *     resource limits for the trade, matching what Reefswap web does.
  */
-
 import {Observable, Subject} from 'rxjs';
 import {Contract, BigNumber} from 'ethers';
-import {Signer as ReefEvmSigner} from '@reef-chain/evm-provider';
-import {getProvider, getNetworkConfig} from './networkApi';
+import {getProvider, getNetworkConfig, getApi} from './networkApi';
 import {reefSigner} from './signer';
 import {ERC20_ABI, REEFSWAP_ROUTER_ABI, REEFSWAP_PAIR_ABI, REEFSWAP_FACTORY_ABI} from './abi';
 import type {TokenWithAmount, SwapSettings, SwapStatusUpdate} from './types';
+
+/**
+ * Hardcoded gas/storage limits for the trade extrinsic, matching the
+ * values used by @reef-chain/react-lib's batched swap flow on mainnet.
+ * We can't estimate the trade accurately before the approval has landed,
+ * so we pick a value known to be sufficient.
+ */
+const TRADE_GAS_LIMIT = 582938 * 2; // ~1.16M — 2x Reefswap web's estimate
+const TRADE_STORAGE_LIMIT = 64 * 2; // 128 bytes — 2x Reefswap web's estimate
 
 /**
  * Execute a token swap via Reefswap router.
@@ -28,63 +50,57 @@ export function executeSwap(
   (async () => {
     try {
       const provider = getProvider();
-      if (!provider) throw new Error('Provider not connected');
+      const api = getApi();
+      if (!provider || !api) throw new Error('Provider not connected');
 
       const config = getNetworkConfig();
       const routerAddress = config.routerAddress;
 
-      // Create a Reef EVM Signer that wraps the Substrate account +
-      // our promise-based reefSigner (which routes approval through the
-      // SigningOverlay). Write operations on contracts require this.
-      // NOTE: ReefEvmSigner requires a Substrate SS58 address, NOT an EVM
-      // hex address — it throws "expect substrate address" otherwise.
-      const evmSigner = new ReefEvmSigner(
-        provider as any,
+      // Resolve the EVM address for this substrate account. This is used
+      // as the `to` param for the swap (recipient of output tokens).
+      const evmAddressRaw: any = await api.query.evmAccounts.evmAddresses(
         substrateAddress,
-        reefSigner,
       );
+      const evmAddress = evmAddressRaw.isEmpty
+        ? computeDefaultEvmAddress(substrateAddress)
+        : evmAddressRaw.toString();
 
-      // Resolve the EVM address that the signer will use to send txs —
-      // this is needed as the `to` param for the swap and the owner
-      // param for ERC20 allowance lookups.
-      const evmAddress = await evmSigner.getAddress();
-
-      // Step 1: Approve token1 spending
       subject.next({status: 'approving'});
 
+      // Build approve calldata via an unsigned ethers Contract (provider
+      // only, no signer — we just need populateTransaction).
       const token1Contract = new Contract(
         token1.address,
         ERC20_ABI,
-        evmSigner as any,
+        provider as any,
       );
-
-      const allowance = await token1Contract.allowance(
-        evmAddress,
+      const approveTx = await token1Contract.populateTransaction.approve(
         routerAddress,
+        token1.amount,
       );
 
-      if (BigNumber.from(allowance).lt(BigNumber.from(token1.amount))) {
-        subject.next({status: 'approve-started'});
+      // Estimate resources for the approve — this call is safe to
+      // estimate because approve has no preconditions.
+      const approveResources = await (provider as any).estimateResources({
+        ...approveTx,
+        from: evmAddress,
+      });
 
-        // Do NOT pass customData.storageLimit — the Reef EvmSigner would
-        // use our literal value verbatim instead of its 3.1x auto-estimate,
-        // and ERC20 approve on proxy tokens can need more than the 2000
-        // we previously hardcoded. Letting it auto-estimate is safer.
-        //
-        // We also skip approveTx.wait() — the Reef scanner that backs it
-        // can hang indefinitely. handleTxResponse in @reef-chain/evm-
-        // provider already rejects on EVM.ExecutedFailed before this
-        // promise resolves, so if we're here, approve succeeded.
-        await token1Contract.approve(routerAddress, token1.amount);
-      }
+      const approveExtrinsic = api.tx.evm.call(
+        approveTx.to!,
+        approveTx.data!,
+        toBN(approveTx.value || 0),
+        toBN(approveResources.gas),
+        approveResources.storage.lt(0)
+          ? toBN(0)
+          : toBN(approveResources.storage),
+      );
 
-      subject.next({status: 'approved'});
-
-      // Step 2: Execute swap
+      // Build swap calldata.
       const routerContract = new Contract(
         routerAddress,
         REEFSWAP_ROUTER_ABI,
-        evmSigner as any,
+        provider as any,
       );
 
       const amountOutMin = calculateAmountWithSlippage(
@@ -92,22 +108,15 @@ export function executeSwap(
         settings.slippageTolerance,
       );
 
-      const deadline = Math.floor(Date.now() / 1000) + settings.deadline * 60;
+      // Reefswap router uses seconds for `block.timestamp`. Use a generous
+      // cushion so the user doesn't get caught by chain lag.
+      const deadline =
+        Math.floor(Date.now() / 1000) + settings.deadline * 60;
 
       const path = [token1.address, token2.address];
 
-      // Swaps touch 3 contracts and many storage slots — auto-estimate
-      // rather than hardcoding a small limit.
-      //
-      // NOTE: We do not call swapTx.wait() — handleTxResponse inside the
-      // Reef EvmSigner already rejects the promise if the extrinsic or
-      // the inner EVM call fails (via EVM.ExecutedFailed or
-      // ExtrinsicFailed). So if await-ing the contract call resolves,
-      // the tx is already in a block and the EVM call succeeded.
-      // Calling .wait() additionally invokes the Reef scanner which can
-      // hang indefinitely on a bad subscription state.
-      const swapTx =
-        await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+      const tradeTx =
+        await routerContract.populateTransaction.swapExactTokensForTokensSupportingFeeOnTransferTokens(
           token1.amount,
           amountOutMin,
           path,
@@ -115,16 +124,104 @@ export function executeSwap(
           deadline,
         );
 
-      subject.next({status: 'broadcast', txHash: swapTx.hash});
-      subject.next({status: 'finalized', txHash: swapTx.hash});
+      // Hardcode the trade's gas/storage — estimateResources can't
+      // simulate it accurately here because the approve hasn't landed.
+      const tradeExtrinsic = api.tx.evm.call(
+        tradeTx.to!,
+        tradeTx.data!,
+        toBN(tradeTx.value || 0),
+        toBN(TRADE_GAS_LIMIT),
+        toBN(TRADE_STORAGE_LIMIT),
+      );
+
+      // Wrap both in a batchAll — atomic: either both succeed or both
+      // roll back.
+      const batch = api.tx.utility.batchAll([
+        approveExtrinsic,
+        tradeExtrinsic,
+      ]);
+
+      subject.next({status: 'approve-started'});
+
+      // Sign and send as one extrinsic. The reefSigner routes the signing
+      // prompt through the SigningOverlay modal.
+      await new Promise<void>((resolve, reject) => {
+        batch
+          .signAndSend(
+            substrateAddress,
+            {signer: reefSigner},
+            ({status, txHash, dispatchError, events}: any) => {
+              if (dispatchError) {
+                reject(new Error(dispatchError.toString()));
+                return;
+              }
+
+              // Look for EVM.ExecutedFailed in the batched events — that
+              // means the inner EVM call reverted even though the
+              // extrinsic succeeded.
+              const evmFailure = events?.find(
+                ({event}: any) =>
+                  event.section === 'evm' &&
+                  event.method === 'ExecutedFailed',
+              );
+              if (evmFailure) {
+                reject(
+                  new Error(
+                    'Swap reverted on-chain. Possible causes: slippage exceeded, insufficient storage limit, or deadline expired.',
+                  ),
+                );
+                return;
+              }
+
+              if (status.isBroadcast) {
+                subject.next({
+                  status: 'broadcast',
+                  txHash: txHash.toHex(),
+                });
+              } else if (status.isInBlock) {
+                subject.next({status: 'approved'});
+                subject.next({
+                  status: 'finalized',
+                  txHash: txHash.toHex(),
+                });
+                resolve();
+              }
+            },
+          )
+          .catch(reject);
+      });
+
       subject.complete();
     } catch (error: any) {
-      subject.next({status: 'error', error: error.message});
+      subject.next({status: 'error', error: error.message || String(error)});
       subject.complete();
     }
   })();
 
   return subject.asObservable();
+}
+
+/**
+ * Convert a value to a BN-like for substrate extrinsic args.
+ * Mirrors toBN from @reef-chain/evm-provider/utils.
+ */
+function toBN(value: any): any {
+  if (value == null) return BigNumber.from(0);
+  if (BigNumber.isBigNumber(value)) return value;
+  return BigNumber.from(value.toString());
+}
+
+/**
+ * Compute the default EVM address for a substrate account (when no
+ * claimed EVM address exists). Mirrors
+ * `Signer.computeDefaultEvmAddress` in @reef-chain/evm-provider.
+ */
+function computeDefaultEvmAddress(substrateAddress: string): string {
+  // For simplicity we require the account to have a claimed EVM address.
+  // If this ever throws, the user needs to run "Claim EVM Address" first.
+  throw new Error(
+    `Account ${substrateAddress} has no claimed EVM address. Claim one from the Accounts screen first.`,
+  );
 }
 
 /**
