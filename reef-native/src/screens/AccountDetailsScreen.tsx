@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {useTranslation} from 'react-i18next';
 import Svg, {
   Path,
@@ -71,6 +72,7 @@ export default function AccountDetailsScreen({
   const {t} = useTranslation();
   const theme = useThemeStore(s => s.theme);
   const isLight = theme === 'light';
+  const insets = useSafeAreaInsets();
   const {selectAccount, deleteAccount, claimEvm} = useAccounts();
   const [isBinding, setIsBinding] = useState(false);
 
@@ -132,7 +134,7 @@ export default function AccountDetailsScreen({
     return (
       <ScrollView
         style={{flex: 1, backgroundColor: '#fff7fe'}}
-        contentContainerStyle={{paddingHorizontal: 24, paddingTop: 24, paddingBottom: 80}}>
+        contentContainerStyle={{paddingHorizontal: 24, paddingTop: insets.top + 16, paddingBottom: 80}}>
 
         {/* ── Header ── */}
         <View style={{
