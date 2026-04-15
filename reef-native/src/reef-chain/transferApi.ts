@@ -8,7 +8,7 @@ import {Contract} from 'ethers';
 import {Signer as ReefEvmSigner} from '@reef-chain/evm-provider';
 import {getApi, getProvider} from './networkApi';
 import {reefSigner} from './signer';
-import {REEF_TOKEN_ADDRESS, STORAGE_LIMIT} from './config';
+import {REEF_TOKEN_ADDRESS} from './config';
 import {ERC20_ABI, ERC1155_ABI} from './abi';
 import type {TxStatusUpdate} from './types';
 
@@ -129,11 +129,10 @@ async function sendErc20(
 
   subject.next({status: 'sending'});
 
-  const tx = await contract.transfer(toAddress, amount, {
-    customData: {
-      storageLimit: STORAGE_LIMIT,
-    },
-  });
+  // Don't hardcode storageLimit — let Reef's EvmSigner auto-estimate with
+  // its 3.1x safety multiplier. Hardcoding 2000 can cause silent reverts
+  // on tokens that need more storage (proxies, fee-on-transfer, etc).
+  const tx = await contract.transfer(toAddress, amount);
 
   subject.next({
     status: 'broadcast',
@@ -141,6 +140,13 @@ async function sendErc20(
   });
 
   const receipt = await tx.wait();
+
+  if (receipt.status === 0) {
+    // The extrinsic landed but the inner EVM call reverted — surface it.
+    throw new Error(
+      'Token transfer reverted on-chain. The tx may have run out of storage/gas limit.',
+    );
+  }
 
   subject.next({
     status: 'finalized',
@@ -187,13 +193,14 @@ export function sendNft(
 
       subject.next({status: 'sending'});
 
+      // Let the EvmSigner auto-estimate gas + storage rather than
+      // hardcoding a value too small for NFT transfers on some contracts.
       const tx = await contract.safeTransferFrom(
         fromEvmAddress,
         toAddress,
         nftId,
         amount,
         '0x',
-        {customData: {storageLimit: STORAGE_LIMIT}},
       );
 
       subject.next({
@@ -202,6 +209,12 @@ export function sendNft(
       });
 
       const receipt = await tx.wait();
+
+      if (receipt.status === 0) {
+        throw new Error(
+          'NFT transfer reverted on-chain. The tx may have run out of storage/gas limit.',
+        );
+      }
 
       subject.next({
         status: 'finalized',

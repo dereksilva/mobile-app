@@ -8,7 +8,6 @@ import {Contract, BigNumber} from 'ethers';
 import {Signer as ReefEvmSigner} from '@reef-chain/evm-provider';
 import {getProvider, getNetworkConfig} from './networkApi';
 import {reefSigner} from './signer';
-import {STORAGE_LIMIT} from './config';
 import {ERC20_ABI, REEFSWAP_ROUTER_ABI, REEFSWAP_PAIR_ABI, REEFSWAP_FACTORY_ABI} from './abi';
 import type {TokenWithAmount, SwapSettings, SwapStatusUpdate} from './types';
 
@@ -67,13 +66,22 @@ export function executeSwap(
       if (BigNumber.from(allowance).lt(BigNumber.from(token1.amount))) {
         subject.next({status: 'approve-started'});
 
+        // Do NOT pass customData.storageLimit — the Reef EvmSigner would
+        // use our literal value verbatim instead of its 3.1x auto-estimate,
+        // and ERC20 approve on proxy tokens can need more than the 2000
+        // we previously hardcoded. Letting it auto-estimate is safer.
         const approveTx = await token1Contract.approve(
           routerAddress,
           token1.amount,
-          {customData: {storageLimit: STORAGE_LIMIT}},
         );
 
-        await approveTx.wait();
+        const approveReceipt = await approveTx.wait();
+        if (approveReceipt.status === 0) {
+          // Inner EVM call reverted even though the extrinsic succeeded.
+          throw new Error(
+            'Token approval reverted on-chain. The tx may have run out of storage/gas limit.',
+          );
+        }
       }
 
       subject.next({status: 'approved'});
@@ -94,6 +102,8 @@ export function executeSwap(
 
       const path = [token1.address, token2.address];
 
+      // Swaps touch 3 contracts and many storage slots — auto-estimate
+      // rather than hardcoding a small limit.
       const swapTx =
         await routerContract.swapExactTokensForTokensSupportingFeeOnTransferTokens(
           token1.amount,
@@ -101,12 +111,20 @@ export function executeSwap(
           path,
           evmAddress,
           deadline,
-          {customData: {storageLimit: STORAGE_LIMIT}},
         );
 
       subject.next({status: 'broadcast', txHash: swapTx.hash});
 
       const receipt = await swapTx.wait();
+
+      if (receipt.status === 0) {
+        // Inner EVM call reverted. Reef's extrinsic still lands on-chain
+        // (you'll see it on reefscan) but no tokens moved — usually caused
+        // by insufficient storage/gas limit or a slippage failure.
+        throw new Error(
+          'Swap reverted on-chain. Possible causes: slippage exceeded, insufficient storage limit, or deadline expired.',
+        );
+      }
 
       subject.next({status: 'finalized', txHash: swapTx.hash});
       subject.complete();
