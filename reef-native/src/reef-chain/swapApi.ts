@@ -19,6 +19,10 @@
  */
 import {Observable, Subject} from 'rxjs';
 import {Contract, BigNumber} from 'ethers';
+// Reef's `toBN` returns a bn.js BN instance — the format Polkadot's
+// api.tx.* expects for Balance/u64/u32 fields. Using ethers BigNumber
+// directly causes "Unable to construct number from multi-key object".
+import {toBN as reefToBN} from '@reef-chain/evm-provider/esm/utils';
 import {getProvider, getNetworkConfig, getApi} from './networkApi';
 import {reefSigner} from './signer';
 import {ERC20_ABI, REEFSWAP_ROUTER_ABI, REEFSWAP_PAIR_ABI, REEFSWAP_FACTORY_ABI} from './abi';
@@ -89,11 +93,11 @@ export function executeSwap(
       const approveExtrinsic = api.tx.evm.call(
         approveTx.to!,
         approveTx.data!,
-        toBN(approveTx.value || 0),
-        toBN(approveResources.gas),
+        reefToBN(approveTx.value || 0),
+        reefToBN(approveResources.gas),
         approveResources.storage.lt(0)
-          ? toBN(0)
-          : toBN(approveResources.storage),
+          ? reefToBN(0)
+          : reefToBN(approveResources.storage),
       );
 
       // Build swap calldata.
@@ -129,9 +133,9 @@ export function executeSwap(
       const tradeExtrinsic = api.tx.evm.call(
         tradeTx.to!,
         tradeTx.data!,
-        toBN(tradeTx.value || 0),
-        toBN(TRADE_GAS_LIMIT),
-        toBN(TRADE_STORAGE_LIMIT),
+        reefToBN(tradeTx.value || 0),
+        reefToBN(TRADE_GAS_LIMIT),
+        reefToBN(TRADE_STORAGE_LIMIT),
       );
 
       // Wrap both in a batchAll — atomic: either both succeed or both
@@ -199,16 +203,6 @@ export function executeSwap(
   })();
 
   return subject.asObservable();
-}
-
-/**
- * Convert a value to a BN-like for substrate extrinsic args.
- * Mirrors toBN from @reef-chain/evm-provider/utils.
- */
-function toBN(value: any): any {
-  if (value == null) return BigNumber.from(0);
-  if (BigNumber.isBigNumber(value)) return value;
-  return BigNumber.from(value.toString());
 }
 
 /**
