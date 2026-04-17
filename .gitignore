@@ -79,3 +79,4 @@ reef-native/android/app/build/
 reef-native/android/build/
 reef-native/.gradle/
 reef-native/.metro-health-check*
+reef-native/android/gradle.properties
