@@ -93,7 +93,17 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('REEF_UPLOAD_STORE_FILE')) {
+            // Load release signing config from keystore.properties (gitignored).
+            // Fall back to gradle.properties for backward compatibility.
+            def keystorePropsFile = rootProject.file('keystore.properties')
+            if (keystorePropsFile.exists()) {
+                def keystoreProps = new Properties()
+                keystoreProps.load(new FileInputStream(keystorePropsFile))
+                storeFile file(keystoreProps['REEF_UPLOAD_STORE_FILE'])
+                storePassword keystoreProps['REEF_UPLOAD_STORE_PASSWORD']
+                keyAlias keystoreProps['REEF_UPLOAD_KEY_ALIAS']
+                keyPassword keystoreProps['REEF_UPLOAD_KEY_PASSWORD']
+            } else if (project.hasProperty('REEF_UPLOAD_STORE_FILE')) {
                 storeFile file(REEF_UPLOAD_STORE_FILE)
                 storePassword REEF_UPLOAD_STORE_PASSWORD
                 keyAlias REEF_UPLOAD_KEY_ALIAS
